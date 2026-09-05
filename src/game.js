@@ -21,7 +21,7 @@ export function createGame(data, botCount, seed = Date.now()) {
     cells: Object.fromEntries(data.map.cells.map(c => [c.coordinate, { ...c, owner: null, building: c.startingCityStrength ? { category: 'city', strength: c.startingCityStrength, initial: true } : null }])),
     blockedConnections: structuredClone(data.map.blockedConnections),
     players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: id ? `Bot ${id}` : 'You', bot: id !== 0, color: COLORS[id], score: 0, hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),
-    log: [], history: [],
+    log: [], history: [], lastTurn: null,
   };
   beginRound(state);
   return state;
@@ -46,22 +46,25 @@ export function publicView(state, playerId) {
 }
 
 export function pickCount(state) { return state.players.length === 2 ? 1 : 2; }
-export function playCard(state, playerId, card) {
+export function playCard(state, playerId, card, actions=null) {
   const player = state.players[playerId];
-  if (card.category === 'parchment') { player.parchments.push(card); state.log.push(`${player.name} kept a parchment.`); return; }
+  if (card.category === 'parchment') { player.parchments.push(card); actions?.push({type:'parchment'}); state.log.push(`${player.name} kept a parchment.`); return; }
   player.played.push(card);
   if (card.category === 'territory') {
     const cell = state.cells[card.coordinate];
+    actions?.push({type:'territory',coordinate:card.coordinate,campOwner:cell.building?.category==='camp'?cell.owner:null});
     if (cell.building?.category === 'camp') cell.building = null;
     cell.owner = playerId;
     state.log.push(`${player.name} claimed ${card.coordinate}.`);
   } else if (card.category === 'provisions') {
     requireRule(state.deck.length >= 2, 'Not enough cards for Provisions.');
     const drawn = state.deck.splice(0, 2);
+    actions?.push({type:'provisions'});
     state.log.push(`${player.name} played Provisions and drew 2 cards.`);
-    for (const extra of drawn) playCard(state, playerId, extra);
+    for (const extra of drawn) playCard(state, playerId, extra, actions);
   } else {
     player.buildings.push(card);
+    actions?.push({type:'building',name:card.name});
     state.log.push(`${player.name} reserved ${card.name}.`);
   }
 }
@@ -82,7 +85,13 @@ export function resolveDraft(state, selections) {
     p.hand = p.hand.filter(c => ![...pick.play, ...pick.discard].includes(c.instanceId));
     return cards;
   });
-  for (const p of state.players) for (const card of plays[p.id]) playCard(state, p.id, card);
+  const lastTurn={round:state.round,pick:state.draftTurn,players:state.players.map(p=>({playerId:p.id,actions:[]}))};
+  for (const p of state.players) {
+    const actions=lastTurn.players[p.id].actions;
+    for (const card of plays[p.id]) playCard(state, p.id, card, actions);
+    if(selections[p.id].discard.length)actions.push({type:'discard',count:selections[p.id].discard.length});
+  }
+  state.lastTurn=lastTurn;
   if (state.players.every(p => p.hand.length === 0)) {
     state.phase = 'construction'; state.log.push('Exploration finished. Construction begins.');
     return;

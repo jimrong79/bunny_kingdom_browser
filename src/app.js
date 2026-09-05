@@ -9,6 +9,7 @@ import { scoringPanel } from './scoring-ui.js';
 import { cardText, buildingText, resourceNames } from './card-text.js';
 import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { sortedHand } from './hand-order.js';
+import { lastTurnPanel } from './last-turn.js';
 import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
@@ -100,7 +101,7 @@ function focusedControl() {
   const element=document.activeElement;
   if(!app.contains(element))return null;
   if(element.id)return '#'+CSS.escape(element.id);
-  for(const name of ['data-card','data-cell','data-building','data-market','data-copy','data-ruling','data-copy-resolution']) {
+  for(const name of ['data-card','data-cell','data-building','data-market','data-copy','data-ruling','data-copy-resolution','data-recent-cell']) {
     if(element.hasAttribute(name))return `[${name}="${CSS.escape(element.getAttribute(name))}"]`;
   }
   return null;
@@ -112,17 +113,20 @@ function render() {
   const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom});
   const handScroll=document.querySelector('.hand')?.scrollLeft||0;
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
+  const recap=document.querySelector('.last-turn-panel');
+  const recapScroll=recap?.dataset.turn===(state.lastTurn?state.lastTurn.round+'-'+state.lastTurn.pick:'none')?recap.scrollTop:0;
   app.classList.add('at-table');
   app.innerHTML = `
     <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div>
     <div class="game-layout table-layout" data-phase="${state.phase}">
-      <section class="map-panel panel" id="map-panel" tabindex="-1">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend"><span class="lava-key">━</span> Lava blocks a shared edge · Select a territory to inspect it</p></section>
+      <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend"><span class="lava-key">━</span> Lava blocks a shared edge · Select a territory to inspect it</p></div></div></section>
       <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
     <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`;
   const hand=document.querySelector('.hand');if(hand)hand.scrollLeft=handScroll;
   document.querySelector('.table-sidebar').scrollTop=sideScroll;
+  document.querySelector('.last-turn-panel').scrollTop=recapScroll;
   document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
   document.querySelector('.board-scroll').scrollLeft=boardScroll;
@@ -130,6 +134,7 @@ function render() {
   const boardConfirm=document.querySelector('#board-confirm');
   if(boardConfirm)boardConfirm.onclick=()=>document.querySelector('#place-building').click();
   bindConstruction();
+  document.querySelectorAll('[data-recent-cell]').forEach(button=>button.onclick=()=>{inspected=button.dataset.recentCell;render();});
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
     const id = button.dataset.card;
     if (selected.includes(id)) selected = selected.filter(x => x !== id);

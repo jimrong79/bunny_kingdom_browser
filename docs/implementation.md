@@ -20,6 +20,8 @@ The table places an illustrated, overlapping hand below the board. Hover or keyb
 
 The hand groups territories on the left, buildings and Provisions in the middle, and parchments on the right. Territories sort by row A–J and then column 1–10; other categories group together and sort naturally by name. Sorting applies to the display copy, so selections keep their Play/Discard roles when the hand is redrawn.
 
+The **Last turn** panel sits to the left of the board and groups the most recently confirmed Exploration pick by player. It includes territory claims, replaced Camps, reserved buildings, and all effects from Provisions, including chains. Parchments and face-down discards remain anonymous. Coordinates open territory inspection. The round/pick label identifies the recap through later phases; the next confirmed pick replaces it. Recaps autosave. Older saves begin recording one on their next pick. On phones the panel appears below the board.
+
 ## Rules still requiring a ruling
 
 The user-supplied catalog defines every card, but four corner-case groups remain unverified. The engine does not silently choose their answers:

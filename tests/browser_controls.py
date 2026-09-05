@@ -149,6 +149,52 @@ def scoring_review(page):
     print('Scoring: ruling review, revision, dependent rank recalculation, and saved results passed.', flush=True)
 
 
+def last_turn_controls(page, url):
+    page.set_viewport_size({'width': 1440, 'height': 1000})
+    page.goto(url)
+    page.locator('[name=bots]').select_option('3')
+    page.locator('[name=seed]').fill('1788624816571')
+    page.locator('#setup button').click()
+    panel = page.locator('#last-turn-panel')
+    assert 'next confirmed pick' in panel.inner_text()
+    page.locator('[data-card=territory_A7]').click()
+    page.locator('[data-card=provisions_1]').click()
+    page.locator('#confirm-draft').click()
+    state = snapshot(page)
+    assert state['lastTurn']['pick'] == 1
+    assert page.locator('[data-turn-player]').count() == 4
+    assert 'Played Provisions' in page.locator('[data-turn-player="0"]').inner_text()
+    for p in state['players']:
+        for c in p['parchments']:
+            assert c['name'] not in panel.inner_text()
+    bounds, board = panel.bounding_box(), page.locator('.board').bounding_box()
+    assert bounds['x'] + bounds['width'] <= board['x']
+    page.locator('[data-recent-cell=A7]').click()
+    assert 'A7 · You' in page.locator('.inspector').inner_text()
+    assert snapshot(page)['lastTurn'] == state['lastTurn']
+    page.screenshot(path='/tmp/bunny-last-turn-desktop.png', full_page=True)
+    page.reload()
+    page.locator('#resume-game').click()
+    assert snapshot(page)['lastTurn'] == state['lastTurn']
+    page.locator('[data-card]').nth(0).click()
+    page.locator('[data-card]').nth(1).click()
+    page.locator('#confirm-draft').click()
+    assert snapshot(page)['lastTurn']['pick'] == 2
+    assert 'Round 1 · Pick 2' in panel.inner_text()
+    page.set_viewport_size({'width': 390, 'height': 844})
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.screenshot(path='/tmp/bunny-last-turn-mobile.png', full_page=True)
+    page.evaluate("""()=>{
+        const saved=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1'));
+        delete saved.game.lastTurn;
+        localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(saved));
+    }""")
+    page.reload()
+    page.locator('#resume-game').click()
+    assert 'next confirmed pick' in panel.inner_text()
+    print('Last turn: all players, Provisions, secrecy, map inspection, replacement, saved and older games passed.', flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://127.0.0.1:8000')
@@ -162,6 +208,7 @@ if __name__ == '__main__':
         construction_controls(page)
         mobile_board(page)
         scoring_review(page)
+        last_turn_controls(page, args.url)
         assert not errors, errors
         browser.close()
     print('All control checks passed.')
