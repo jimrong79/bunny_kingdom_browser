@@ -4,7 +4,7 @@ Browser implementation of the original Bunny Kingdom base game, starting with ve
 
 ## Play locally
 
-From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. Final parchment scoring follows next.
+From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. All 37 parchments have scoring handlers, including copy selection and treasure interactions. Final scores show a per-card breakdown. Unverified tie/copy/stacking cases require an explicit, recorded ruling only if they occur.
 
 Run engine tests with `npm test` (Node.js 22+).
 
@@ -46,4 +46,4 @@ All **37 parchment entries** have been imported from the supplied text, completi
 - [Reusable JSON](data/cards/base-parchments.json) and [spreadsheet export](data/cards/base-parchments.csv)
 - [Original supplied text](data/cards/parchments.txt)
 
-Game implementation is in progress. Inventory coverage is complete; scoring definitions remain under review.
+The browser game supports a complete four-round session. Inventory coverage is complete; the documented parchment edge cases still require rulings. This is local play against heuristic bots, with no external AI service or account required.
