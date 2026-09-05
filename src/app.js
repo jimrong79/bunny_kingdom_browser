@@ -40,12 +40,31 @@ function board() {
 }
 function cardHTML(c) {
   const i = selected.indexOf(c.instanceId), label = i >= 0 ? (state.players.length === 2 && i === 1 ? 'Discard' : 'Play') : '';
-  return `<button class="card ${c.category} ${i >= 0 ? 'selected' : ''}" data-card="${c.instanceId}" aria-pressed="${i >= 0}"><span class="tag">${escape(c.category)} ${label ? ' · ' + label : ''}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`;
+  return `<button class="card ${c.category} ${i >= 0 ? 'selected' : ''} ${label==='Discard'?'discard-selected':''}" data-card="${c.instanceId}" aria-pressed="${i >= 0}"><span class="tag">${escape(c.category)} ${label ? ' · ' + label : ''}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`;
+}
+function draftPanel() {
+  const twoPlayers=state.players.length===2;
+  const slots=[0,1].map(i=>{
+    const card=state.players[0].hand.find(c=>c.instanceId===selected[i]);
+    const label=twoPlayers?(i===0?'Play':'Discard'):'Play '+(i+1);
+    return `<div class="draft-slot ${twoPlayers&&i===1?'discard-slot':''}"><b>${label}</b><span>${card?escape(card.name):'Choose a card'}</span></div>`;
+  }).join('');
+  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div><div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div><button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${twoPlayers?'First choose a card to play, then one to discard.':'Both selected cards will be played.'} Click a selected card to remove it.</p><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>`;
+}
+function focusedControl() {
+  const element=document.activeElement;
+  if(!app.contains(element))return null;
+  if(element.id)return '#'+CSS.escape(element.id);
+  for(const name of ['data-card','data-cell','data-building','data-market','data-copy','data-ruling','data-copy-resolution']) {
+    if(element.hasAttribute(name))return `[${name}="${CSS.escape(element.getAttribute(name))}"]`;
+  }
+  return null;
 }
 function render() {
+  const focus=focusedControl();
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
   const saved=saveGame(state,{selected,buildingId,targets,inspected});
-  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? `<p class="muted">${state.players.length === 2 ? 'First selection: play. Second selection: discard.' : 'Select two cards, then confirm.'}</p><button id="confirm-draft" class="primary" ${selected.length !== 2 ? 'disabled' : ''}>Confirm cards & pass →</button><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>` : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
+  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? draftPanel() : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
   app.insertAdjacentHTML('beforeend',`<p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`);
   document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
@@ -57,10 +76,15 @@ function render() {
     render();
   });
   const confirm = document.querySelector('#confirm-draft');
-  if (confirm) confirm.onclick = () => {
+  if (confirm) confirm.onclick = () => attempt(() => {
     const choices = state.players.map(p => p.bot ? chooseDraft(publicView(state, p.id), p.id) : { play: state.players.length === 2 ? [selected[0]] : [...selected], discard: state.players.length === 2 ? [selected[1]] : [] });
-    resolveDraft(state, choices); selected = []; if(state.phase==='construction') beginCampOffers(state); driveBots(); render();
-  };
+    resolveDraft(state, choices); selected = []; if(state.phase==='construction') beginCampOffers(state); driveBots();
+  });
+  const swap=document.querySelector('#swap-draft');
+  if(swap)swap.onclick=()=>{selected.reverse();render();};
+  const clear=document.querySelector('#clear-draft');
+  if(clear)clear.onclick=()=>{selected=[];render();};
+  if(focus)document.querySelector(focus)?.focus({preventScroll:true});
 }
 
 function constructionPanel() {
