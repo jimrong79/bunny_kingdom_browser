@@ -55,7 +55,7 @@ def build(page):
             page.locator('#place-building').click()
             assert not page.locator('.error').count()
             placed += 1
-        if page.locator('#cancel-building').count():
+        if page.locator('#cancel-building').count() and page.locator('#cancel-building').is_enabled():
             page.locator('#cancel-building').click()
     page.locator('#finish-building').click()
     return placed

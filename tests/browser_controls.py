@@ -97,6 +97,10 @@ def construction_controls(page):
 
 
 def mobile_board(page):
+    original_width = page.locator('.board').bounding_box()['width']
+    page.locator('#board-zoom').click()
+    assert page.locator('.board').bounding_box()['width'] > original_width * 1.2
+    page.locator('#board-zoom').click()
     page.set_viewport_size({'width': 390, 'height': 844})
     scenario(page, 'construction', [{'id': 'trading_post'}], {'A10': 0})
     assert page.locator('.board-large').count() == 1
