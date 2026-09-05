@@ -1,0 +1,595 @@
+{
+  "schemaVersion": 1,
+  "id": "original-base-buildings-and-provisions",
+  "name": "Bunny Kingdom — original base-game buildings and Provisions",
+  "scope": "Catalog of 42 building cards and 3 Provisions cards. Territory cards come from the map. Parchment definitions are not included.",
+  "verification": {
+    "status": "user_confirmed_inventory_with_tentative_name",
+    "confirmationDate": "2026-09-05",
+    "confirmedBy": "user",
+    "confirmedDetails": [
+      "City card quantities: 9 strength 1, 9 strength 2, 3 strength 3; 18 strength-1 cities already on the original board.",
+      "Camp priorities: one each of 1 through 6; lower number has precedence.",
+      "Basic farms and Trading Posts confirmed.",
+      "Luxury resources and placement: pearl/sea, mushroom/forest, carrot powder(?)/field, diamond/copper/gold/steel on mountain."
+    ],
+    "notes": [
+      "Counts and luxury-terrain assignments use the user's confirmation. General building and Provisions rules come from the official rulebook.",
+      "Names are descriptive labels, not a transcription of every printed card title. Steel preserves the user's supplied name.",
+      "Carrot powder is a tentative label for the unique field luxury resource. Its identity, quantity, and field requirement are confirmed.",
+      "This catalog records rules as data; it is not an implemented or tested gameplay engine."
+    ]
+  },
+  "sources": [
+    {
+      "id": "user-confirmation",
+      "kind": "user_message",
+      "date": "2026-09-05",
+      "description": "User's city-component arithmetic, camp priorities, and farm resource/terrain confirmation."
+    },
+    {
+      "id": "official-rulebook",
+      "kind": "publisher_rulebook",
+      "url": "https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf",
+      "pages": [
+        2,
+        3,
+        4,
+        6,
+        7,
+        10
+      ],
+      "description": "Base-game components, card categories, building placement, camp precedence/override, Sky Towers, Trading Posts, and Provisions."
+    }
+  ],
+  "deckCounts": {
+    "territory": 100,
+    "city": 21,
+    "farm": 12,
+    "camp": 6,
+    "sky_tower": 3,
+    "provisions": 3,
+    "parchment": 37,
+    "total": 182
+  },
+  "cityComponents": [
+    {
+      "strength": 1,
+      "figures": 27
+    },
+    {
+      "strength": 2,
+      "figures": 9
+    },
+    {
+      "strength": 3,
+      "figures": 3
+    }
+  ],
+  "resources": [
+    {
+      "id": "wood",
+      "name": "Wood",
+      "kind": "basic"
+    },
+    {
+      "id": "fish",
+      "name": "Fish",
+      "kind": "basic"
+    },
+    {
+      "id": "carrots",
+      "name": "Carrots",
+      "kind": "basic"
+    },
+    {
+      "id": "pearl",
+      "name": "Pearl",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "mushroom",
+      "name": "Mushroom",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "luxury_field",
+      "name": "Carrot powder",
+      "kind": "luxury",
+      "nameStatus": "tentative"
+    },
+    {
+      "id": "diamond",
+      "name": "Diamond",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "copper",
+      "name": "Copper",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "steel",
+      "name": "Steel",
+      "kind": "luxury",
+      "nameStatus": "user_supplied"
+    }
+  ],
+  "buildingRules": {
+    "sourceRefs": [
+      "official-rulebook"
+    ],
+    "mayDeferPlacement": true,
+    "maxBuildingsPerTerritory": 1,
+    "mayMoveAfterPlacement": false,
+    "preservesBaseResource": true,
+    "discardCardAfterPlacement": true
+  },
+  "ruleNotes": [
+    "Playing a building card during Exploration reserves its matching piece(s); actual placement happens during Construction.",
+    "Construction is optional. An unplaced building can be kept for a future round.",
+    "Buildings require a controlled territory with no existing building, except Camps, which require a territory with neither a rabbit nor a building.",
+    "There is at most one building (city or token) per territory. A city cannot upgrade or replace an existing city.",
+    "A territory keeps its printed terrain and natural resource when a building is placed.",
+    "A farm adds its resource to the territory. Fief wealth counts distinct resource types; resource-counting parchments count production including farms.",
+    "A Trading Post produces one chosen basic resource each round. Its round-four choice also applies to final parchment scoring.",
+    "Each Sky Tower card supplies a matching pair of tokens. Place them on two of your territories in different fiefs; the pair connects those territories as adjacent. Each token occupies a building slot.",
+    "To place a Camp, announce its priority without announcing the target. Holders of lower-numbered Camps may place theirs first, starting with the lowest. After they place or pass, the announcing player may place or keep their Camp for a future round.",
+    "The matching territory card removes a Camp. If played by its owner, their rabbit stays; if played by an opponent, the opponent replaces the rabbit and takes control. The building slot becomes available.",
+    "Provisions immediately draws and plays two cards from the deck, then is discarded. Those cards do not enter the passing draft hand; their normal effects apply, including Construction timing for buildings and secrecy for parchments."
+  ],
+  "openItems": [
+    {
+      "id": "field-luxury-name",
+      "affects": "display_name_only",
+      "resourceId": "luxury_field",
+      "description": "Confirm the printed name of the field luxury resource currently called Carrot powder. It is a distinct luxury resource, not basic carrots."
+    },
+    {
+      "id": "parchment-scoring-review",
+      "affects": "scoring_definitions",
+      "description": "All 37 parchment entries are recorded in base-parchments.json. Scoring clarifications and review remain; see base-parchments.review.md."
+    }
+  ],
+  "cards": [
+    {
+      "id": "city_1",
+      "name": "City 1",
+      "category": "city",
+      "copies": 9,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "add_strength",
+        "strength": 1
+      }
+    },
+    {
+      "id": "city_2",
+      "name": "City 2",
+      "category": "city",
+      "copies": 9,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "add_strength",
+        "strength": 2
+      }
+    },
+    {
+      "id": "city_3",
+      "name": "City 3",
+      "category": "city",
+      "copies": 3,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "mountain"
+        ]
+      },
+      "effect": {
+        "type": "add_strength",
+        "strength": 3
+      }
+    },
+    {
+      "id": "farm_wood",
+      "name": "Wood Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "wood",
+        "quantity": 1
+      },
+      "farmType": "basic"
+    },
+    {
+      "id": "farm_fish",
+      "name": "Fish Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "fish",
+        "quantity": 1
+      },
+      "farmType": "basic"
+    },
+    {
+      "id": "farm_carrots",
+      "name": "Carrots Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "carrots",
+        "quantity": 1
+      },
+      "farmType": "basic"
+    },
+    {
+      "id": "trading_post",
+      "name": "Trading Post",
+      "category": "farm",
+      "copies": 2,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "choose_resource",
+        "choices": [
+          "wood",
+          "fish",
+          "carrots"
+        ],
+        "quantity": 1,
+        "choiceFrequency": "each_round",
+        "finalRoundChoiceAppliesToParchments": true
+      },
+      "farmType": "trading_post"
+    },
+    {
+      "id": "farm_pearl",
+      "name": "Pearl Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "sea"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "pearl",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "farm_mushroom",
+      "name": "Mushroom Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "forest"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "mushroom",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "farm_luxury_field",
+      "name": "Carrot powder Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "field"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "luxury_field",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "tentative"
+    },
+    {
+      "id": "farm_diamond",
+      "name": "Diamond Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "mountain"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "diamond",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "farm_copper",
+      "name": "Copper Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "mountain"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "copper",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "farm_gold",
+      "name": "Gold Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "mountain"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "gold",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "farm_steel",
+      "name": "Steel Farm",
+      "category": "farm",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": [
+          "mountain"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "steel",
+        "quantity": 1
+      },
+      "farmType": "luxury",
+      "nameStatus": "user_supplied"
+    },
+    {
+      "id": "camp_1",
+      "name": "Camp 1",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 1,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "camp_2",
+      "name": "Camp 2",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 2,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "camp_3",
+      "name": "Camp 3",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 3,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "camp_4",
+      "name": "Camp 4",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 4,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "camp_5",
+      "name": "Camp 5",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 5,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "camp_6",
+      "name": "Camp 6",
+      "category": "camp",
+      "copies": 1,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "unclaimed",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "claim_territory",
+        "priority": 6,
+        "placeRabbit": true
+      }
+    },
+    {
+      "id": "sky_tower",
+      "name": "Sky Tower",
+      "category": "sky_tower",
+      "copies": 3,
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "ownership": "self",
+        "requiresEmptyBuildingSlot": true,
+        "allowedTerrains": null
+      },
+      "effect": {
+        "type": "connect_fiefs",
+        "tokensPerCard": 2,
+        "territoriesPerCard": 2,
+        "requiresDifferentFiefs": true
+      }
+    },
+    {
+      "id": "provisions",
+      "name": "Provisions",
+      "category": "provisions",
+      "copies": 3,
+      "resolutionPhase": "exploration",
+      "effect": {
+        "type": "draw_and_play",
+        "count": 2,
+        "immediate": true,
+        "discardAfterResolution": true
+      }
+    }
+  ]
+}

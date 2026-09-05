@@ -1,0 +1,23 @@
+id,name,category,copies,effect,terrain,nameStatus
+city_1,City 1,city,9,Strength 1,any,descriptive
+city_2,City 2,city,9,Strength 2,any,descriptive
+city_3,City 3,city,3,Strength 3,mountain,descriptive
+farm_wood,Wood Farm,farm,1,Wood,any,descriptive
+farm_fish,Fish Farm,farm,1,Fish,any,descriptive
+farm_carrots,Carrots Farm,farm,1,Carrots,any,descriptive
+trading_post,Trading Post,farm,2,Choose wood/fish/carrots each round,any,descriptive
+farm_pearl,Pearl Farm,farm,1,Pearl,sea,user_supplied
+farm_mushroom,Mushroom Farm,farm,1,Mushroom,forest,user_supplied
+farm_luxury_field,Carrot powder Farm,farm,1,Carrot powder,field,tentative
+farm_diamond,Diamond Farm,farm,1,Diamond,mountain,user_supplied
+farm_copper,Copper Farm,farm,1,Copper,mountain,user_supplied
+farm_gold,Gold Farm,farm,1,Gold,mountain,user_supplied
+farm_steel,Steel Farm,farm,1,Steel,mountain,user_supplied
+camp_1,Camp 1,camp,1,Priority 1,any,descriptive
+camp_2,Camp 2,camp,1,Priority 2,any,descriptive
+camp_3,Camp 3,camp,1,Priority 3,any,descriptive
+camp_4,Camp 4,camp,1,Priority 4,any,descriptive
+camp_5,Camp 5,camp,1,Priority 5,any,descriptive
+camp_6,Camp 6,camp,1,Priority 6,any,descriptive
+sky_tower,Sky Tower,sky_tower,3,2 tokens; connects 2 separate fiefs,any,descriptive
+provisions,Provisions,provisions,3,Immediately draw and play 2 cards,n/a,descriptive

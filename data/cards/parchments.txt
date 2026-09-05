@@ -1,0 +1,37 @@
+Royal Ring — 1 carrot
+Royal Coat — 2 carrots
+Royal Scepter — 3 carrots
+Royal Chalice — 4 carrots
+Royal Crown — 5 carrots
+Royal Carrot — 6 carrots
+Left Glove — 1 carrot alone; if you also have Right Glove, each glove is worth 4 → 8 total
+Right Glove — same as Left Glove
+Bureaucrat — 1 carrot for each Parchment you own, including this one
+Burgomaster — 1 carrot per City
+Diplomat — 1 carrot per territory you control along the outside edge of the board
+Explorer — 3 carrots per corner territory you control
+Carpenter — 1 carrot per Wood resource you produce
+Master Carpenter — 2 carrots per Wood resource
+Woodland King — 20 carrots if you produce at least 7 Wood
+Fisher — 1 carrot per Fish resource you produce
+Master Fisher — 2 carrots per Fish resource
+Fisher King — 20 carrots if you produce at least 7 Fish
+Farmer — 1 carrot per Carrot resource you produce
+Master Farmer — 2 carrots per Carrot resource
+Carrot King — 15 carrots if you produce at least 5 Carrots
+Merchant — 3 carrots per Luxury Resource you produce
+Master of the Mountains — 2 carrots per Mountain territory you control
+Carrotistador — 4 carrots for every Fief containing at least 3 territories
+Harecingetorix — 1 carrot per Fief you control
+Hun-ny King — 12 carrots if you have at least 10 Fiefs
+Bun-Shee — 2 carrots per City in your Fiefs that produce no resources
+PanPan the Barbarian — 2 carrots per territory you control that has neither a City nor a resource
+Colonist — 3 carrots for each Camp card you played
+King of Thieves — 12 carrots if you have at least 9 Cities
+Matriarch — 12 carrots if you control the most territories
+Little Prince — perform another harvest of all your Fiefs except your best Fief
+Treasure Guardian — 3 carrots for each Treasure Parchment you own
+Treasure Hunter — doubles the value of your Treasure Parchments
+Liberal — copy one Parchment belonging to the player on your right
+Socialist — copy one Parchment belonging to the player on your left
+Opportunist — 10 carrots if you're in second place after final scoring

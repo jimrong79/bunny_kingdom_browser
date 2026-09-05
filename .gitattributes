@@ -1,0 +1,2 @@
+# Preserve the source transcription's bytes for its recorded SHA-256.
+/data/cards/parchments.txt -text whitespace=cr-at-eol

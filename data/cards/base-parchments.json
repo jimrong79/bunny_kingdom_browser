@@ -1,0 +1,930 @@
+{
+  "schemaVersion": 1,
+  "id": "original-base-parchments",
+  "name": "Bunny Kingdom — original base-game parchments",
+  "verification": {
+    "status": "awaiting_user_review",
+    "importDate": "2026-09-05",
+    "inventoryStatus": "37_distinct_source_entries",
+    "scoringStatus": "draft_with_open_items",
+    "notes": [
+      "The user supplied all 37 named entries as summaries. Original wording is preserved in sourceText; normalized scoringSpec fields are draft interpretations.",
+      "One copy per entry is assumed from 37 distinct entries matching the rulebook's 37-card total; no separate copy counts were supplied.",
+      "The six royal items and two gloves are classified as treasures; the other 29 are missions.",
+      "On 2026-09-05 the user confirmed Opportunist's timing as after final scoring and updated its source-file entry. Tie and copy interactions remain unresolved.",
+      "This import is not verification of every printed card or a tested scoring engine. Null rule fields are unresolved and must not receive silent defaults."
+    ]
+  },
+  "sources": [
+    {
+      "id": "user-parchments",
+      "kind": "user_file",
+      "file": "data/cards/parchments.txt",
+      "sha256": "24a0d690fff9cdc5480b84a841c7c665609372c1b0af5d4e023d79cb5b6f8e86",
+      "description": "Unmodified user-supplied card summaries, one card per nonempty line."
+    },
+    {
+      "id": "official-rulebook",
+      "kind": "publisher_rulebook",
+      "url": "https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf",
+      "pages": [
+        4,
+        5,
+        6,
+        10,
+        11
+      ],
+      "description": "Inventory, parchment handling, resource/city/fief scoring, PanPan, gloves, Little Prince ties, and copied-treasure bonuses."
+    },
+    {
+      "id": "user-opportunist-timing",
+      "kind": "user_message",
+      "date": "2026-09-05",
+      "text": "10 carrots if you're in second place after final scoring",
+      "description": "User confirmation of Opportunist's printed wording; also reflected in line 37 of the supplied file."
+    }
+  ],
+  "inventory": {
+    "totalCards": 37,
+    "treasures": 8,
+    "missions": 29
+  },
+  "lifecycle": {
+    "onPlay": "keep_face_down",
+    "ownerMayInspect": true,
+    "ownedCardCountIsPublic": true,
+    "revealAfterRound": 4,
+    "scoringPhase": "end_game"
+  },
+  "scoringConventions": {
+    "pointsUnit": "golden_carrots",
+    "basicCarrotResourceId": "carrots",
+    "resourceCounts": "Count all production from controlled territories and farms, including repeated basic resources; do not substitute the distinct-type count used for fief wealth.",
+    "tradingPosts": "Keep the basic resource selected for the fourth harvest when scoring parchments.",
+    "cityCounts": "Count each city once regardless of strength.",
+    "fiefConnectivity": "Use actual connections, including Camps and Sky Tower pairs; they cannot be ignored for parchment scoring.",
+    "nullFields": "Unresolved rule: a future scoring engine must require a verified resolution before relying on this field."
+  },
+  "openItems": [
+    {
+      "id": "matriarch-ties",
+      "cardIds": [
+        "matriarch"
+      ],
+      "status": "open",
+      "question": "Does a tie for the most territories qualify? The supplied summary and checked rulebook do not specify this.",
+      "evidenceNeeded": "Printed clarification or a readable publisher/designer ruling."
+    },
+    {
+      "id": "copy-interactions",
+      "cardIds": [
+        "liberal",
+        "socialist"
+      ],
+      "status": "open",
+      "question": "Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.",
+      "evidenceNeeded": "Publisher/designer clarification; the rulebook confirms whole-card copying and copied-treasure bonuses, but does not settle these interactions."
+    },
+    {
+      "id": "treasure-hunter-stacking",
+      "cardIds": [
+        "treasure_hunter",
+        "liberal",
+        "socialist"
+      ],
+      "status": "open",
+      "question": "How do an owned Treasure Hunter and a copied Treasure Hunter combine?",
+      "evidenceNeeded": "Publisher/designer clarification; do not infer repeated doubling or additive bonuses."
+    },
+    {
+      "id": "opportunist-ties-and-copies",
+      "cardIds": [
+        "opportunist"
+      ],
+      "status": "open",
+      "question": "How are tied rankings and interactions between copied Opportunists handled after final scoring?",
+      "evidenceNeeded": "Publisher/designer clarification of ties and copied effects. The user confirmed the printed timing as after final scoring."
+    }
+  ],
+  "cards": [
+    {
+      "id": "royal_ring",
+      "name": "Royal Ring",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 1,
+      "sourceText": "1 carrot",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 1
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "royal_coat",
+      "name": "Royal Coat",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 2,
+      "sourceText": "2 carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 2
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "royal_scepter",
+      "name": "Royal Scepter",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 3,
+      "sourceText": "3 carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 3
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "royal_chalice",
+      "name": "Royal Chalice",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 4,
+      "sourceText": "4 carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 4
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "royal_crown",
+      "name": "Royal Crown",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 5,
+      "sourceText": "5 carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 5
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "royal_carrot",
+      "name": "Royal Carrot",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 6,
+      "sourceText": "6 carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "fixed_points",
+        "points": 6
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "left_glove",
+      "name": "Left Glove",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 7,
+      "sourceText": "1 carrot alone; if you also have Right Glove, each glove is worth 4 → 8 total",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "paired_treasure",
+        "partnerCardId": "right_glove",
+        "pointsAlone": 1,
+        "pointsWithPartner": 4
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "right_glove",
+      "name": "Right Glove",
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "copies": 1,
+      "sourceLine": 8,
+      "sourceText": "same as Left Glove",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "paired_treasure",
+        "partnerCardId": "left_glove",
+        "pointsAlone": 1,
+        "pointsWithPartner": 4
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "The source abbreviates this as the same as Left Glove; the reciprocal pairing is made explicit using rulebook page 11."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "bureaucrat",
+      "name": "Bureaucrat",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 9,
+      "sourceText": "1 carrot for each Parchment you own, including this one",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "owned_parchments",
+        "pointsPerItem": 1,
+        "includesSelf": true
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "burgomaster",
+      "name": "Burgomaster",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 10,
+      "sourceText": "1 carrot per City",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_cities",
+        "pointsPerItem": 1
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Count cities, not their towers/strength (rulebook page 10)."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "diplomat",
+      "name": "Diplomat",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 11,
+      "sourceText": "1 carrot per territory you control along the outside edge of the board",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_border_territories",
+        "pointsPerItem": 1,
+        "countEachTerritoryOnce": true
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [
+        "Count a controlled border territory once, including corners. Border and corner definitions here refer to the original rectangular board."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "explorer",
+      "name": "Explorer",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 12,
+      "sourceText": "3 carrots per corner territory you control",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_corner_territories",
+        "pointsPerItem": 3
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [
+        "The original board corners are A1, A10, J1, and J10."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "carpenter",
+      "name": "Carpenter",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 13,
+      "sourceText": "1 carrot per Wood resource you produce",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "wood",
+        "pointsPerUnit": 1
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "master_carpenter",
+      "name": "Master Carpenter",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 14,
+      "sourceText": "2 carrots per Wood resource",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "wood",
+        "pointsPerUnit": 2
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "woodland_king",
+      "name": "Woodland King",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 15,
+      "sourceText": "20 carrots if you produce at least 7 Wood",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "resource_threshold",
+        "resource": "wood",
+        "minimum": 7,
+        "points": 20
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "fisher",
+      "name": "Fisher",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 16,
+      "sourceText": "1 carrot per Fish resource you produce",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "fish",
+        "pointsPerUnit": 1
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "master_fisher",
+      "name": "Master Fisher",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 17,
+      "sourceText": "2 carrots per Fish resource",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "fish",
+        "pointsPerUnit": 2
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "fisher_king",
+      "name": "Fisher King",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 18,
+      "sourceText": "20 carrots if you produce at least 7 Fish",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "resource_threshold",
+        "resource": "fish",
+        "minimum": 7,
+        "points": 20
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "farmer",
+      "name": "Farmer",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 19,
+      "sourceText": "1 carrot per Carrot resource you produce",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "carrots",
+        "pointsPerUnit": 1
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "master_farmer",
+      "name": "Master Farmer",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 20,
+      "sourceText": "2 carrots per Carrot resource",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource",
+        "resource": "carrots",
+        "pointsPerUnit": 2
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "carrot_king",
+      "name": "Carrot King",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 21,
+      "sourceText": "15 carrots if you produce at least 5 Carrots",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "resource_threshold",
+        "resource": "carrots",
+        "minimum": 5,
+        "points": 15
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "merchant",
+      "name": "Merchant",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 22,
+      "sourceText": "3 carrots per Luxury Resource you produce",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_resource_class",
+        "resourceClass": "luxury",
+        "pointsPerUnit": 3
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Count luxury-resource production, including farms; basic carrots and the field luxury resource remain distinct."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "master_of_the_mountains",
+      "name": "Master of the Mountains",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 23,
+      "sourceText": "2 carrots per Mountain territory you control",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_mountain_territories",
+        "pointsPerItem": 2
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "carrotistador",
+      "name": "Carrotistador",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 24,
+      "sourceText": "4 carrots for every Fief containing at least 3 territories",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_qualifying_fief",
+        "minimumTerritories": 3,
+        "pointsPerFief": 4
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "harecingetorix",
+      "name": "Harecingetorix",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 25,
+      "sourceText": "1 carrot per Fief you control",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_fiefs",
+        "pointsPerItem": 1
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "hun_ny_king",
+      "name": "Hun-ny King",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 26,
+      "sourceText": "12 carrots if you have at least 10 Fiefs",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "count_threshold",
+        "metric": "controlled_fiefs",
+        "minimum": 10,
+        "points": 12
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [],
+      "openItemRefs": []
+    },
+    {
+      "id": "bun_shee",
+      "name": "Bun-Shee",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 27,
+      "sourceText": "2 carrots per City in your Fiefs that produce no resources",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "cities_in_fiefs_with_no_resource_production",
+        "pointsPerItem": 2
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Check resource production across the entire fief, then count its cities, regardless of city strength."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "panpan_the_barbarian",
+      "name": "PanPan the Barbarian",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 28,
+      "sourceText": "2 carrots per territory you control that has neither a City nor a resource",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_territories_with_no_city_and_no_resource_production",
+        "pointsPerItem": 2
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Check each territory separately. A city or resource elsewhere in the fief does not disqualify it. A Camp or Sky Tower is not a city (rulebook page 11)."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "colonist",
+      "name": "Colonist",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 29,
+      "sourceText": "3 carrots for each Camp card you played",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "camp_cards_played",
+        "pointsPerItem": 3
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [
+        "The supplied text counts Camp cards played, not Camp tokens currently on the board. Keep card-play history separate from surviving camps; this is a transcription of the supplied summary."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "king_of_thieves",
+      "name": "King of Thieves",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 30,
+      "sourceText": "12 carrots if you have at least 9 Cities",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "count_threshold",
+        "metric": "controlled_cities",
+        "minimum": 9,
+        "points": 12
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Count cities, not towers/strength (rulebook page 10)."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "matriarch",
+      "name": "Matriarch",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 31,
+      "sourceText": "12 carrots if you control the most territories",
+      "scoringStatus": "needs_clarification",
+      "scoringSpec": {
+        "type": "territory_lead_bonus",
+        "points": 12,
+        "tiePolicy": null
+      },
+      "sourceRefs": [
+        "user-parchments"
+      ],
+      "notes": [
+        "The tie policy is deliberately unset pending a verified clarification."
+      ],
+      "openItemRefs": [
+        "matriarch-ties"
+      ]
+    },
+    {
+      "id": "little_prince",
+      "name": "Little Prince",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 32,
+      "sourceText": "perform another harvest of all your Fiefs except your best Fief",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "extra_harvest_except_best",
+        "excludedFiefs": 1,
+        "excludeExactlyOneIfBestTied": true
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "If multiple fiefs tie for highest harvest, exclude exactly one of them (rulebook page 11)."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "treasure_guardian",
+      "name": "Treasure Guardian",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 33,
+      "sourceText": "3 carrots for each Treasure Parchment you own",
+      "scoringStatus": "draft_from_source",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "owned_treasures",
+        "pointsPerItem": 3,
+        "includesCopiedTreasures": true
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "A copied treasure qualifies for this bonus (rulebook page 11)."
+      ],
+      "openItemRefs": []
+    },
+    {
+      "id": "treasure_hunter",
+      "name": "Treasure Hunter",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 34,
+      "sourceText": "doubles the value of your Treasure Parchments",
+      "scoringStatus": "needs_clarification",
+      "scoringSpec": {
+        "type": "multiply_treasure_values",
+        "factor": 2,
+        "includesCopiedTreasures": true,
+        "multipleHunterStacking": null
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Copied treasures qualify. This effect changes treasure values; it must not be counted as an unrelated fixed-point reward. Stacking with a copied Hunter remains open."
+      ],
+      "openItemRefs": [
+        "treasure-hunter-stacking"
+      ]
+    },
+    {
+      "id": "liberal",
+      "name": "Liberal",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 35,
+      "sourceText": "copy one Parchment belonging to the player on your right",
+      "scoringStatus": "needs_clarification",
+      "scoringSpec": {
+        "type": "copy_parchment",
+        "targetNeighbor": "right",
+        "copyEntireCard": true,
+        "copiedTreasuresQualifyForBonuses": true,
+        "copyCardTargetPolicy": null,
+        "choiceOrder": null
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+      ],
+      "openItemRefs": [
+        "copy-interactions",
+        "treasure-hunter-stacking"
+      ]
+    },
+    {
+      "id": "socialist",
+      "name": "Socialist",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 36,
+      "sourceText": "copy one Parchment belonging to the player on your left",
+      "scoringStatus": "needs_clarification",
+      "scoringSpec": {
+        "type": "copy_parchment",
+        "targetNeighbor": "left",
+        "copyEntireCard": true,
+        "copiedTreasuresQualifyForBonuses": true,
+        "copyCardTargetPolicy": null,
+        "choiceOrder": null
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "official-rulebook"
+      ],
+      "notes": [
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+      ],
+      "openItemRefs": [
+        "copy-interactions",
+        "treasure-hunter-stacking"
+      ]
+    },
+    {
+      "id": "opportunist",
+      "name": "Opportunist",
+      "category": "parchment",
+      "parchmentType": "mission",
+      "copies": 1,
+      "sourceLine": 37,
+      "sourceText": "10 carrots if you're in second place after final scoring",
+      "scoringStatus": "needs_clarification",
+      "scoringSpec": {
+        "type": "rank_bonus",
+        "rank": 2,
+        "points": 10,
+        "checkpoint": "after_final_scoring",
+        "tiePolicy": null
+      },
+      "sourceRefs": [
+        "user-parchments",
+        "user-opportunist-timing"
+      ],
+      "notes": [
+        "The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved."
+      ],
+      "openItemRefs": [
+        "opportunist-ties-and-copies"
+      ]
+    }
+  ]
+}

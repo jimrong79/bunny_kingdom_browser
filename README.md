@@ -24,4 +24,20 @@ The supplied board photo has been transcribed into **100 spaces, 18 starting cit
 - [Readable text summary](data/maps/original-board.review.txt)
 - [Data format and correction instructions](data/maps/README.md)
 
-The game has not been implemented yet. The first completed step is the original-board transcription and its review tools.
+## Buildings and Provisions
+
+The building inventory is recorded as **21 cities, 12 farms, 6 camps, and 3 Sky Towers**, plus **3 Provisions**. The user's confirmed city quantities, camp priorities, and luxury-terrain assignments are included. The field luxury resource's name is tentative; its placement requirement is confirmed.
+
+- [Readable card review](data/cards/base-buildings-and-provisions.review.md)
+- [Reusable JSON](data/cards/base-buildings-and-provisions.json) and [spreadsheet export](data/cards/base-buildings-and-provisions.csv)
+- [Data conventions and validation](data/cards/README.md)
+
+## Parchments
+
+All **37 parchment entries** have been imported from the supplied text, completing the recorded **182-card inventory**. The import preserves the source wording and adds draft scoring specifications. Opportunist awards 10 Golden Carrots for second place after final scoring, as confirmed by the user. Tie handling for Opportunist and Matriarch, and some copy-card interactions, still need clarification.
+
+- [Readable parchment review and open questions](data/cards/base-parchments.review.md)
+- [Reusable JSON](data/cards/base-parchments.json) and [spreadsheet export](data/cards/base-parchments.csv)
+- [Original supplied text](data/cards/parchments.txt)
+
+The game has not been implemented yet. Inventory coverage is complete; scoring definitions remain under review.
