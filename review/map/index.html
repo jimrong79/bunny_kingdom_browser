@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bunny Kingdom — original board review</title>
+  <style>
+    :root { color-scheme: light; --ink:#263b33; --muted:#58675f; --paper:#f6f5ef; --line:#d9ded3; --lava:#c53e1a; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.5 system-ui,sans-serif; }
+    main { max-width:1560px; margin:auto; padding:32px clamp(16px,3vw,48px) 60px; }
+    .eyebrow { margin:0 0 4px; font-size:12px; font-weight:700; letter-spacing:.14em; color:#627466; }
+    h1 { margin:0; font-size:clamp(25px,3vw,38px); letter-spacing:-.04em; line-height:1.15; }
+    h2 { margin:0 0 10px; font-size:18px; letter-spacing:-.02em; }
+    p { margin:8px 0 16px; }
+    a { color:#265b4a; text-underline-offset:3px; }
+    button,select,input { font:inherit; }
+    button,select { color:var(--ink); }
+    button { cursor:pointer; }
+    button:focus-visible,a:focus-visible,select:focus-visible { outline:3px solid #005fbe; outline-offset:3px; }
+    .header { display:flex; justify-content:space-between; gap:24px; align-items:start; }
+    .status { border:1px solid #dcc787; background:#faf0cd; padding:7px 12px; border-radius:8px; white-space:nowrap; font-size:13px; }
+    .status.verified { border-color:#9bbea3; background:#e1efe2; }
+    .intro { color:var(--muted); max-width:850px; }
+    .stats,.downloads,.legend,.controls { display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; }
+    .stats { margin:20px 0 18px; }
+    .stat { padding:10px 18px; background:white; border:1px solid var(--line); border-radius:10px; }
+    .stat strong { margin-right:6px; font-size:22px; }
+    .downloads { font-size:14px; margin-bottom:22px; }
+    .legend { margin:14px 0; gap:8px 14px; font-size:13px; }
+    .swatch { display:inline-block; width:13px; height:13px; border:1px solid #263b3340; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+    .controls { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:12px 0; margin-bottom:20px; }
+    .controls label { display:flex; align-items:center; gap:7px; font-size:14px; }
+    .controls select,.plain-button { background:white; border:1px solid #bac6b9; border-radius:6px; padding:6px 10px; }
+    .boards { display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; }
+    .panel-note { margin:0 0 12px; color:var(--muted); font-size:13px; }
+    .board { display:grid; grid-template-columns:24px repeat(10,minmax(0,1fr)); gap:2px; }
+    .axis { display:flex; justify-content:center; align-items:center; font-size:12px; font-weight:700; min-height:24px; }
+    .cell { position:relative; aspect-ratio:1; min-width:0; border:1px solid #263b3333; border-radius:4px; padding:2px; display:flex; flex-direction:column; justify-content:center; align-items:center; line-height:1.15; }
+    .cell-coord { font-size:clamp(10px,.9vw,14px); font-weight:750; }
+    .cell-name { font-size:clamp(8px,.7vw,11px); margin-top:4px; }
+    .cell[aria-pressed="true"] { outline:3px solid #172d26; outline-offset:-5px; box-shadow:inset 0 0 0 6px #ffffff80; }
+    .cell.lava-east { border-right:5px solid var(--lava); }
+    .cell.lava-south { border-bottom:5px solid var(--lava); }
+    .hide-lava .cell.lava-east,.hide-lava .cell.lava-south { border:1px solid #263b3333; }
+    .source { display:block; width:100%; aspect-ratio:1; background:#eeeee9; border-radius:8px; }
+    .source-selection { fill:#ffe97b26; stroke:#fff064; stroke-width:3; vector-effect:non-scaling-stroke; pointer-events:none; }
+    .source-lava { stroke:#e33d16; stroke-width:4; stroke-dasharray:7 4; vector-effect:non-scaling-stroke; pointer-events:none; }
+    .hide-lava #source-lava { display:none; }
+    .under { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:22px; }
+    .details { display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:6px 16px; margin:0; font-size:14px; }
+    .details dt { color:var(--muted); }
+    .details dd { margin:0; overflow-wrap:anywhere; }
+    .edge-list { display:flex; flex-wrap:wrap; gap:8px; }
+    .edge-button { background:#fff4ef; border:1px solid #e3b6a6; border-radius:7px; padding:6px 10px; font-size:14px; }
+    .edge-button[aria-pressed="true"] { background:#f7d5c6; outline:2px solid #963113; }
+    .small { font-size:13px; color:var(--muted); }
+    .notes { margin-top:22px; }
+    .notes ul { margin:0; padding-left:21px; }
+    .notes li { margin:7px 0; }
+    .table-wrap { overflow-x:auto; margin-top:16px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th,td { text-align:left; padding:8px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+    th { background:#eef2e9; }
+    tbody tr { cursor:pointer; }
+    tbody tr:hover,tbody tr.selected { background:#f7efd3; }
+    details { margin-top:22px; }
+    summary { cursor:pointer; font-weight:650; }
+    code { background:#eef1e9; border-radius:4px; padding:1px 4px; }
+    [hidden] { display:none !important; }
+    @media (max-width:960px) { .boards,.under { grid-template-columns:1fr; } .cell-coord { font-size:14px; } .cell-name { font-size:11px; } .header { flex-direction:column; gap:12px; } }
+    @media (max-width:520px) { main { padding:20px 10px 40px; } .panel { padding:12px 8px; } .cell-coord { font-size:10px; } .cell-name { font-size:8px; margin-top:2px; } .board { grid-template-columns:18px repeat(10,minmax(0,1fr)); gap:1px; } .stat { padding:7px 10px; } .cell.lava-east { border-right-width:3px; } .cell.lava-south { border-bottom-width:3px; } .cell[aria-pressed="true"] { outline-width:2px; outline-offset:-3px; } }
+    @media print { .controls,.downloads { display:none; } main { padding:0; } .panel { break-inside:avoid; } .boards { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header class="header">
+    <div><p class="eyebrow">BUNNY KINGDOM · MAP REFERENCE</p><h1>Original board review</h1></div>
+    <div class="status" id="status">Review status</div>
+  </header>
+  <p class="intro">Compare the extracted board with your photograph. Select a territory or a lava edge to inspect it on both views. Rows run A–J from top to bottom; columns run 1–10 from left to right.</p>
+  <div class="stats" id="stats"></div>
+  <nav class="downloads" aria-label="Extracted data files">
+    <a href="../../data/maps/original-board.json">JSON · game data</a>
+    <a href="../../data/maps/original-board.cells.csv" download>CSV · 100 spaces</a>
+    <a href="../../data/maps/original-board.lava.csv" download>CSV · lava edges</a>
+    <a href="../../data/maps/original-board.review.txt">Text · readable summary</a>
+  </nav>
+  <div class="legend" id="legend" aria-label="Space type legend"></div>
+  <div class="controls">
+    <label>Territory <select id="coordinate-picker" aria-label="Select a territory"></select></label>
+    <label><input id="show-lava" type="checkbox" checked> Show lava markings</label>
+    <label><input id="zoom-photo" type="checkbox"> Enlarge selection in photo</label>
+    <button class="plain-button" id="reset" type="button">Reset view</button>
+  </div>
+  <div class="boards">
+    <section class="panel" aria-labelledby="extracted-heading">
+      <h2 id="extracted-heading">Extracted board</h2>
+      <p class="panel-note">City = a printed neutral city with 1 tower. Red edges block direct connection.</p>
+      <div class="board" id="board" aria-label="Extracted board territories"></div>
+    </section>
+    <section class="panel" aria-labelledby="photo-heading">
+      <h2 id="photo-heading">Your photograph</h2>
+      <p class="panel-note">Rotated upright. Highlight alignment is approximate because of perspective.</p>
+      <p id="photo-error" class="small" hidden>The local photo could not load. Keep this project next to reference/map/IMG_3156.jpeg, or compare with your original separately.</p>
+      <svg id="source" class="source" viewBox="190 90 1000 1000" role="img" aria-label="Original board photograph with selection and lava overlays">
+        <title>Original board photograph</title>
+        <g transform="translate(1600 0) rotate(90)"><image id="source-photo" width="1200" height="1600" href="../../reference/map/IMG_3156.jpeg"/></g>
+        <g id="source-lava"></g><g id="source-selection"></g>
+      </svg>
+    </section>
+  </div>
+  <div class="under">
+    <section class="panel" aria-labelledby="selection-heading">
+      <h2 id="selection-heading">Selected territory</h2>
+      <div id="selection-details" aria-live="polite"></div>
+    </section>
+    <section class="panel" aria-labelledby="lava-heading">
+      <h2 id="lava-heading">Lava edges</h2>
+      <div class="edge-list" id="edge-list"></div>
+      <p class="small">The continuous flow at the bottom blocks two edges: I7 ↔ J7 and I8 ↔ J8. Each entry is undirected. A different route can still connect those territories into a fief.</p>
+    </section>
+  </div>
+  <section class="panel notes">
+    <h2>What to check</h2>
+    <ul>
+      <li>Compare terrain and starting cities row by row. Resource shields identify mixed coastal spaces; a small island or decorative river does not change the space type.</li>
+      <li>Check all eight marked lava edges. The physical fold between rows E and F is not a lava flow.</li>
+      <li>City is a label for the preprinted city spaces, each with no base resource and a starting neutral city of strength 1.</li>
+      <li id="verification-note">All spaces are readable in the supplied photo. See the recorded review status above.</li>
+    </ul>
+    <p class="small">To request a correction, give the coordinate or edge pair and the change. The JSON is the source data; CSV and this page are generated from it.</p>
+  </section>
+  <details class="panel">
+    <summary>View all 100 extracted records</summary>
+    <div class="table-wrap"><table><thead><tr><th>Coordinate</th><th>Printed type</th><th>Base resource</th><th>Starting city strength</th><th>Lava-blocked neighbors</th></tr></thead><tbody id="records"></tbody></table></div>
+  </details>
+  <noscript><p>This interactive preview needs JavaScript. Open the text summary or CSV links above for the complete extraction.</p></noscript>
+</main>
+<script id="board-data" type="application/json">{"schemaVersion": 1, "id": "original-base-board", "name": "Bunny Kingdom — original base board", "dimensions": {"rows": 10, "columns": 10}, "coordinateSystem": {"rows": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"], "columns": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "orientation": "A is the top row; 1 is the leftmost column."}, "source": {"file": "reference/map/IMG_3156.jpeg", "sha256": "11f2e35afa1a2a59e2bf9db654ff82bbe8692c9317b6226e3162f53ce420dc48", "encodedImageSize": {"width": 5712, "height": 4284}, "exifOrientation": 6, "displayRotationClockwiseDegrees": 90, "method": "Manual visual transcription of the supplied photograph, inspected upright and with enlarged lava regions."}, "verification": {"status": "user_verified", "reviewedBy": "user", "reviewRecordedAt": "2026-09-05T06:34:33Z", "reviewEvidence": "User confirmed: data looks good.", "photoClarity": "clear", "unresolvedCells": [], "unresolvedBoundaries": [], "notes": ["All 100 spaces and their coordinates are visible. No additional photo is currently needed.", "Eight shared edges are marked as lava. The continuous southern flow blocks both I7–J7 and I8–J8.", "The horizontal board fold is not a lava boundary.", "The user reviewed the extraction and confirmed that the data looks correct."]}, "definitions": {"terrain": "The six printed space categories are forest, plains, field, sea, mountain, and city. City denotes a preprinted neutral-city space, not a city constructed during play. No unshown underlying terrain is inferred.", "baseResource": "The resource printed on the original board. Null means no printed resource; it does not include resources from buildings added during play.", "startingCityStrength": "1 for a printed neutral-city space, otherwise 0. Starting cities are neutral until a player claims their territory.", "blockedConnections": "Undirected blocked shared edges. They prevent direct orthogonal connection only; alternate routes and Sky Towers are handled by the game rules.", "decorativeFeatures": "Rivers, paths, small islands, rocks, coastlines, and the physical fold are not additional terrain or blocked connections. Resource shields determine mixed coastal spaces."}, "cells": [{"coordinate": "A1", "row": "A", "column": 1, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "A2", "row": "A", "column": 2, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "A3", "row": "A", "column": 3, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "A4", "row": "A", "column": 4, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "A5", "row": "A", "column": 5, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "A6", "row": "A", "column": 6, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "A7", "row": "A", "column": 7, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "A8", "row": "A", "column": 8, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "A9", "row": "A", "column": 9, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "A10", "row": "A", "column": 10, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "B1", "row": "B", "column": 1, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "B2", "row": "B", "column": 2, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "B3", "row": "B", "column": 3, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "B4", "row": "B", "column": 4, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "B5", "row": "B", "column": 5, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "B6", "row": "B", "column": 6, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "B7", "row": "B", "column": 7, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "B8", "row": "B", "column": 8, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "B9", "row": "B", "column": 9, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "B10", "row": "B", "column": 10, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "C1", "row": "C", "column": 1, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "C2", "row": "C", "column": 2, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "C3", "row": "C", "column": 3, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "C4", "row": "C", "column": 4, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "C5", "row": "C", "column": 5, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "C6", "row": "C", "column": 6, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "C7", "row": "C", "column": 7, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "C8", "row": "C", "column": 8, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "C9", "row": "C", "column": 9, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "C10", "row": "C", "column": 10, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D1", "row": "D", "column": 1, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D2", "row": "D", "column": 2, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D3", "row": "D", "column": 3, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "D4", "row": "D", "column": 4, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "D5", "row": "D", "column": 5, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D6", "row": "D", "column": 6, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D7", "row": "D", "column": 7, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "D8", "row": "D", "column": 8, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "D9", "row": "D", "column": 9, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "D10", "row": "D", "column": 10, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "E1", "row": "E", "column": 1, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "E2", "row": "E", "column": 2, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "E3", "row": "E", "column": 3, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "E4", "row": "E", "column": 4, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "E5", "row": "E", "column": 5, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "E6", "row": "E", "column": 6, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "E7", "row": "E", "column": 7, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "E8", "row": "E", "column": 8, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "E9", "row": "E", "column": 9, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "E10", "row": "E", "column": 10, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "F1", "row": "F", "column": 1, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "F2", "row": "F", "column": 2, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "F3", "row": "F", "column": 3, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "F4", "row": "F", "column": 4, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "F5", "row": "F", "column": 5, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "F6", "row": "F", "column": 6, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "F7", "row": "F", "column": 7, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "F8", "row": "F", "column": 8, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "F9", "row": "F", "column": 9, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "F10", "row": "F", "column": 10, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "G1", "row": "G", "column": 1, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "G2", "row": "G", "column": 2, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "G3", "row": "G", "column": 3, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "G4", "row": "G", "column": 4, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "G5", "row": "G", "column": 5, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "G6", "row": "G", "column": 6, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "G7", "row": "G", "column": 7, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "G8", "row": "G", "column": 8, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "G9", "row": "G", "column": 9, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "G10", "row": "G", "column": 10, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H1", "row": "H", "column": 1, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H2", "row": "H", "column": 2, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "H3", "row": "H", "column": 3, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "H4", "row": "H", "column": 4, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "H5", "row": "H", "column": 5, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H6", "row": "H", "column": 6, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H7", "row": "H", "column": 7, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "H8", "row": "H", "column": 8, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H9", "row": "H", "column": 9, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "H10", "row": "H", "column": 10, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "I1", "row": "I", "column": 1, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "I2", "row": "I", "column": 2, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "I3", "row": "I", "column": 3, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "I4", "row": "I", "column": 4, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "I5", "row": "I", "column": 5, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "I6", "row": "I", "column": 6, "terrain": "plains", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "I7", "row": "I", "column": 7, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "I8", "row": "I", "column": 8, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "I9", "row": "I", "column": 9, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "I10", "row": "I", "column": 10, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "J1", "row": "J", "column": 1, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "J2", "row": "J", "column": 2, "terrain": "forest", "baseResource": "wood", "startingCityStrength": 0}, {"coordinate": "J3", "row": "J", "column": 3, "terrain": "city", "baseResource": null, "startingCityStrength": 1}, {"coordinate": "J4", "row": "J", "column": 4, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "J5", "row": "J", "column": 5, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "J6", "row": "J", "column": 6, "terrain": "field", "baseResource": "carrots", "startingCityStrength": 0}, {"coordinate": "J7", "row": "J", "column": 7, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "J8", "row": "J", "column": 8, "terrain": "mountain", "baseResource": null, "startingCityStrength": 0}, {"coordinate": "J9", "row": "J", "column": 9, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}, {"coordinate": "J10", "row": "J", "column": 10, "terrain": "sea", "baseResource": "fish", "startingCityStrength": 0}], "blockedConnections": [{"from": "B1", "to": "B2", "reason": "lava"}, {"from": "B6", "to": "C6", "reason": "lava"}, {"from": "C2", "to": "D2", "reason": "lava"}, {"from": "C8", "to": "C9", "reason": "lava"}, {"from": "D5", "to": "D6", "reason": "lava"}, {"from": "F2", "to": "F3", "reason": "lava"}, {"from": "I7", "to": "J7", "reason": "lava"}, {"from": "I8", "to": "J8", "reason": "lava"}]}</script>
+<script>
+  'use strict';
+  const data = JSON.parse(document.getElementById('board-data').textContent);
+  const cells = new Map(data.cells.map(cell => [cell.coordinate, cell]));
+  const blocked = new Map(data.cells.map(cell => [cell.coordinate, []]));
+  const palette = {forest:'#b4cdb8',plains:'#e5eccd',field:'#efce92',sea:'#b6dae7',mountain:'#c6cbd6',city:'#e6c8b9'};
+  const label = {forest:'Forest',plains:'Plains',field:'Field',sea:'Sea',mountain:'Mountain',city:'City · 1'};
+  const rows = data.coordinateSystem.rows;
+  const ns = 'http://www.w3.org/2000/svg';
+  const buttons = new Map();
+  const tableRows = new Map();
+  let selected = ['A1'];
+  // Approximate row-edge locations on the upright photograph scaled to 1600 × 1200.
+  // These points affect the review overlay only; they are not game coordinates.
+  const photoRows = [
+    [[245,146],[1112,128]], [[241,231],[1117,213]], [[240,318],[1123,297]],
+    [[238,404],[1128,383]], [[236,490],[1133,474]], [[234,577],[1138,563]],
+    [[233,667],[1144,655]], [[232,759],[1149,744]], [[230,849],[1154,837]],
+    [[230,943],[1157,929]], [[229,1040],[1159,1028]]
+  ];
+  function node(tag, text, className) {
+    const result = document.createElement(tag);
+    if (text !== undefined) result.textContent = text;
+    if (className) result.className = className;
+    return result;
+  }
+  function svgNode(tag, attributes) {
+    const result = document.createElementNS(ns, tag);
+    for (const [key,value] of Object.entries(attributes)) result.setAttribute(key,String(value));
+    return result;
+  }
+  function photoPoint(row, column) {
+    const [a,b] = photoRows[row];
+    return [a[0]+(b[0]-a[0])*column/10, a[1]+(b[1]-a[1])*column/10];
+  }
+  function photoPolygon(coordinate) {
+    const cell = cells.get(coordinate), r = rows.indexOf(cell.row), c = cell.column-1;
+    return [photoPoint(r,c),photoPoint(r,c+1),photoPoint(r+1,c+1),photoPoint(r+1,c)];
+  }
+  function edgePoints(edge) {
+    const a=cells.get(edge.from), b=cells.get(edge.to);
+    const ra=rows.indexOf(a.row), rb=rows.indexOf(b.row);
+    if (ra === rb) {
+      const column = Math.min(a.column,b.column);
+      return [photoPoint(ra,column),photoPoint(ra+1,column)];
+    }
+    const row = Math.max(ra,rb), column = a.column-1;
+    return [photoPoint(row,column),photoPoint(row,column+1)];
+  }
+  for (const edge of data.blockedConnections) {
+    blocked.get(edge.from).push(edge.to); blocked.get(edge.to).push(edge.from);
+  }
+  const stats = document.getElementById('stats');
+  for (const [count,name] of [[data.cells.length,'spaces'],[data.cells.filter(c=>c.startingCityStrength).length,'starting cities'],[data.blockedConnections.length,'lava edges']]) {
+    const stat=node('div',undefined,'stat'); stat.append(node('strong',String(count)),document.createTextNode(name)); stats.append(stat);
+  }
+  const verified = data.verification.status === 'user_verified';
+  document.getElementById('status').textContent=verified ? 'User verified' : 'Awaiting your review';
+  document.getElementById('status').classList.toggle('verified',verified);
+  document.getElementById('verification-note').textContent=verified
+    ? 'The user reviewed the extraction and confirmed that the data looks correct. Structural checks also passed.'
+    : 'All spaces are readable in the supplied photo. Structural checks passed; your comparison is still needed before the map is marked verified.';
+  for (const [terrain,color] of Object.entries(palette)) {
+    const item=node('span'), swatch=node('span',undefined,'swatch'); swatch.style.background=color;
+    item.append(swatch,document.createTextNode(`${label[terrain]} (${data.cells.filter(c=>c.terrain===terrain).length})`));
+    document.getElementById('legend').append(item);
+  }
+  const board=document.getElementById('board'), picker=document.getElementById('coordinate-picker');
+  board.append(node('span','', 'axis'));
+  for (let column=1;column<=10;column++) board.append(node('span',String(column),'axis'));
+  for (const row of rows) {
+    board.append(node('span',row,'axis'));
+    for (const cell of data.cells.filter(c=>c.row===row)) {
+      const button=node('button',undefined,'cell'); button.type='button'; button.dataset.coordinate=cell.coordinate;
+      button.style.background=palette[cell.terrain]; button.setAttribute('aria-pressed','false');
+      button.setAttribute('aria-label',`${cell.coordinate}, ${label[cell.terrain]}, base resource ${cell.baseResource || 'none'}`);
+      button.append(node('span',cell.coordinate,'cell-coord'),node('span',label[cell.terrain],'cell-name'));
+      button.addEventListener('click',()=>select([cell.coordinate])); board.append(button); buttons.set(cell.coordinate,button);
+      const option=node('option',`${cell.coordinate} — ${label[cell.terrain]}`); option.value=cell.coordinate; picker.append(option);
+    }
+  }
+  for (const edge of data.blockedConnections) {
+    const a=cells.get(edge.from), b=cells.get(edge.to);
+    const first = a.row===b.row ? (a.column<b.column?a:b) : (rows.indexOf(a.row)<rows.indexOf(b.row)?a:b);
+    buttons.get(first.coordinate).classList.add(a.row===b.row?'lava-east':'lava-south');
+    const [p,q]=edgePoints(edge);
+    document.getElementById('source-lava').append(svgNode('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],class:'source-lava'}));
+    const button=node('button',`${edge.from} ↔ ${edge.to}`,'edge-button'); button.type='button';
+    button.dataset.from=edge.from; button.dataset.to=edge.to; button.setAttribute('aria-pressed','false');
+    button.addEventListener('click',()=>select([edge.from,edge.to])); document.getElementById('edge-list').append(button);
+  }
+  for (const cell of data.cells) {
+    const tr=node('tr'); tr.dataset.coordinate=cell.coordinate;
+    for (const value of [cell.coordinate,label[cell.terrain],cell.baseResource||'None',cell.startingCityStrength,blocked.get(cell.coordinate).join(', ')||'None']) tr.append(node('td',String(value)));
+    tr.addEventListener('click',()=>select([cell.coordinate])); document.getElementById('records').append(tr); tableRows.set(cell.coordinate,tr);
+  }
+  function mapNeighbors(coordinate) {
+    const cell=cells.get(coordinate), r=rows.indexOf(cell.row), result=[];
+    for (const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+      const nr=r+dr, nc=cell.column+dc;
+      if (nr>=0 && nr<10 && nc>=1 && nc<=10) {
+        const next=rows[nr]+nc;
+        if (!blocked.get(coordinate).includes(next)) result.push(next);
+      }
+    }
+    return result;
+  }
+  function select(coordinates) {
+    selected=coordinates; picker.value=coordinates[0];
+    for (const [coord,button] of buttons) button.setAttribute('aria-pressed',String(coordinates.includes(coord)));
+    for (const [coord,tr] of tableRows) tr.classList.toggle('selected',coordinates.includes(coord));
+    for (const button of document.querySelectorAll('.edge-button')) button.setAttribute('aria-pressed',String(coordinates.length===2 && coordinates.includes(button.dataset.from) && coordinates.includes(button.dataset.to)));
+    const panel=document.getElementById('selection-details'); panel.replaceChildren();
+    document.getElementById('selection-heading').textContent=coordinates.length===1 ? `${coordinates[0]} · ${label[cells.get(coordinates[0]).terrain]}` : `${coordinates.join(' ↔ ')} · Lava boundary`;
+    for (const coordinate of coordinates) {
+      const cell=cells.get(coordinate), dl=node('dl',undefined,'details');
+      for (const [key,value] of [['Territory',coordinate],['Printed type',label[cell.terrain]],['Base resource',cell.baseResource||'None'],['Starting city',cell.startingCityStrength?'Neutral · strength 1':'None'],['Map neighbors, lava excluded',mapNeighbors(coordinate).join(', ')],['Lava-blocked neighbors',blocked.get(coordinate).join(', ')||'None']]) {
+        dl.append(node('dt',key),node('dd',value));
+      }
+      panel.append(dl); if (coordinates.length===2) panel.append(node('p','', 'small'));
+    }
+    const layer=document.getElementById('source-selection'); layer.replaceChildren();
+    const points=coordinates.flatMap(coordinate=>{
+      const polygon=photoPolygon(coordinate);
+      layer.append(svgNode('polygon',{points:polygon.map(p=>p.join(',')).join(' '),class:'source-selection'}));
+      return polygon;
+    });
+    const source=document.getElementById('source');
+    if (document.getElementById('zoom-photo').checked) {
+      const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);
+      const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+      const size=Math.max(maxX-minX,maxY-minY)+120;
+      source.setAttribute('viewBox',`${(minX+maxX-size)/2} ${(minY+maxY-size)/2} ${size} ${size}`);
+    } else source.setAttribute('viewBox','190 90 1000 1000');
+  }
+  picker.addEventListener('change',()=>select([picker.value]));
+  document.getElementById('zoom-photo').addEventListener('change',()=>select(selected));
+  document.getElementById('show-lava').addEventListener('change',event=>document.body.classList.toggle('hide-lava',!event.target.checked));
+  document.getElementById('reset').addEventListener('click',()=>{
+    document.getElementById('zoom-photo').checked=false; document.getElementById('show-lava').checked=true;
+    document.body.classList.remove('hide-lava'); select(['A1']);
+  });
+  document.getElementById('source-photo').addEventListener('error',()=>{document.getElementById('photo-error').hidden=false;});
+  select(['A1']);
+</script>
+</body>
+</html>

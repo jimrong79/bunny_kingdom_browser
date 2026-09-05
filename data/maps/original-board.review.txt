@@ -1,0 +1,61 @@
+BUNNY KINGDOM — ORIGINAL BOARD TRANSCRIPTION
+
+Status: user_verified
+Source: reference/map/IMG_3156.jpeg
+The user reviewed the extraction and confirmed that the data looks correct.
+
+Orientation: A at top; J at bottom; 1 at left; 10 at right.
+FO = Forest (wood); PL = Plains (none); FI = Field (carrots)
+SE = Sea (fish); MO = Mountain (none); CI = Starting city (none, strength 1)
+
+     1  2  3  4  5  6  7  8  9 10
+A   FO FO FO CI SE SE SE FO PL SE
+B   MO MO CI SE SE MO CI PL CI SE
+C   CI MO PL SE SE MO FI MO MO PL
+D   PL MO CI FI MO MO FI PL CI FO
+E   FO PL FI PL PL CI PL FI PL CI
+F   FO MO MO FO FO PL FI CI FO PL
+G   FO CI PL PL CI PL FI PL CI PL
+H   PL FI CI FI PL PL CI PL PL FO
+I   CI PL PL SE SE PL MO MO CI FO
+J   FO FO CI SE SE FI MO MO SE SE
+
+SPACE COUNTS
+forest: 15
+plains: 26
+field: 10
+sea: 15
+mountain: 16
+city: 18
+Total: 100
+
+STARTING CITIES (18)
+A4, B3, B7, B9, C1, D3, D9, E6, E10, F8, G2, G5, G9, H3, H7, I1, I9, J3
+
+LAVA — BLOCKED SHARED EDGES (8)
+B1 <-> B2
+B6 <-> C6
+C2 <-> D2
+C8 <-> C9
+D5 <-> D6
+F2 <-> F3
+I7 <-> J7
+I8 <-> J8
+
+INTERPRETATION
+The six printed space categories are forest, plains, field, sea, mountain, and city. City denotes a preprinted neutral-city space, not a city constructed during play. No unshown underlying terrain is inferred.
+The resource printed on the original board. Null means no printed resource; it does not include resources from buildings added during play.
+1 for a printed neutral-city space, otherwise 0. Starting cities are neutral until a player claims their territory.
+Undirected blocked shared edges. They prevent direct orthogonal connection only; alternate routes and Sky Towers are handled by the game rules.
+Rivers, paths, small islands, rocks, coastlines, and the physical fold are not additional terrain or blocked connections. Resource shields determine mixed coastal spaces.
+
+REVIEW NOTES
+All 100 spaces and their coordinates are visible. No additional photo is currently needed.
+Eight shared edges are marked as lava. The continuous southern flow blocks both I7–J7 and I8–J8.
+The horizontal board fold is not a lava boundary.
+The user reviewed the extraction and confirmed that the data looks correct.
+
+CORRECTIONS
+Report a coordinate (for example A4) or an edge pair, followed by the correction.
+Edit original-board.json, then run python3 scripts/build_map_review.py to regenerate all views.
+Validation cannot prove that a visual transcription matches the physical board.

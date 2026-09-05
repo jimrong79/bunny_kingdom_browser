@@ -1,0 +1,10 @@
+# Local board reference uploads; retain instructions in the repository.
+/reference/map/*
+!/reference/map/README.md
+
+# Local environment and operating-system files.
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

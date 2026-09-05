@@ -1,0 +1,913 @@
+{
+  "schemaVersion": 1,
+  "id": "original-base-board",
+  "name": "Bunny Kingdom — original base board",
+  "dimensions": {
+    "rows": 10,
+    "columns": 10
+  },
+  "coordinateSystem": {
+    "rows": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J"
+    ],
+    "columns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "orientation": "A is the top row; 1 is the leftmost column."
+  },
+  "source": {
+    "file": "reference/map/IMG_3156.jpeg",
+    "sha256": "11f2e35afa1a2a59e2bf9db654ff82bbe8692c9317b6226e3162f53ce420dc48",
+    "encodedImageSize": {
+      "width": 5712,
+      "height": 4284
+    },
+    "exifOrientation": 6,
+    "displayRotationClockwiseDegrees": 90,
+    "method": "Manual visual transcription of the supplied photograph, inspected upright and with enlarged lava regions."
+  },
+  "verification": {
+    "status": "user_verified",
+    "reviewedBy": "user",
+    "reviewRecordedAt": "2026-09-05T06:34:33Z",
+    "reviewEvidence": "User confirmed: data looks good.",
+    "photoClarity": "clear",
+    "unresolvedCells": [],
+    "unresolvedBoundaries": [],
+    "notes": [
+      "All 100 spaces and their coordinates are visible. No additional photo is currently needed.",
+      "Eight shared edges are marked as lava. The continuous southern flow blocks both I7–J7 and I8–J8.",
+      "The horizontal board fold is not a lava boundary.",
+      "The user reviewed the extraction and confirmed that the data looks correct."
+    ]
+  },
+  "definitions": {
+    "terrain": "The six printed space categories are forest, plains, field, sea, mountain, and city. City denotes a preprinted neutral-city space, not a city constructed during play. No unshown underlying terrain is inferred.",
+    "baseResource": "The resource printed on the original board. Null means no printed resource; it does not include resources from buildings added during play.",
+    "startingCityStrength": "1 for a printed neutral-city space, otherwise 0. Starting cities are neutral until a player claims their territory.",
+    "blockedConnections": "Undirected blocked shared edges. They prevent direct orthogonal connection only; alternate routes and Sky Towers are handled by the game rules.",
+    "decorativeFeatures": "Rivers, paths, small islands, rocks, coastlines, and the physical fold are not additional terrain or blocked connections. Resource shields determine mixed coastal spaces."
+  },
+  "cells": [
+    {
+      "coordinate": "A1",
+      "row": "A",
+      "column": 1,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A2",
+      "row": "A",
+      "column": 2,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A3",
+      "row": "A",
+      "column": 3,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A4",
+      "row": "A",
+      "column": 4,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "A5",
+      "row": "A",
+      "column": 5,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A6",
+      "row": "A",
+      "column": 6,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A7",
+      "row": "A",
+      "column": 7,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A8",
+      "row": "A",
+      "column": 8,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A9",
+      "row": "A",
+      "column": 9,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "A10",
+      "row": "A",
+      "column": 10,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B1",
+      "row": "B",
+      "column": 1,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B2",
+      "row": "B",
+      "column": 2,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B3",
+      "row": "B",
+      "column": 3,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "B4",
+      "row": "B",
+      "column": 4,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B5",
+      "row": "B",
+      "column": 5,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B6",
+      "row": "B",
+      "column": 6,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B7",
+      "row": "B",
+      "column": 7,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "B8",
+      "row": "B",
+      "column": 8,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "B9",
+      "row": "B",
+      "column": 9,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "B10",
+      "row": "B",
+      "column": 10,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C1",
+      "row": "C",
+      "column": 1,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "C2",
+      "row": "C",
+      "column": 2,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C3",
+      "row": "C",
+      "column": 3,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C4",
+      "row": "C",
+      "column": 4,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C5",
+      "row": "C",
+      "column": 5,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C6",
+      "row": "C",
+      "column": 6,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C7",
+      "row": "C",
+      "column": 7,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C8",
+      "row": "C",
+      "column": 8,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C9",
+      "row": "C",
+      "column": 9,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "C10",
+      "row": "C",
+      "column": 10,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D1",
+      "row": "D",
+      "column": 1,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D2",
+      "row": "D",
+      "column": 2,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D3",
+      "row": "D",
+      "column": 3,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "D4",
+      "row": "D",
+      "column": 4,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D5",
+      "row": "D",
+      "column": 5,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D6",
+      "row": "D",
+      "column": 6,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D7",
+      "row": "D",
+      "column": 7,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D8",
+      "row": "D",
+      "column": 8,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "D9",
+      "row": "D",
+      "column": 9,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "D10",
+      "row": "D",
+      "column": 10,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E1",
+      "row": "E",
+      "column": 1,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E2",
+      "row": "E",
+      "column": 2,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E3",
+      "row": "E",
+      "column": 3,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E4",
+      "row": "E",
+      "column": 4,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E5",
+      "row": "E",
+      "column": 5,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E6",
+      "row": "E",
+      "column": 6,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "E7",
+      "row": "E",
+      "column": 7,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E8",
+      "row": "E",
+      "column": 8,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E9",
+      "row": "E",
+      "column": 9,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "E10",
+      "row": "E",
+      "column": 10,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "F1",
+      "row": "F",
+      "column": 1,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F2",
+      "row": "F",
+      "column": 2,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F3",
+      "row": "F",
+      "column": 3,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F4",
+      "row": "F",
+      "column": 4,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F5",
+      "row": "F",
+      "column": 5,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F6",
+      "row": "F",
+      "column": 6,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F7",
+      "row": "F",
+      "column": 7,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F8",
+      "row": "F",
+      "column": 8,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "F9",
+      "row": "F",
+      "column": 9,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "F10",
+      "row": "F",
+      "column": 10,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G1",
+      "row": "G",
+      "column": 1,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G2",
+      "row": "G",
+      "column": 2,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "G3",
+      "row": "G",
+      "column": 3,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G4",
+      "row": "G",
+      "column": 4,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G5",
+      "row": "G",
+      "column": 5,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "G6",
+      "row": "G",
+      "column": 6,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G7",
+      "row": "G",
+      "column": 7,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G8",
+      "row": "G",
+      "column": 8,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "G9",
+      "row": "G",
+      "column": 9,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "G10",
+      "row": "G",
+      "column": 10,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H1",
+      "row": "H",
+      "column": 1,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H2",
+      "row": "H",
+      "column": 2,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H3",
+      "row": "H",
+      "column": 3,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "H4",
+      "row": "H",
+      "column": 4,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H5",
+      "row": "H",
+      "column": 5,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H6",
+      "row": "H",
+      "column": 6,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H7",
+      "row": "H",
+      "column": 7,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "H8",
+      "row": "H",
+      "column": 8,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H9",
+      "row": "H",
+      "column": 9,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "H10",
+      "row": "H",
+      "column": 10,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I1",
+      "row": "I",
+      "column": 1,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "I2",
+      "row": "I",
+      "column": 2,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I3",
+      "row": "I",
+      "column": 3,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I4",
+      "row": "I",
+      "column": 4,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I5",
+      "row": "I",
+      "column": 5,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I6",
+      "row": "I",
+      "column": 6,
+      "terrain": "plains",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I7",
+      "row": "I",
+      "column": 7,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I8",
+      "row": "I",
+      "column": 8,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "I9",
+      "row": "I",
+      "column": 9,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "I10",
+      "row": "I",
+      "column": 10,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J1",
+      "row": "J",
+      "column": 1,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J2",
+      "row": "J",
+      "column": 2,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J3",
+      "row": "J",
+      "column": 3,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1
+    },
+    {
+      "coordinate": "J4",
+      "row": "J",
+      "column": 4,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J5",
+      "row": "J",
+      "column": 5,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J6",
+      "row": "J",
+      "column": 6,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J7",
+      "row": "J",
+      "column": 7,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J8",
+      "row": "J",
+      "column": 8,
+      "terrain": "mountain",
+      "baseResource": null,
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J9",
+      "row": "J",
+      "column": 9,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    },
+    {
+      "coordinate": "J10",
+      "row": "J",
+      "column": 10,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0
+    }
+  ],
+  "blockedConnections": [
+    {
+      "from": "B1",
+      "to": "B2",
+      "reason": "lava"
+    },
+    {
+      "from": "B6",
+      "to": "C6",
+      "reason": "lava"
+    },
+    {
+      "from": "C2",
+      "to": "D2",
+      "reason": "lava"
+    },
+    {
+      "from": "C8",
+      "to": "C9",
+      "reason": "lava"
+    },
+    {
+      "from": "D5",
+      "to": "D6",
+      "reason": "lava"
+    },
+    {
+      "from": "F2",
+      "to": "F3",
+      "reason": "lava"
+    },
+    {
+      "from": "I7",
+      "to": "J7",
+      "reason": "lava"
+    },
+    {
+      "from": "I8",
+      "to": "J8",
+      "reason": "lava"
+    }
+  ]
+}
