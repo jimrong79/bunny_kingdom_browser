@@ -43,7 +43,15 @@ Copy choices are completed before final scoring. The first version lets bots cho
 
 ## Bot behavior and information
 
-Bots value harvest potential, resource variety, city strength, connectivity through real lava/Sky Tower rules, and their own parchment objectives. They compare legal building placements, save redundant buildings, choose Camp locations, optimize their Trading Post combinations, and choose copy targets.
+**Normal** is the default strategy. **Easy** preserves the original bot from the `bots-v1-baseline` checkpoint. Difficulty is saved in `game.botDifficulty`; saves without that field use Normal. Old saves without observed-hand history accumulate it from their next confirmed pick.
+
+Normal evaluates legal harvest gains across the remaining rounds and estimates future expansion and parchment progress. Strength-3 cities respect the mountain restriction; luxury farms benefit from additional harvests, while unavailable late terrain sharply reduces their value. Drafting evaluates every unordered pair (up to 66), including combined territory connections and territory/building combinations. Two-player games compare play/discard assignments using the next player's public opportunities. Public board evaluation of rivals excludes their unknown parchment objectives.
+
+Construction searches up to three placements ahead, retaining four promising alternatives at each depth, including alternatives that temporarily gain little but unlock a later combination. Equivalent slots are grouped by fief, terrain, and natural production, and Sky Tower endpoints preserve terrain needed by reserved buildings. Draft estimates use a shallower two-placement search. Trading Posts maximize the current harvest; round-four comparisons add parchment points exactly once. Copy choices consider the whole effective parchment collection, including changes to an existing glove and treasure multipliers.
+
+Each player privately records the IDs of cards in hands they actually saw before passing. Normal uses seen territories to estimate future connections and can recognize previously seen two-player territories that must have been discarded after a completed round. Observation history is excluded from rival views and autosaves with the owning player. The bot does not consult the deal seed, hidden deck, rival hands, or rival observation histories. Forecasts of future resources and unresolved parchment awards are decision estimates; they never change scoring rules or resolve the user's pending rule questions.
+
+These are bounded heuristic searches, not full-game rollouts or trained agents. Strength is compared against the original bot with seeded, seat-rotated games; see [benchmark methods and checkpoints](bot-benchmark.md).
 
 The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed parchments, discarded cards, all reserve contents, and deck contents are removed from that view. At final scoring all parchments become visible. These are local browser opponents, not a network security boundary against someone inspecting their own browser's developer tools.
 
@@ -57,7 +65,9 @@ The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed p
 | `src/camps.js` | Priority offers and Camp placement/saving |
 | `src/harvest.js` | Trading Posts, harvest ledger, round progression |
 | `src/scoring.js` | Parchments, copy resolution, explicit ruling requests, final totals |
-| `src/bots.js` | Heuristic choices from each bot's permitted view |
+| `src/bots.js`, `src/bots-baseline.js` | Normal and Easy decisions from each bot's permitted view |
+| `src/bot-evaluation.js`, `src/bot-planning.js` | Harvest/goal forecasts and bounded construction search |
+| `src/bot-memory.js` | Private observed hands and known territory availability |
 | `src/storage.js` | Save/load and basic save-integrity checks |
 | `src/app.js`, `src/scoring-ui.js`, `src/card-text.js` | Browser controls, board/card inspection, score review |
 | `src/kingdom-ui.js`, `src/interaction.css` | Production, public/private inventories, colored fief inspection |
@@ -78,6 +88,7 @@ python3 tests/browser_controls.py
 python3 tests/browser_table.py
 python3 tests/browser_interactions.py
 python3 tests/browser_animations.py
+python3 tests/browser_bot_difficulty.py
 ```
 
 Keep the local server running while executing that script. It completes games at every player count through the actual controls, places human buildings and Camps, selects Trading Post resources and copy targets, verifies totals and card conservation, and checks refresh/resume and mobile overflow. Use `--screenshots /tmp/bunny-browser-checks` to capture review images. Explicit rulings selected by the test are test inputs, not assertions about the unresolved official rules.
@@ -87,5 +98,7 @@ The separate control checks exercise keyboard card selection, Play/Discard swaps
 The table checks cover every card position in overlapping hands, complete-text previews, territory highlights, desktop/laptop viewport fit, artwork coverage, and updating the fourth player's color in older saves. Pass `--screenshots /tmp/bunny-table-checks` to save layout images.
 
 Interaction checks cover repeated resource production, Trading Posts, luxury farms, lava/Sky fief highlighting, and inventory privacy. Animation checks use real motion to exercise all players, Provisions, hidden card backs, counter updates, input locking, skipping, refreshing mid-flight, saved preferences, building placement, mobile panning, and reduced motion. The other browser suites request reduced motion so long playthroughs need not wait for playback.
+
+Bot checks exercise paired connections, mountain/city combinations, constrained building slots, final Trading Post tradeoffs, glove-copy interactions, opponent-aware discards, private observations, and invariance to hidden cards or the game seed. The difficulty browser check verifies both policies' actual decisions, saved settings, old-save compatibility, and mobile setup.
 
 The existing `build_map_review.py`, `build_card_review.py`, and `build_parchment_review.py` checks still validate the source catalogs and their exports separately from engine behavior.

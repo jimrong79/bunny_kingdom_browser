@@ -26,6 +26,8 @@ def watch(page):
 def animation_controls(page):
     page.goto('http://127.0.0.1:8000')
     page.locator('[name=bots]').select_option('3')
+    # This deal's baseline bot choices exercise every animation category, including secret parchments.
+    page.locator('[name=difficulty]').select_option('easy')
     page.locator('[name=seed]').fill('1788624816571')
     page.locator('#setup button').click()
     watch(page)

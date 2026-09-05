@@ -1,5 +1,6 @@
 import { COLORS, createGame, publicView, resolveDraft } from './game.js';
-import { chooseDraft, chooseBuilding, chooseCamp, chooseMarkets, chooseCopies } from './bots.js';
+import * as normalBots from './bots.js';
+import * as easyBots from './bots-baseline.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
 import { fiefs } from './fiefs.js';
 import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
@@ -16,6 +17,7 @@ import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
+const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
 let boardZoom=matchMedia('(max-width:600px)').matches;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -27,8 +29,8 @@ try {
 function setup() {
   app.classList.remove('at-table');
   const saved=loadGame();
-  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); };
+  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); };
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
 }
 function resume(saved) {
@@ -126,7 +128,7 @@ function render() {
       <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
-    <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`;
+    <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · ${state.botDifficulty==='easy'?'Easy':'Normal'} bots · Seed ${escape(state.seed)}</p>`;
   const hand=document.querySelector('.hand');if(hand)hand.scrollLeft=handScroll;
   document.querySelector('.table-sidebar').scrollTop=sideScroll;
   document.querySelector('.last-turn-panel').scrollTop=recapScroll;
@@ -163,7 +165,7 @@ function render() {
   });
   const confirm = document.querySelector('#confirm-draft');
   if (confirm) confirm.onclick = () => attempt(() => {
-    const choices = state.players.map(p => p.bot ? chooseDraft(publicView(state, p.id), p.id) : { play: state.players.length === 2 ? [selected[0]] : [...selected], discard: state.players.length === 2 ? [selected[1]] : [] });
+    const choices = state.players.map(p => p.bot ? botPolicy().chooseDraft(publicView(state, p.id), p.id) : { play: state.players.length === 2 ? [selected[0]] : [...selected], discard: state.players.length === 2 ? [selected[1]] : [] });
     resolveDraft(state, choices); selected = []; if(state.phase==='construction') beginCampOffers(state); driveBots();
   });
   const swap=document.querySelector('#swap-draft');
@@ -201,20 +203,20 @@ function driveBots() {
   while(state.phase==='camps') {
     const next=state.campQueue[0];
     if(next.playerId===0) {buildingId=next.cardId;targets=[];return;}
-    respondCamp(state,next.playerId,chooseCamp(publicView(state,next.playerId),next.playerId,next.cardId));
+    respondCamp(state,next.playerId,botPolicy().chooseCamp(publicView(state,next.playerId),next.playerId,next.cardId));
   }
   buildingId=null;targets=[];
   if (state.phase === 'construction') for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
     let action;
-    while ((action=chooseBuilding(publicView(state,p.id),p.id))) placeBuilding(state,p.id,action.cardId,action.coordinates);
+    while ((action=botPolicy().chooseBuilding(publicView(state,p.id),p.id))) placeBuilding(state,p.id,action.cardId,action.coordinates);
     finishConstruction(state,p.id);
   }
   if(state.phase==='parchments') {
     state.scoringDecisions ||= {copies:{},rulings:{},copyResolutions:{}};
-    for(const p of state.players.filter(p=>p.bot)) Object.assign(state.scoringDecisions.copies,chooseCopies(publicView(state,p.id),p.id,state.scoringDecisions));
+    for(const p of state.players.filter(p=>p.bot)) Object.assign(state.scoringDecisions.copies,botPolicy().chooseCopies(publicView(state,p.id),p.id,state.scoringDecisions));
   }
   if(state.phase==='markets') for(const p of state.players.filter(p=>p.bot&&!p.ready)) {
-    for(const c of chooseMarkets(publicView(state,p.id),p.id)) chooseResource(state,p.id,c.coordinate,c.resource);
+    for(const c of botPolicy().chooseMarkets(publicView(state,p.id),p.id)) chooseResource(state,p.id,c.coordinate,c.resource);
     finishMarkets(state,p.id);
   }
 }
