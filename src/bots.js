@@ -1,116 +1,87 @@
-// Receives only the information visible to this player, never the deck or rival hands.
-export function cardValue(view, playerId, card) {
-  const own = Object.values(view.cells).filter(c => c.owner === playerId);
-  if (card.category === 'territory') {
-    const cell=view.cells[card.coordinate],trial=structuredClone(view);
-    trial.cells[card.coordinate].owner=playerId;
-    if(trial.cells[card.coordinate].building?.category==='camp')trial.cells[card.coordinate].building=null;
-    const gain=positionValue(trial,playerId)-positionValue(view,playerId);
-    return 2+gain+(cell.owner===playerId?0.5:0)+(cell.owner!==null&&cell.owner!==playerId?2:0);
-  }
-  if (card.category === 'provisions') return 12;
-  if (card.category === 'city') return own.length ? card.effect.strength * 3 + 2 : 3;
-  if (card.category === 'farm') return own.length ? (card.farmType === 'luxury' ? 8 : 5) : 2;
-  if (card.category === 'camp') return 8 - card.effect.priority * 0.15;
-  if (card.category === 'sky_tower') return own.length > 3 ? 7 : 2;
-  if (card.category === 'parchment') {
-    const s = card.scoringSpec;
-    const estimated=basePoints(card,playerStats(view,playerId),[...view.players[playerId].parchments,card]);
-    if (s.type === 'fixed_points') return s.points;
-    if(estimated!==null&&estimated>0)return estimated+(5-view.round)*0.7;
-    if (s.resource) return 2 + own.filter(c => c.baseResource === s.resource).length * (s.pointsPerUnit || 2);
-    if (s.type === 'copy_parchment') return 6;
-    return 4 + view.round;
-  }
-  return 0;
+// All decisions use the player's permitted view. No seed, hidden deck, or rival hand is consulted.
+import {playCard} from './game.js';
+import {fiefs} from './fiefs.js';
+import {playerStats,copyOptions,isCopy} from './scoring.js';
+import {forkPosition,positionValue,parchmentValue} from './bot-evaluation.js';
+import {planBuildings} from './bot-planning.js';
+export {positionValue} from './bot-evaluation.js';
+
+export function draftPosition(view,playerId,cards) {
+  const trial=forkPosition(view,playerId);
+  for(const card of cards)if(card.category!=='provisions')playCard(trial,playerId,card);
+  return trial;
 }
-export function chooseDraft(view, playerId) {
-  const cards = [...view.players[playerId].hand].sort((a,b) => cardValue(view,playerId,b) - cardValue(view,playerId,a) || a.instanceId.localeCompare(b.instanceId));
-  return { play: cards.slice(0, view.players.length === 2 ? 1 : 2).map(c=>c.instanceId), discard: view.players.length === 2 ? [cards[1].instanceId] : [] };
+export function projectedValue(view,playerId) {
+  return planBuildings(view,playerId,{depth:2,width:1,camps:true}).value;
+}
+export function provisionsValue(view) {
+  // Two unknown cards, with no access to the actual draw order. Declines as future harvests disappear.
+  return 5+(5-view.round)*2;
+}
+export function cardValue(view,playerId,card,base=projectedValue(view,playerId)) {
+  if(card.category==='provisions')return provisionsValue(view);
+  return projectedValue(draftPosition(view,playerId,[card]),playerId)-base;
+}
+export function chooseDraft(view,playerId) {
+  const base=projectedValue(view,playerId);
+  const cards=view.players[playerId].hand.map(card=>({card,value:cardValue(view,playerId,card,base)})).sort((a,b)=>b.value-a.value||a.card.instanceId.localeCompare(b.card.instanceId));
+  return {play:cards.slice(0,view.players.length===2?1:2).map(c=>c.card.instanceId),discard:view.players.length===2?[cards[1].card.instanceId]:[]};
 }
 
-import { fiefs } from './fiefs.js';
-import { eligibleTerritories, placeBuilding } from './construction.js';
-export function positionValue(view, playerId) {
-  const groups=fiefs(view,playerId), player=view.players[playerId];
-  let value=groups.reduce((sum,f)=>sum+f.points*(5-view.round)+f.wealth*1.5+f.strength+f.coordinates.length*0.15,0);
-  if(Array.isArray(player.parchments)&&player.parchments.length) {
-    const stats=playerStats(view,playerId);
-    for(const card of player.parchments)value+=basePoints(card,stats,player.parchments)||0;
-  }
-  return value;
+export function chooseBuilding(view,playerId) {
+  const prepared=prepareMarkets(view,playerId);
+  const plan=planBuildings(prepared,playerId,{depth:3,width:4});
+  const action=plan.actions[0];
+  return action?{cardId:action.cardId,coordinates:action.coordinates}:null;
 }
-export function chooseBuilding(view, playerId) {
-  let best = null, bestValue = positionValue(view,playerId) + 0.01;
-  for (const card of view.players[playerId].buildings.filter(c=>c.category!=='camp')) {
-    const eligible = eligibleTerritories(view,playerId,card);
-    const groups = fiefs(view,playerId);
-    const choices = card.category === 'sky_tower' ? eligible.flatMap((a,i)=>eligible.slice(i+1).filter(b=>!groups.some(f=>f.coordinates.includes(a)&&f.coordinates.includes(b))).map(b=>[a,b])) : eligible.map(c=>[c]);
-    for (const coordinates of choices) {
-      const trial = structuredClone(view);
-      placeBuilding(trial,playerId,card.instanceId,coordinates);
-      const value = positionValue(trial,playerId);
-      if (value > bestValue) { bestValue=value; best={ cardId:card.instanceId,coordinates }; }
+export function chooseCamp(view,playerId,cardId) {
+  const trial=prepareMarkets(view,playerId);
+  trial.players[playerId].buildings=trial.players[playerId].buildings.filter(c=>c.instanceId===cardId);
+  const plan=planBuildings(trial,playerId,{depth:1,width:1,camps:true});
+  return plan.actions[0]?.coordinates[0]??null;
+}
+
+function marketPlan(view,playerId,posts,score) {
+  let best=[],value=-Infinity;
+  const visit=(index,trial,choices)=>{
+    if(index===posts.length) {
+      const candidate=score(trial);
+      if(candidate>value){value=candidate;best=choices;}
+      return;
     }
-  }
-  return best;
-}
-
-export function chooseCamp(view, playerId, cardId) {
-  const card=view.players[playerId].buildings.find(c=>c.instanceId===cardId);
-  let best=null,value=-Infinity;
-  for(const coordinate of eligibleTerritories(view,playerId,card)) {
-    const trial=structuredClone(view);
-    trial.cells[coordinate].owner=playerId;
-    trial.cells[coordinate].building={category:'camp',priority:card.effect.priority};
-    const candidate=positionValue(trial,playerId);
-    if(candidate>value) {value=candidate;best=coordinate;}
-  }
-  return best;
-}
-
-import { BASIC_RESOURCES, tradingPosts } from './harvest.js';
-import { resourcesAt } from './fiefs.js';
-export function chooseMarkets(view, playerId) {
-  const posts=tradingPosts(view,playerId);
-  let best=[],bestValue=-Infinity;
-  function visit(index, choices) {
-    if(index<posts.length) {for(const resource of BASIC_RESOURCES) visit(index+1,[...choices,{coordinate:posts[index].coordinate,resource}]);return;}
-    const trial=structuredClone(view);
-    for(const c of choices) trial.cells[c.coordinate].building.choice=c.resource;
-    let value=positionValue(trial,playerId);
-    if(view.round===4) {
-      const production=Object.values(trial.cells).filter(c=>c.owner===playerId).flatMap(resourcesAt);
-      for(const card of trial.players[playerId].parchments) {
-        const s=card.scoringSpec,n=production.filter(r=>r===s.resource).length;
-        if(s.type==='points_per_resource') value+=n*s.pointsPerUnit;
-        if(s.type==='resource_threshold'&&n>=s.minimum) value+=s.points;
-      }
+    for(const resource of ['wood','fish','carrots']) {
+      const next=forkPosition(trial,playerId),coordinate=posts[index].coordinate;
+      next.cells[coordinate].building.choice=resource;
+      visit(index+1,next,[...choices,{coordinate,resource}]);
     }
-    if(value>bestValue) {bestValue=value;best=choices;}
-  }
-  visit(0,[]);return best;
+  };
+  visit(0,view,[]);return best;
+}
+function prepareMarkets(view,playerId) {
+  const trial=forkPosition(view,playerId);
+  const posts=Object.values(view.cells).filter(c=>c.owner===playerId&&c.building?.farmType==='trading_post'&&!c.building.choice);
+  if(posts.length)for(const c of marketPlan(view,playerId,posts,s=>positionValue(s,playerId)))trial.cells[c.coordinate].building.choice=c.resource;
+  return trial;
+}
+export function chooseMarkets(view,playerId) {
+  const posts=Object.values(view.cells).filter(c=>c.owner===playerId&&c.building?.farmType==='trading_post');
+  return marketPlan(view,playerId,posts,trial=>fiefs(trial,playerId).reduce((n,f)=>n+f.points,0)
+    +(view.round===4?parchmentValue(trial,playerId,trial.players[playerId].parchments,playerStats(trial,playerId),false):0));
 }
 
-import { basePoints, playerStats, copyOptions, isCopy } from './scoring.js';
-export function chooseCopies(view, playerId, decisions) {
-  const player=view.players[playerId],stats=playerStats(view,playerId),result={};
-  for(const copy of player.parchments.filter(isCopy)) {
-    const options=copyOptions(view,playerId,copy).cards.filter(c=>!isCopy(c));
-    let best=null,bestValue=-Infinity;
-    for(const target of options) {
-      const all=view.players.flatMap(p=>Array.isArray(p.parchments)?p.parchments:[]);
-      const effective=player.parchments.map(c=>c.instanceId===copy.instanceId?target:all.find(t=>t.instanceId===(result[c.instanceId]||decisions.copies[c.instanceId]))||c);
-      let value=basePoints(target,stats,effective) ?? 5;
-      if(target.scoringSpec.type==='multiply_treasure_values') {
-        const already=effective.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length>1;
-        value=already?-1:effective.filter(c=>c.parchmentType==='treasure').reduce((sum,c)=>sum+basePoints(c,stats,effective),0);
-      }
-      if(target.parchmentType==='treasure') value+=effective.filter(c=>c.id==='treasure_guardian').length*3;
-      if(value>bestValue){bestValue=value;best=target;}
+export function chooseCopies(view,playerId,decisions) {
+  const player=view.players[playerId],copies=player.parchments.filter(isCopy),stats=playerStats(view,playerId);
+  let best={},value=-Infinity;
+  const visit=(index,effective,choices)=>{
+    if(index===copies.length) {
+      const score=parchmentValue(view,playerId,effective,stats,false);
+      if(score>value){value=score;best=choices;}
+      return;
     }
-    if(best)result[copy.instanceId]=best.instanceId;
-    else if(copyOptions(view,playerId,copy).cards.length) result[copy.instanceId]=copyOptions(view,playerId,copy).cards[0].instanceId;
-  }
-  return result;
+    const copy=copies[index],available=copyOptions(view,playerId,copy).cards;
+    const targets=available.filter(c=>!isCopy(c));
+    if(!targets.length){visit(index+1,effective.filter(c=>c.instanceId!==copy.instanceId),available.length?{...choices,[copy.instanceId]:available[0].instanceId}:choices);return;}
+    for(const target of targets)visit(index+1,effective.map(c=>c.instanceId===copy.instanceId?{...target,instanceId:copy.instanceId}:c),{...choices,[copy.instanceId]:target.instanceId});
+  };
+  visit(0,player.parchments,{});return best;
 }
