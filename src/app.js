@@ -171,8 +171,14 @@ function bindConstruction() {
   bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
   bind('next-round',()=>{advanceRound(state);selected=[];buildingId=null;targets=[];driveBots();});
   document.querySelectorAll('[data-copy]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copies[s.dataset.copy]=s.value;state.scoringDecisions.copyResolutions={};state.scoringDecisions.rulings={};}));
-  document.querySelectorAll('[data-ruling]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.rulings[s.dataset.ruling]=Number(s.value);}));
-  document.querySelectorAll('[data-copy-resolution]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copyResolutions[s.dataset.copyResolution]=s.value;}));
+  document.querySelectorAll('[data-ruling]').forEach(s=>s.onchange=()=>attempt(()=>{if(s.value!=='')state.scoringDecisions.rulings[s.dataset.ruling]=Number(s.value);}));
+  document.querySelectorAll('[data-copy-resolution]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copyResolutions[s.dataset.copyResolution]=s.value;state.scoringDecisions.rulings={};}));
+  document.querySelectorAll('[data-reset-ruling]').forEach(b=>b.onclick=()=>attempt(()=>{
+    delete state.scoringDecisions.rulings[b.dataset.resetRuling];
+    // A changed earlier award can change the later rank ruling.
+    for(const key of Object.keys(state.scoringDecisions.rulings))if(key.startsWith('opportunist:'))delete state.scoringDecisions.rulings[key];
+  }));
+  document.querySelectorAll('[data-reset-copy-resolution]').forEach(b=>b.onclick=()=>attempt(()=>{delete state.scoringDecisions.copyResolutions[b.dataset.resetCopyResolution];state.scoringDecisions.rulings={};}));
   bind('finish-scoring',()=>finalizeScoring(state,state.scoringDecisions));
   const again=document.querySelector('#play-again');if(again)again.onclick=setup;
   bind('save-camp',()=>{respondCamp(state,0);driveBots();});

@@ -17,6 +17,7 @@
 .draft-controls #confirm-draft{margin:10px 0 0}.card.discard-selected{outline-color:#a64737;background:#f9e9e0}
 input:focus-visible,select:focus-visible{outline:3px solid #a17525;outline-offset:2px}
 .placement-guide{font:13px/1.5 system-ui;background:#edf2e6;border-left:3px solid #9e6c17;padding:12px;margin:14px 0;border-radius:6px}.placement-guide p{margin:5px 0}.placement-guide span{color:#63715e}
+.rulings-review{font:13px/1.5 system-ui;padding:12px;border:1px solid #d6b574;border-radius:8px;margin:16px 0}.rulings-review summary{font-weight:600;cursor:pointer}.rulings-review ul{list-style:none;padding:0;margin-bottom:0}.rulings-review li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}.rulings-review .quiet{font:12px system-ui;padding:7px 10px}
 
 .game-layout>*{min-width:0}.board-scroll{overflow-x:auto;padding:3px;overscroll-behavior-x:contain;scrollbar-color:#8b9e7c #edf1e4;border-radius:10px}.board-large{min-width:600px}
 .board-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px}.board-toolbar h2{font-size:21px;margin:0}.board-toolbar .quiet{font:12px system-ui;padding:9px 12px;white-space:nowrap}.board-scroll-hint{margin:10px 0}

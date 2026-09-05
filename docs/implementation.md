@@ -25,7 +25,7 @@ The user-supplied catalog defines every card, but four corner-case groups remain
 - Multiple Treasure Hunter effects applying to one player's treasures. The screen requests the total multiplier.
 - Tied rankings or multiple effective Opportunists. The screen requests the applicable awards after other scoring is known.
 
-Only a case that occurs in the current game prompts for input. Rulings are stored in `scoringDecisions`. They are user decisions, not verified publisher rules. A single Opportunist with an untied ranking checks second place after the other final scores, then awards its 10 points once.
+Only a case that occurs in the current game prompts for input. Rulings are stored in `scoringDecisions` and listed on the score screen. They can be revised before confirming the final score, and remain visible in the saved result. Changing an earlier ruling also reopens any dependent rank ruling. They are user decisions, not verified publisher rules. A single Opportunist with an untied ranking checks second place after the other final scores, then awards its 10 points once.
 
 Copy choices are completed before final scoring. The first version lets bots choose their copy targets before the human confirms theirs; copy-choice ordering remains part of the catalog's open questions. Bot choices are heuristic, not a claim of optimal simultaneous strategy.
 

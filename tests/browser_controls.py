@@ -56,7 +56,8 @@ def scenario(page, phase, cards, owners):
             if(card.category==='parchment')player.parchments.push(card);
             else {player.played.push(card);player.buildings.push(card);}
         }
-        s.phase=phase;s.scoringDecisions={copies:{},rulings:{},copyResolutions:{}};
+        s.phase=phase;s.round=phase==='parchments'?4:1;
+        s.scoringDecisions={copies:{},rulings:{},copyResolutions:{}};
         saved.ui={};localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(saved));
     }""", {'phase': phase, 'cards': cards, 'owners': owners})
     page.reload()
@@ -120,6 +121,30 @@ def mobile_board(page):
     print('Mobile: board navigation, scrolling, placement, fit/enlarge, and saved view passed.', flush=True)
 
 
+def scoring_review(page):
+    # These awards are explicit test rulings, not claims about official tie rules.
+    scenario(page, 'parchments', [{'id': 'matriarch'}, {'id': 'opportunist'}],
+             {'A1': 0, 'A10': 1})
+    assert page.locator('#finish-scoring').is_disabled()
+    page.locator('[data-ruling^="matriarch:"]').select_option('0')
+    page.locator('[data-ruling^="opportunist:"]').select_option('10')
+    assert page.locator('.rulings-review li').count() == 2
+    assert page.locator('#finish-scoring').is_enabled()
+    page.locator('[data-reset-ruling^="matriarch:"]').click()
+    assert page.locator('#finish-scoring').is_disabled()
+    assert snapshot(page)['scoringDecisions']['rulings'] == {}
+    page.locator('[data-ruling^="matriarch:"]').select_option('0')
+    page.locator('[data-ruling^="opportunist:"]').select_option('0')
+    page.locator('#finish-scoring').click()
+    assert page.locator('.rulings-review li').count() == 2
+    assert page.locator('[data-reset-ruling]').count() == 0
+    page.reload()
+    page.locator('#resume-game').click()
+    assert page.locator('.rulings-review li').count() == 2
+    assert all(p['score'] == 0 for p in snapshot(page)['players'])
+    print('Scoring: ruling review, revision, dependent rank recalculation, and saved results passed.', flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://127.0.0.1:8000')
@@ -132,6 +157,7 @@ if __name__ == '__main__':
         draft_controls(page, args.url)
         construction_controls(page)
         mobile_board(page)
+        scoring_review(page)
         assert not errors, errors
         browser.close()
     print('All control checks passed.')
