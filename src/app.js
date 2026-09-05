@@ -1,7 +1,8 @@
 import { createGame, publicView, resolveDraft } from './game.js';
-import { chooseDraft, chooseBuilding } from './bots.js';
+import { chooseDraft, chooseBuilding, chooseCamp } from './bots.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
 import { fiefs } from './fiefs.js';
+import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "";
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -41,17 +42,27 @@ function render() {
   const confirm = document.querySelector('#confirm-draft');
   if (confirm) confirm.onclick = () => {
     const choices = state.players.map(p => p.bot ? chooseDraft(publicView(state, p.id), p.id) : { play: state.players.length === 2 ? [selected[0]] : [...selected], discard: state.players.length === 2 ? [selected[1]] : [] });
-    resolveDraft(state, choices); selected = []; driveBots(); render();
+    resolveDraft(state, choices); selected = []; if(state.phase==='construction') beginCampOffers(state); driveBots(); render();
   };
 }
 
 function constructionPanel() {
+  if(state.phase==='camps') {
+    const current=state.campQueue[0];
+    return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2><p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
+  }
   if (state.phase === 'markets') return '<h2>Trading Posts</h2><p>All players have finished building. Trading Post selection and harvest follow next.</p>';
   const available = state.players[0].buildings;
-  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p><div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}" ${c.category==='camp'?'disabled':''}><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${c.placement.allowedTerrains?.join(', ') || 'Any terrain'}${c.category==='camp'?' · Priority controls follow next':''}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${targets.length ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building">Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p><div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${c.placement.allowedTerrains?.join(', ') || 'Any terrain'}${c.category==='camp'?' · Announce priority '+c.effect.priority:''}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${targets.length ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building">Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
 function attempt(action) { try { error=''; action(); } catch(e) {error=e.message;} render(); }
 function driveBots() {
+  while(state.phase==='camps') {
+    const next=state.campQueue[0];
+    if(next.playerId===0) {buildingId=next.cardId;targets=[];return;}
+    respondCamp(state,next.playerId,chooseCamp(publicView(state,next.playerId),next.playerId,next.cardId));
+  }
+  buildingId=null;targets=[];
   if (state.phase !== 'construction') return;
   for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
     let action;
@@ -60,7 +71,7 @@ function driveBots() {
   }
 }
 function bindConstruction() {
-  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>{buildingId=b.dataset.building;targets=[];error='';render();});
+  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp'){requestCamp(state,0,buildingId);driveBots();}}));
   document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
     const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
     if(!card || !eligibleTerritories(state,0,card).includes(b.dataset.cell)) return;
@@ -70,7 +81,8 @@ function bindConstruction() {
     render();
   });
   const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
-  bind('place-building',()=>{placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];});
+  bind('place-building',()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}});
+  bind('save-camp',()=>{respondCamp(state,0);driveBots();});
   bind('cancel-building',()=>{buildingId=null;targets=[];});
   bind('finish-building',()=>{finishConstruction(state,0);buildingId=null;targets=[];driveBots();});
 }

@@ -45,3 +45,16 @@ export function chooseBuilding(view, playerId) {
   }
   return best;
 }
+
+export function chooseCamp(view, playerId, cardId) {
+  const card=view.players[playerId].buildings.find(c=>c.instanceId===cardId);
+  let best=null,value=-Infinity;
+  for(const coordinate of eligibleTerritories(view,playerId,card)) {
+    const trial=structuredClone(view);
+    trial.cells[coordinate].owner=playerId;
+    trial.cells[coordinate].building={category:'camp',priority:card.effect.priority};
+    const candidate=positionValue(trial,playerId);
+    if(candidate>value) {value=candidate;best=coordinate;}
+  }
+  return best;
+}
