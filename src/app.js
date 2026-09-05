@@ -7,6 +7,7 @@ import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './har
 import { finalizeScoring } from './scoring.js';
 import { scoringPanel } from './scoring-ui.js';
 import { cardText, buildingText, resourceMarks } from './card-text.js';
+import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -17,8 +18,16 @@ try {
   setup();
 } catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
 function setup() {
-  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p><form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); selected = []; render(); };
+  const saved=loadGame();
+  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); };
+  const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
+}
+function resume(saved) {
+  state=saved.game;const ui=saved.ui||{};
+  selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,2);
+  buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)?ui.buildingId:null;
+  targets=(ui.targets||[]).filter(id=>state.cells[id]);inspected=state.cells[ui.inspected]?ui.inspected:null;error='';render();
 }
 function board() {
   const blocked = new Set(state.blockedConnections.flatMap(e => [e.from + ':' + e.to, e.to + ':' + e.from]));
@@ -34,7 +43,11 @@ function cardHTML(c) {
   return `<button class="card ${c.category} ${i >= 0 ? 'selected' : ''}" data-card="${c.instanceId}" aria-pressed="${i >= 0}"><span class="tag">${escape(c.category)} ${label ? ' · ' + label : ''}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`;
 }
 function render() {
+  const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
+  const saved=saveGame(state,{selected,buildingId,targets,inspected});
   app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? `<p class="muted">${state.players.length === 2 ? 'First selection: play. Second selection: discard.' : 'Select two cards, then confirm.'}</p><button id="confirm-draft" class="primary" ${selected.length !== 2 ? 'disabled' : ''}>Confirm cards & pass →</button><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>` : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
+  app.insertAdjacentHTML('beforeend',`<p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`);
+  document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
   bindConstruction();
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
