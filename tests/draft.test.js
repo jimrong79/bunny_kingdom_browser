@@ -29,3 +29,14 @@ test('Provisions chains and does not place buildings early; territory overrides 
  assert.ok(s.players[0].buildings.includes(city));assert.ok(s.players[0].parchments.includes(parchment));
  assert.ok(!s.log.join(' ').includes(parchment.name));
 });
+
+test('hands pass left in odd rounds and right in even rounds',()=>{
+ for(const round of [1,2,3,4]) {
+  const s=createGame(data,3,'passing');s.round=round;
+  const remaining=s.players.map(p=>p.hand.slice(2).map(c=>c.instanceId));
+  const picks=s.players.map(p=>({play:p.hand.slice(0,2).map(c=>c.instanceId),discard:[]}));
+  resolveDraft(s,picks);
+  const source=round%2?3:1;
+  assert.deepEqual(s.players[0].hand.map(c=>c.instanceId),remaining[source]);
+ }
+});

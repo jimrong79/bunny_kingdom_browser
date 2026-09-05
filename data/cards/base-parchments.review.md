@@ -4,7 +4,7 @@
 
 Status: **awaiting review**. [Original supplied text](parchments.txt) is preserved; the table below repeats it. [JSON](base-parchments.json) contains draft scoring specifications; [CSV](base-parchments.csv) includes both wording and specifications.
 
-One copy per entry and the treasure/mission classification are recorded assumptions. Matching counts does not prove every scoring rule. No scoring engine has been implemented.
+One copy per entry and the treasure/mission classification are recorded assumptions. Matching counts does not prove every scoring rule. The browser engine handles documented cases and asks for explicit rulings for unresolved cases.
 
 ## Rules still needing clarification
 

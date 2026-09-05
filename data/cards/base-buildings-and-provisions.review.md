@@ -54,4 +54,4 @@ Any terrain still requires the appropriate ownership and an empty building slot.
 - Confirm the printed name of the field luxury resource currently called Carrot powder. It is a distinct luxury resource, not basic carrots.
 - All 37 parchment entries are recorded in base-parchments.json. Scoring clarifications and review remain; see base-parchments.review.md.
 
-Rules source: [IELLO base-game rulebook](https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf), pages 2-4, 6-7, and 10. This catalog is reference data; gameplay has not been implemented or tested.
+Rules source: [IELLO base-game rulebook](https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf), pages 2-4, 6-7, and 10. This catalog is reference data; browser gameplay and engine tests are maintained separately in src/ and tests/.

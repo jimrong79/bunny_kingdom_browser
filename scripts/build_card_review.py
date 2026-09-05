@@ -145,7 +145,7 @@ def artifacts(data):
     lines.extend(["", "## Remaining items", ""])
     lines.extend(f'- {item["description"]}' for item in data["openItems"])
     source = next(s for s in data["sources"] if s["id"] == "official-rulebook")
-    lines.extend(["", f'Rules source: [IELLO base-game rulebook]({source["url"]}), pages 2-4, 6-7, and 10. This catalog is reference data; gameplay has not been implemented or tested.', ""])
+    lines.extend(["", f'Rules source: [IELLO base-game rulebook]({source["url"]}), pages 2-4, 6-7, and 10. This catalog is reference data; browser gameplay and engine tests are maintained separately in src/ and tests/.', ""])
     return {
         CATALOG.with_suffix(".csv"): stream.getvalue(),
         CATALOG.with_suffix(".review.md"): "\n".join(lines),

@@ -94,7 +94,7 @@ def artifacts(data):
     lines = ["# Original base-game parchments", "",
              "**37 entries imported: 8 treasures and 29 missions, one copy each.** Combined with 100 territories and 45 building/Provisions cards, the inventory totals 182.", "",
              "Status: **awaiting review**. [Original supplied text](parchments.txt) is preserved; the table below repeats it. [JSON](base-parchments.json) contains draft scoring specifications; [CSV](base-parchments.csv) includes both wording and specifications.", "",
-             "One copy per entry and the treasure/mission classification are recorded assumptions. Matching counts does not prove every scoring rule. No scoring engine has been implemented.", "",
+             "One copy per entry and the treasure/mission classification are recorded assumptions. Matching counts does not prove every scoring rule. The browser engine handles documented cases and asks for explicit rulings for unresolved cases.", "",
              "## Rules still needing clarification", ""]
     by_id = {c["id"]: c for c in data["cards"]}
     for issue in data["openItems"]:
