@@ -2,6 +2,12 @@
 
 Browser implementation of the original Bunny Kingdom base game, starting with verification of the board, cards, and rules.
 
+## Play locally
+
+From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. The first playable feature supports choosing 1–3 bots and dealing round one; drafting follows next.
+
+Run engine tests with `npm test` (Node.js 22+).
+
 ## Local workspace
 
 - Windows: `C:\Users\jimro\workspaces\bunny_kingdom_browser`
@@ -40,4 +46,4 @@ All **37 parchment entries** have been imported from the supplied text, completi
 - [Reusable JSON](data/cards/base-parchments.json) and [spreadsheet export](data/cards/base-parchments.csv)
 - [Original supplied text](data/cards/parchments.txt)
 
-The game has not been implemented yet. Inventory coverage is complete; scoring definitions remain under review.
+Game implementation is in progress. Inventory coverage is complete; scoring definitions remain under review.
