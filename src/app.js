@@ -20,6 +20,7 @@ try {
   setup();
 } catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
 function setup() {
+  app.classList.remove('at-table');
   const saved=loadGame();
   app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
   document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); };
@@ -70,9 +71,20 @@ function boardToolbar() {
 function pieceKey() {
   return `<details class="piece-key"><summary>Pieces & resources</summary><div class="piece-key-row"><span>${rabbitArt()} Owner</span><span>${pieceArt({category:'city',strength:2})} City · strength shown</span><span>${pieceArt({category:'camp'})} Camp · priority shown</span><span>${pieceArt({category:'sky_tower'})} Sky Tower · pair shown</span></div><div class="resource-key">${Object.entries(resourceNames).map(([id,name])=>`<span>${resourceArt(id)} ${name}</span>`).join('')}</div><p>A gold rim marks a luxury farm. The small shield shows the territory's natural resource.</p></details>`;
 }
-function cardHTML(c) {
-  const i = selected.indexOf(c.instanceId), label = i >= 0 ? (state.players.length === 2 && i === 1 ? 'Discard' : 'Play') : '';
-  return `<button class="card ${c.category} ${i >= 0 ? 'selected' : ''} ${label==='Discard'?'discard-selected':''}" data-card="${c.instanceId}" aria-pressed="${i >= 0}"><span class="tag">${escape(c.category)} ${label ? ' · ' + label : ''}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`;
+function cardHTML(c,index=0) {
+  const i=selected.indexOf(c.instanceId),label=i>=0?(state.players.length===2&&i===1?'Discard':'Play'):'';
+  const type=c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ');
+  const offset=index-(state.players[0].hand.length-1)/2;
+  return `<button class="card ${c.category} ${c.farmType==='luxury'?'luxury-card':''} ${i>=0?'selected':''} ${label==='Discard'?'discard-selected':''}" style="--fan-angle:${offset*.65}deg;--fan-drop:${Math.abs(offset)*1.5}px;--card-order:${index}" data-card="${c.instanceId}" aria-pressed="${i>=0}" aria-label="${escape(c.name+': '+cardText(c,state)+(label?' — '+label:''))}"><span class="tag">${escape(type)}</span><span class="card-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p>${label?`<span class="choice-ribbon">${label==='Discard'?'×':'✓'} ${label}</span>`:''}</button>`;
+}
+function handPanel() {
+  return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · Pass ${state.round%2?'left ←':'right →'}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${state.players[0].hand.map(cardHTML).join('')}</div></section>`;
+}
+function playerPanels() {
+  return `<div class="players">${state.players.map(p=>`<div class="player" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit">${rabbitArt()}</span><b>${p.name}</b><span class="player-score">${p.score}<small> pts</small></span></div><small>${Object.values(state.cells).filter(c=>c.owner===p.id).length} territories · ${p.parchments.length} parchments${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small></div>`).join('')}</div>`;
+}
+function cardPreview(card) {
+  return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location.</p>';
 }
 function draftPanel() {
   const twoPlayers=state.players.length===2;
@@ -81,7 +93,7 @@ function draftPanel() {
     const label=twoPlayers?(i===0?'Play':'Discard'):'Play '+(i+1);
     return `<div class="draft-slot ${twoPlayers&&i===1?'discard-slot':''}"><b>${label}</b><span>${card?escape(card.name):'Choose a card'}</span></div>`;
   }).join('');
-  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div><div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div><button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${twoPlayers?'First choose a card to play, then one to discard.':'Both selected cards will be played.'} Click a selected card to remove it.</p><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>`;
+  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div><div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div><button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">Click a selected card to remove it.</p>`;
 }
 function focusedControl() {
   const element=document.activeElement;
@@ -97,8 +109,19 @@ function render() {
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
   const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom});
-  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${Object.values(state.cells).filter(c=>c.owner===p.id).length} territories · ${p.parchments.length} parchments</small><small>${state.phase==='draft'?p.hand.length+' cards in hand':['construction','markets'].includes(state.phase)?(p.ready?'✓ Ready':'Choosing'):''}</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel" id="map-panel" tabindex="-1">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll horizontally in the enlarged view">${board()}</div><p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${pieceKey()}${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel" id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? draftPanel() : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
-  app.insertAdjacentHTML('beforeend',`<nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a><a href="#turn-panel">${({draft:'Choose cards',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav><p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`);
+  const handScroll=document.querySelector('.hand')?.scrollLeft||0;
+  const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
+  app.classList.add('at-table');
+  app.innerHTML = `
+    <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div>
+    <div class="game-layout table-layout" data-phase="${state.phase}">
+      <section class="map-panel panel" id="map-panel" tabindex="-1">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend"><span class="lava-key">━</span> Lava blocks a shared edge · Select a territory to inspect it</p></section>
+      <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
+    </div>
+    <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
+    <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`;
+  const hand=document.querySelector('.hand');if(hand)hand.scrollLeft=handScroll;
+  document.querySelector('.table-sidebar').scrollTop=sideScroll;
   document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
   document.querySelector('.board-scroll').scrollLeft=boardScroll;
@@ -111,6 +134,21 @@ function render() {
     if (selected.includes(id)) selected = selected.filter(x => x !== id);
     else if (selected.length < 2) selected.push(id);
     render();
+  });
+  document.querySelectorAll('[data-card]').forEach(button=>{
+    const preview=()=>{
+      const card=state.players[0].hand.find(c=>c.instanceId===button.dataset.card);
+      document.querySelector('#card-preview').innerHTML=cardPreview(card);
+      document.querySelector('#card-preview').classList.add('visible');
+      document.querySelectorAll('.preview-target').forEach(el=>el.classList.remove('preview-target'));
+      if(card.coordinate)document.querySelector(`[data-cell="${card.coordinate}"]`)?.classList.add('preview-target');
+    };
+    button.onmouseenter=preview;button.onfocus=preview;
+    const hidePreview=()=>{
+      document.querySelector('#card-preview')?.classList.remove('visible');
+      document.querySelectorAll('.preview-target').forEach(el=>el.classList.remove('preview-target'));
+    };
+    button.onmouseleave=hidePreview;button.onblur=hidePreview;
   });
   const confirm = document.querySelector('#confirm-draft');
   if (confirm) confirm.onclick = () => attempt(() => {
@@ -135,7 +173,7 @@ function constructionPanel() {
   const available = state.players[0].buildings;
   const card=available.find(c=>c.instanceId===buildingId);
   const complete=card&&targets.length===(card.category==='sky_tower'?2:1);
-  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
 function attempt(action) { try { error=''; action(); } catch(e) {error=e.message;} render(); }
 function driveBots() {

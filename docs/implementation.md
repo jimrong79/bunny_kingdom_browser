@@ -16,6 +16,8 @@ Games autosave, including unconfirmed selections. Refreshing returns to the setu
 
 Draft controls show both selected cards; two-player games offer a Play/Discard swap. Building prompts show the required endpoints and highlight legal locations. On small screens, use the bottom links to switch between the board and your current choices. The board opens enlarged on phones: scroll sideways, or select **Fit board** to see all 100 territories at once. This view preference is saved with the game.
 
+The table places an illustrated, overlapping hand below the board. Hover or keyboard focus lifts a card and shows its full text above the hand; territory previews highlight their coordinates. Short laptop screens use compact card faces so the board and hand remain visible together. Phones use a horizontally scrolling hand. The layout was informed by [IELLO's public BGA screenshots](https://iello.fr/bunny-kingdom-sur-board-game-arena/); the vector terrain, rabbits, and building pieces are original code in `src/art.js`. Cities show strength, Camps show priority, and Sky Towers show their pair number. Luxury farms have gold rims. Bot 3 uses green, including when older saves are resumed.
+
 ## Rules still requiring a ruling
 
 The user-supplied catalog defines every card, but four corner-case groups remain unverified. The engine does not silently choose their answers:
@@ -60,10 +62,13 @@ python3 -m pip install playwright
 python3 -m playwright install chromium
 python3 tests/browser_smoke.py
 python3 tests/browser_controls.py
+python3 tests/browser_table.py
 ```
 
 Keep the local server running while executing that script. It completes games at every player count through the actual controls, places human buildings and Camps, selects Trading Post resources and copy targets, verifies totals and card conservation, and checks refresh/resume and mobile overflow. Use `--screenshots /tmp/bunny-browser-checks` to capture review images. Explicit rulings selected by the test are test inputs, not assertions about the unresolved official rules.
 
 The separate control checks exercise keyboard card selection, Play/Discard swaps, Sky Tower endpoint guidance, required Trading Post choices, and mobile board navigation and placement.
+
+The table checks cover every card position in overlapping hands, complete-text previews, territory highlights, desktop/laptop viewport fit, artwork coverage, and updating the fourth player's color in older saves. Pass `--screenshots /tmp/bunny-table-checks` to save layout images.
 
 The existing `build_map_review.py`, `build_card_review.py`, and `build_parchment_review.py` checks still validate the source catalogs and their exports separately from engine behavior.
