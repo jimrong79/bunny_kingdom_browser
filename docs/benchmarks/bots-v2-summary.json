@@ -1,0 +1,61 @@
+{
+  "baselineCommit": "a747c2e",
+  "strategyCommit": "e6e2aa880d9f9d09d4b9326e5ac14d89e364fa99",
+  "seedPrefix": "held-out-v2",
+  "rulingConvention": "low",
+  "totalGames": 620,
+  "opponents": "One Normal bot against Easy bots, with every seat tested on each deal.",
+  "results": {
+    "2": {
+      "games": 200,
+      "winRate": 0.99,
+      "averageMargin": 67.53,
+      "averageScore": 165.49,
+      "gamesWithRulings": 7,
+      "draftMs": {
+        "mean": 29.501943763874994,
+        "p95": 86.31099900000845,
+        "max": 204.65018799999962
+      },
+      "deals": 100,
+      "outrightWins": 198,
+      "sharedWins": 0,
+      "gamesWithoutRulings": 193,
+      "winRateWithoutRulings": 0.9896373056994818
+    },
+    "3": {
+      "games": 180,
+      "winRate": 0.8638888888888889,
+      "averageMargin": 35.43333333333333,
+      "averageScore": 181.42222222222222,
+      "gamesWithRulings": 23,
+      "draftMs": {
+        "mean": 59.289558635416924,
+        "p95": 174.35354600002756,
+        "max": 634.3366770000139
+      },
+      "deals": 60,
+      "outrightWins": 154,
+      "sharedWins": 3,
+      "gamesWithoutRulings": 157,
+      "winRateWithoutRulings": 0.8471337579617835
+    },
+    "4": {
+      "games": 240,
+      "winRate": 0.7708333333333334,
+      "averageMargin": 18.7,
+      "averageScore": 129.01666666666668,
+      "gamesWithRulings": 31,
+      "draftMs": {
+        "mean": 32.4294887827081,
+        "p95": 101.80679899998358,
+        "max": 286.8647779999883
+      },
+      "deals": 60,
+      "outrightWins": 183,
+      "sharedWins": 4,
+      "gamesWithoutRulings": 209,
+      "winRateWithoutRulings": 0.777511961722488
+    }
+  }
+}
