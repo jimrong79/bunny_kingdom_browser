@@ -24,3 +24,24 @@ export function chooseDraft(view, playerId) {
   const cards = [...view.players[playerId].hand].sort((a,b) => cardValue(view,playerId,b) - cardValue(view,playerId,a) || a.instanceId.localeCompare(b.instanceId));
   return { play: cards.slice(0, view.players.length === 2 ? 1 : 2).map(c=>c.instanceId), discard: view.players.length === 2 ? [cards[1].instanceId] : [] };
 }
+
+import { fiefs } from './fiefs.js';
+import { eligibleTerritories, placeBuilding } from './construction.js';
+export function positionValue(view, playerId) {
+  return fiefs(view,playerId).reduce((sum,f) => sum + f.points * (5-view.round) + f.wealth * 1.5 + f.strength + f.coordinates.length * 0.15, 0);
+}
+export function chooseBuilding(view, playerId) {
+  let best = null, bestValue = -Infinity;
+  for (const card of view.players[playerId].buildings.filter(c=>c.category!=='camp')) {
+    const eligible = eligibleTerritories(view,playerId,card);
+    const groups = fiefs(view,playerId);
+    const choices = card.category === 'sky_tower' ? eligible.flatMap((a,i)=>eligible.slice(i+1).filter(b=>!groups.some(f=>f.coordinates.includes(a)&&f.coordinates.includes(b))).map(b=>[a,b])) : eligible.map(c=>[c]);
+    for (const coordinates of choices) {
+      const trial = structuredClone(view);
+      placeBuilding(trial,playerId,card.instanceId,coordinates);
+      const value = positionValue(trial,playerId);
+      if (value > bestValue) { bestValue=value; best={ cardId:card.instanceId,coordinates }; }
+    }
+  }
+  return best;
+}

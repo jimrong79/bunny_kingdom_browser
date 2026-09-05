@@ -1,7 +1,9 @@
 import { createGame, publicView, resolveDraft } from './game.js';
-import { chooseDraft } from './bots.js';
+import { chooseDraft, chooseBuilding } from './bots.js';
+import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
+import { fiefs } from './fiefs.js';
 const app = document.querySelector('#app');
-let data, state, selected = [];
+let data, state, selected = [], buildingId = null, targets = [], error = "";
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons = { forest: '♣', field: '🥕', sea: '≈', mountain: '▲', plains: '·', city: '♜' };
 try {
@@ -16,8 +18,10 @@ function setup() {
 function board() {
   const blocked = new Set(state.blockedConnections.flatMap(e => [e.from + ':' + e.to, e.to + ':' + e.from]));
   return `<div class="board" aria-label="New World board">${Object.values(state.cells).map(c => {
+    const card = state.players[0].buildings.find(b=>b.instanceId===buildingId);
+    const valid = card ? eligibleTerritories(state,0,card) : [];
     const right = c.row + (c.column + 1), down = String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column;
-    return `<button class="cell ${c.terrain} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" title="${c.coordinate}: ${c.terrain}${c.building ? ', city strength ' + c.building.strength : ''}"><small>${c.coordinate}</small>${c.owner === null ? '' : `<i class="bunny" aria-label="${state.players[c.owner].name}">●</i>`}<span>${icons[c.terrain]}</span>${c.building ? `<b class="piece">♜${c.building.strength}</b>` : ''}</button>`;
+    return `<button class="cell ${c.terrain} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}"><small>${c.coordinate}</small>${c.owner === null ? '' : `<i class="bunny" aria-label="${state.players[c.owner].name}">●</i>`}<span>${icons[c.terrain]}</span>${c.building ? `<b class="piece">${c.building.category === 'city' ? '♜' + c.building.strength : c.building.category === 'farm' ? '◆' : c.building.category === 'camp' ? '⚑' + c.building.priority : '↗'}</b>` : ''}</button>`;
   }).join('')}</div>`;
 }
 function cardHTML(c) {
@@ -25,8 +29,9 @@ function cardHTML(c) {
   return `<button class="card ${c.category} ${i >= 0 ? 'selected' : ''}" data-card="${c.instanceId}" aria-pressed="${i >= 0}"><span class="tag">${escape(c.category)} ${label ? ' · ' + label : ''}</span><h3>${escape(c.name)}</h3><p>${escape(c.sourceText || (c.category === 'territory' ? c.terrain : c.category === 'provisions' ? 'Draw and play 2 cards immediately.' : 'Place during Construction.'))}</p></button>`;
 }
 function render() {
-  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${state.phase === 'draft' ? 'Explore the New World' : 'Build your kingdom'}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; 🥕 Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p></section><aside class="panel"><p class="eyebrow">YOUR HAND</p><h2>${state.phase === 'draft' ? `Choose your cards · pick ${state.draftTurn}` : 'Construction'}</h2><p>${state.players.length === 2 ? 'Play 1 card and discard 1. A reserve card is added before each pick.' : 'Choose 2 cards each pick.'} Pass ${state.round % 2 ? 'left' : 'right'}.</p><div id="actions">${state.phase === 'draft' ? `<p class="muted">${state.players.length === 2 ? 'First selection: play. Second selection: discard.' : 'Select two cards, then confirm.'}</p><button id="confirm-draft" class="primary" ${selected.length !== 2 ? 'disabled' : ''}>Confirm cards & pass →</button><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>` : `<p>${state.players[0].buildings.length} buildings available. Construction controls arrive in the next feature.</p>`}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
+  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${state.phase === 'draft' ? 'Explore the New World' : 'Build your kingdom'}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; 🥕 Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p></section><aside class="panel"><p class="eyebrow">YOUR HAND</p><h2>${state.phase === 'draft' ? `Choose your cards · pick ${state.draftTurn}` : 'Construction'}</h2><p>${state.players.length === 2 ? 'Play 1 card and discard 1. A reserve card is added before each pick.' : 'Choose 2 cards each pick.'} Pass ${state.round % 2 ? 'left' : 'right'}.</p><div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? `<p class="muted">${state.players.length === 2 ? 'First selection: play. Second selection: discard.' : 'Select two cards, then confirm.'}</p><button id="confirm-draft" class="primary" ${selected.length !== 2 ? 'disabled' : ''}>Confirm cards & pass →</button><div class="hand">${state.players[0].hand.map(cardHTML).join('')}</div>` : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
   document.querySelector('#new-game').onclick = setup;
+  bindConstruction();
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
     const id = button.dataset.card;
     if (selected.includes(id)) selected = selected.filter(x => x !== id);
@@ -36,6 +41,36 @@ function render() {
   const confirm = document.querySelector('#confirm-draft');
   if (confirm) confirm.onclick = () => {
     const choices = state.players.map(p => p.bot ? chooseDraft(publicView(state, p.id), p.id) : { play: state.players.length === 2 ? [selected[0]] : [...selected], discard: state.players.length === 2 ? [selected[1]] : [] });
-    resolveDraft(state, choices); selected = []; render();
+    resolveDraft(state, choices); selected = []; driveBots(); render();
   };
+}
+
+function constructionPanel() {
+  if (state.phase === 'markets') return '<h2>Trading Posts</h2><p>All players have finished building. Trading Post selection and harvest follow next.</p>';
+  const available = state.players[0].buildings;
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p><div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}" ${c.category==='camp'?'disabled':''}><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${c.placement.allowedTerrains?.join(', ') || 'Any terrain'}${c.category==='camp'?' · Priority controls follow next':''}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${targets.length ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building">Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+}
+function attempt(action) { try { error=''; action(); } catch(e) {error=e.message;} render(); }
+function driveBots() {
+  if (state.phase !== 'construction') return;
+  for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
+    let action;
+    while ((action=chooseBuilding(publicView(state,p.id),p.id))) placeBuilding(state,p.id,action.cardId,action.coordinates);
+    finishConstruction(state,p.id);
+  }
+}
+function bindConstruction() {
+  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>{buildingId=b.dataset.building;targets=[];error='';render();});
+  document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
+    const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+    if(!card || !eligibleTerritories(state,0,card).includes(b.dataset.cell)) return;
+    const id=b.dataset.cell, count=card.category==='sky_tower'?2:1;
+    if(targets.includes(id)) targets=targets.filter(c=>c!==id);
+    else targets=[...targets.slice(-(count-1)||targets.length),id].slice(-count);
+    render();
+  });
+  const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
+  bind('place-building',()=>{placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];});
+  bind('cancel-building',()=>{buildingId=null;targets=[];});
+  bind('finish-building',()=>{finishConstruction(state,0);buildingId=null;targets=[];driveBots();});
 }
