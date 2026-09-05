@@ -4,7 +4,7 @@ Browser implementation of the original Bunny Kingdom base game, starting with ve
 
 ## Play locally
 
-From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. The first playable feature supports choosing 1–3 bots and dealing round one; drafting follows next.
+From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction follows next.
 
 Run engine tests with `npm test` (Node.js 22+).
 

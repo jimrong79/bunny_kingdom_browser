@@ -44,3 +44,54 @@ export function publicView(state, playerId) {
   view.players = view.players.map(p => p.id === playerId ? { ...p, reserve: { count: p.reserve.length } } : { ...p, hand: { count: p.hand.length }, reserve: { count: p.reserve.length }, parchments: { count: p.parchments.length }, discarded: { count: p.discarded.length } });
   return view;
 }
+
+export function pickCount(state) { return state.players.length === 2 ? 1 : 2; }
+export function playCard(state, playerId, card) {
+  const player = state.players[playerId];
+  if (card.category === 'parchment') { player.parchments.push(card); state.log.push(`${player.name} kept a parchment.`); return; }
+  player.played.push(card);
+  if (card.category === 'territory') {
+    const cell = state.cells[card.coordinate];
+    if (cell.building?.category === 'camp') cell.building = null;
+    cell.owner = playerId;
+    state.log.push(`${player.name} claimed ${card.coordinate}.`);
+  } else if (card.category === 'provisions') {
+    requireRule(state.deck.length >= 2, 'Not enough cards for Provisions.');
+    const drawn = state.deck.splice(0, 2);
+    state.log.push(`${player.name} played Provisions and drew 2 cards.`);
+    for (const extra of drawn) playCard(state, playerId, extra);
+  } else {
+    player.buildings.push(card);
+    state.log.push(`${player.name} reserved ${card.name}.`);
+  }
+}
+export function resolveDraft(state, selections) {
+  requireRule(state.phase === 'draft', 'It is not the Exploration phase.');
+  requireRule(selections.length === state.players.length, 'Every player must confirm a selection.');
+  // Validate the entire simultaneous pick before making any changes.
+  for (const p of state.players) {
+    const pick = selections[p.id];
+    requireRule(pick && Array.isArray(pick.play) && Array.isArray(pick.discard), 'Invalid selection.');
+    requireRule(pick.play.length === pickCount(state) && pick.discard.length === (state.players.length === 2 ? 1 : 0), 'Select the required play/discard cards.');
+    const ids = [...pick.play, ...pick.discard];
+    requireRule(new Set(ids).size === ids.length && ids.every(id => p.hand.some(c => c.instanceId === id)), 'Select distinct cards from your own hand.');
+  }
+  const plays = state.players.map(p => {
+    const pick = selections[p.id], cards = pick.play.map(id => p.hand.find(c => c.instanceId === id));
+    p.discarded.push(...p.hand.filter(c => pick.discard.includes(c.instanceId)));
+    p.hand = p.hand.filter(c => ![...pick.play, ...pick.discard].includes(c.instanceId));
+    return cards;
+  });
+  for (const p of state.players) for (const card of plays[p.id]) playCard(state, p.id, card);
+  if (state.players.every(p => p.hand.length === 0)) {
+    state.phase = 'construction'; state.log.push('Exploration finished. Construction begins.');
+    return;
+  }
+  const hands = state.players.map(p => p.hand), direction = state.round % 2 ? 1 : -1;
+  for (const p of state.players) p.hand = hands[(p.id - direction + hands.length) % hands.length];
+  if (state.players.length === 2) for (const p of state.players) {
+    requireRule(p.reserve.length > 0, 'Missing two-player reserve card.');
+    p.hand.push(p.reserve.shift());
+  }
+  state.draftTurn++;
+}
