@@ -10,6 +10,7 @@ import { cardText, buildingText, resourceNames } from './card-text.js';
 import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { sortedHand } from './hand-order.js';
 import { lastTurnPanel } from './last-turn.js';
+import { playerPanels as renderPlayerPanels, bindKingdomInspection } from './kingdom-ui.js';
 import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
@@ -41,7 +42,7 @@ function board() {
   const valid=placementOptions();
   return `<div class="board ${boardZoom?'board-large':''}" aria-label="New World board">${Object.values(state.cells).map(c => {
     const right = c.row + (c.column + 1), down = String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column;
-    return `<button class="cell ${c.terrain} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some((id,i)=>!(state.players.length===2&&i===1)&&state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" aria-label="${c.coordinate}, ${c.terrain}, ${c.owner===null?'unclaimed':state.players[c.owner].name}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}">${terrainArt(c.terrain)}<small class="coordinate">${c.coordinate}</small>${c.baseResource?`<span class="natural-resource" title="Natural ${resourceNames[c.baseResource]}">${resourceArt(c.baseResource)}</span>`:''}${c.owner===null?'':`<span class="bunny" aria-label="${state.players[c.owner].name}">${rabbitArt()}</span>`}${c.building?`<span class="piece" data-kind="${c.building.category}" title="${escape(buildingText(c.building))}">${pieceArt(c.building)}${c.building.category==='farm'?'':`<span class="piece-level">${c.building.category==='city'?c.building.strength:c.building.category==='camp'?c.building.priority:'↗'+c.building.pairId.split('_').at(-1)}</span>`}</span>`:''}</button>`;
+    return `<button class="cell ${c.terrain} ${c.owner===null?'':'owned'} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some((id,i)=>!(state.players.length===2&&i===1)&&state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" data-owner="${c.owner??''}" aria-label="${c.coordinate}, ${c.terrain}, ${c.owner===null?'unclaimed':state.players[c.owner].name}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}">${terrainArt(c.terrain)}${c.owner===null?'':'<span class="owner-overlay"></span>'}<small class="coordinate">${c.coordinate}</small>${c.baseResource?`<span class="natural-resource" title="Natural ${resourceNames[c.baseResource]}">${resourceArt(c.baseResource)}</span>`:''}${c.owner===null?'':`<span class="bunny" aria-label="${state.players[c.owner].name}">${rabbitArt()}</span>`}${c.building?`<span class="piece" data-kind="${c.building.category}" title="${escape(buildingText(c.building))}">${pieceArt(c.building)}${c.building.category==='farm'?'':`<span class="piece-level">${c.building.category==='city'?c.building.strength:c.building.category==='camp'?c.building.priority:'↗'+c.building.pairId.split('_').at(-1)}</span>`}</span>`:''}</button>`;
   }).join('')}</div>`;
 }
 
@@ -82,9 +83,8 @@ function cardHTML(c,index=0) {
 function handPanel() {
   return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · Pass ${state.round%2?'left ←':'right →'}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${sortedHand(state.players[0].hand).map(cardHTML).join('')}</div></section>`;
 }
-function playerPanels() {
-  return `<div class="players">${state.players.map(p=>`<div class="player" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit">${rabbitArt()}</span><b>${p.name}</b><span class="player-score">${p.score}<small> pts</small></span></div><small>${Object.values(state.cells).filter(c=>c.owner===p.id).length} territories · ${p.parchments.length} parchments${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small></div>`).join('')}</div>`;
-}
+function playerPanels() { return renderPlayerPanels(state); }
+
 function cardPreview(card) {
   return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location.</p>';
 }
@@ -119,7 +119,7 @@ function render() {
   app.innerHTML = `
     <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div>
     <div class="game-layout table-layout" data-phase="${state.phase}">
-      <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend"><span class="lava-key">━</span> Lava blocks a shared edge · Select a territory to inspect it</p></div></div></section>
+      <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend" id="fief-readout"></p></div></div></section>
       <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
@@ -134,6 +134,7 @@ function render() {
   const boardConfirm=document.querySelector('#board-confirm');
   if(boardConfirm)boardConfirm.onclick=()=>document.querySelector('#place-building').click();
   bindConstruction();
+  bindKingdomInspection(state,inspected);
   document.querySelectorAll('[data-recent-cell]').forEach(button=>button.onclick=()=>{inspected=button.dataset.recentCell;render();});
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
     const id = button.dataset.card;
