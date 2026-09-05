@@ -1,4 +1,5 @@
 // Original vector pieces and terrain illustrations, shared by the board and cards.
+import { parchmentArt } from './parchment-art.js';
 const svg=(body,cls='',viewBox='0 0 64 64')=>`<svg class="${cls}" viewBox="${viewBox}" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export function rabbitArt() {
@@ -46,7 +47,7 @@ export function pieceArt(building) {
 
 export function cardArt(card) {
   if(card.category==='territory')return `<span class="card-landscape ${card.terrain}">${terrainArt(card.terrain)}<strong>${card.coordinate}</strong></span>`;
-  if(card.category==='parchment')return svg('<path d="M15 10H50L46 20V52H17V20L10 15Z" fill="#f4df9f" stroke="#9a7745" stroke-width="2"/><path d="M23 23H39M23 30H37M23 37H40" stroke="#a58b54" stroke-width="2"/><circle cx="34" cy="48" r="9" fill="#b96848"/><path d="M30 46L33 49L39 43" fill="none" stroke="#fce7aa" stroke-width="2"/>','parchment-art');
+  if(card.category==='parchment')return parchmentArt(card,{resourceArt,pieceArt,rabbitArt});
   if(card.category==='provisions')return svg('<path d="M12 27H53L49 56H17Z" fill="#b88b51" stroke="#705c3b" stroke-width="3"/><path d="M23 29V17Q32 2 43 17V29" fill="none" stroke="#705c3b" stroke-width="4"/><path d="M18 37H49M19 47H48M26 29V55M38 29V55" stroke="#e1bb77" stroke-width="3"/>','provisions-art');
   return pieceArt({...card,strength:card.effect?.strength,resource:card.effect?.resource});
 }

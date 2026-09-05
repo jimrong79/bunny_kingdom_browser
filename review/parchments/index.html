@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parchment picture guide · Bunny Kingdom</title>
+<style>
+  body{background:#f3f0e4;color:#2e5041;font-family:system-ui,sans-serif;margin:24px auto;padding:0 20px;max-width:1250px}
+  h1,h2{font-family:Georgia,serif}a{color:#326950}main{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:16px}
+  article{background:#fffae9;border:1px solid #d7d2b5;border-radius:12px;padding:14px}article.treasure{background:#fbefc6;border-color:#c4a556}
+  svg{width:100%;height:140px}h2{font-size:19px;margin:8px 0}p{font-size:13px;line-height:1.5}small{color:#807849;text-transform:uppercase;letter-spacing:1px}
+</style>
+<p><a href="../../">← Back to the game</a></p>
+<h1>Parchment picture guide</h1>
+<p>All 37 cards. Gold shields show treasure values; paired gloves are worth 4 each. Mission pictures are memory aids—read the full effect for conditions.</p>
+<main id="guide"></main>
+<script type="module">
+  import {cardArt} from '../../src/art.js';
+  const {cards}=await fetch('../../data/cards/base-parchments.json').then(r=>r.json());
+  const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  document.querySelector('#guide').innerHTML=cards.map(c=>`<article class="${c.parchmentType}" data-guide-card="${c.id}"><small>${c.parchmentType}</small>${cardArt(c)}<h2>${esc(c.name)}</h2><p>${esc(c.sourceText)}</p></article>`).join('');
+</script>
+</html>

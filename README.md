@@ -6,6 +6,8 @@ Browser implementation of the original Bunny Kingdom base game, starting with ve
 
 From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Games autosave in this browser; after a refresh, select **Resume**. A seed lets you reproduce a deal. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. All 37 parchments have scoring handlers, including copy selection and treasure interactions. Select board territories to inspect buildings, resources, lava boundaries, and fiefs. Your secret parchments are available to inspect throughout play. Final scores show a per-card breakdown. Unverified tie/copy/stacking cases require an explicit, recorded ruling only if they occur.
 
+Player panels show total production (including farms and assigned Trading Posts), public building trays, and parchment stacks. Hover, focus, or tap a territory to highlight its connected fief and see its harvest value. Each parchment has an original pictogram; use the [picture guide](review/parchments/index.html) to learn all 37. Gold shields identify treasures and their values.
+
 Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, rule limitations, and browser checks](docs/implementation.md).
 
 ## Local workspace
