@@ -95,6 +95,31 @@ def construction_controls(page):
     print('Construction: separate Sky Tower fiefs, incomplete placement, and required market choices passed.', flush=True)
 
 
+def mobile_board(page):
+    page.set_viewport_size({'width': 390, 'height': 844})
+    scenario(page, 'construction', [{'id': 'trading_post'}], {'A10': 0})
+    assert page.locator('.board-large').count() == 1
+    page.locator('.game-nav a[href="#turn-panel"]').click()
+    page.locator('[data-building^=trading_post]').click()
+    page.locator('.game-nav a[href="#map-panel"]').click()
+    scroller = page.locator('.board-scroll')
+    scroller.evaluate('(el)=>el.scrollLeft=el.scrollWidth')
+    page.locator('[data-cell=A10]').click()
+    assert scroller.evaluate('(el)=>el.scrollLeft') > 200
+    assert page.locator('#board-confirm').is_enabled()
+    page.screenshot(path='/tmp/bunny-polished-mobile.png', full_page=True)
+    page.locator('#board-confirm').click()
+    assert snapshot(page)['cells']['A10']['building']['category'] == 'farm'
+    page.locator('#board-zoom').click()
+    assert page.locator('.board-large').count() == 0
+    assert scroller.evaluate('(el)=>el.scrollWidth <= el.clientWidth')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.reload()
+    page.locator('#resume-game').click()
+    assert page.locator('.board-large').count() == 0
+    print('Mobile: board navigation, scrolling, placement, fit/enlarge, and saved view passed.', flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://127.0.0.1:8000')
@@ -106,6 +131,7 @@ if __name__ == '__main__':
         page.on('pageerror', lambda error: errors.append(str(error)))
         draft_controls(page, args.url)
         construction_controls(page)
+        mobile_board(page)
         assert not errors, errors
         browser.close()
     print('All control checks passed.')

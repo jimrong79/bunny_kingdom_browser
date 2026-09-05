@@ -10,6 +10,7 @@ import { cardText, buildingText, resourceMarks } from './card-text.js';
 import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
+let boardZoom=matchMedia('(max-width:600px)').matches;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons = { forest: '♣', field: '<svg class=carrot viewBox="0 0 30 30" aria-hidden="true"><path d="M9 9 L24 13 L8 27 Z" fill="#b46d27"/><path d="M15 10 L15 3 M18 11 L25 5" stroke="#517843" stroke-width="3"/></svg>', sea: '≈', mountain: '▲', plains: '·', city: '♜' };
 try {
@@ -25,6 +26,7 @@ function setup() {
 }
 function resume(saved) {
   state=saved.game;const ui=saved.ui||{};
+  boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
   selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,2);
   buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)?ui.buildingId:null;
   targets=(ui.targets||[]).filter(id=>state.cells[id]);inspected=state.cells[ui.inspected]?ui.inspected:null;error='';render();
@@ -32,9 +34,9 @@ function resume(saved) {
 function board() {
   const blocked = new Set(state.blockedConnections.flatMap(e => [e.from + ':' + e.to, e.to + ':' + e.from]));
   const valid=placementOptions();
-  return `<div class="board" aria-label="New World board">${Object.values(state.cells).map(c => {
+  return `<div class="board ${boardZoom?'board-large':''}" aria-label="New World board">${Object.values(state.cells).map(c => {
     const right = c.row + (c.column + 1), down = String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column;
-    return `<button class="cell ${c.terrain} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some(id=>state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" aria-label="${c.coordinate}, ${c.terrain}, ${c.owner===null?'unclaimed':state.players[c.owner].name}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}"><small>${c.coordinate}</small>${c.owner === null ? '' : `<i class="bunny" aria-label="${state.players[c.owner].name}">●</i>`}<span>${icons[c.terrain]}</span>${c.building ? `<b class="piece">${c.building.category === 'city' ? '♜' + c.building.strength : c.building.category === 'farm' ? (resourceMarks[c.building.resource||c.building.choice]||'?') : c.building.category === 'camp' ? '⚑' + c.building.priority : '↗'+c.building.pairId.split('_').at(-1)}</b>` : ''}</button>`;
+    return `<button class="cell ${c.terrain} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some((id,i)=>!(state.players.length===2&&i===1)&&state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" aria-label="${c.coordinate}, ${c.terrain}, ${c.owner===null?'unclaimed':state.players[c.owner].name}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}"><small>${c.coordinate}</small>${c.owner === null ? '' : `<i class="bunny" aria-label="${state.players[c.owner].name}">●</i>`}<span>${icons[c.terrain]}</span>${c.building ? `<b class="piece">${c.building.category === 'city' ? '♜' + c.building.strength : c.building.category === 'farm' ? (resourceMarks[c.building.resource||c.building.choice]||'?') : c.building.category === 'camp' ? '⚑' + c.building.priority : '↗'+c.building.pairId.split('_').at(-1)}</b>` : ''}</button>`;
   }).join('')}</div>`;
 }
 
@@ -56,6 +58,12 @@ function placementGuide() {
   let guidance=targets.length===count?'Ready to place. Confirm below.':count===2&&targets.length?'Choose the second endpoint in another highlighted fief.':'Choose a highlighted territory on the board.';
   if(!placementOptions().length)guidance=card.category==='sky_tower'?'No legal pair is available. You need empty building slots in two separate fiefs.':'No eligible territory is available for this building.';
   return `<div class="placement-guide" role="status"><b>${escape(card.name)}</b><p>${escape(guidance)}</p><span>${targets.length} / ${count} territories selected${targets.length?': '+targets.join(' + '):''}</span></div>`;
+}
+
+function boardToolbar() {
+  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  const count=card?.category==='sky_tower'?2:1;
+  return `<div class="board-toolbar"><h2>The New World</h2><button class="quiet" id="board-zoom" aria-pressed="${boardZoom}">${boardZoom?'Fit board':'Enlarge board'}</button></div>${card?`<div class="board-placement"><span>${escape(card.name)} · ${targets.length}/${count} selected</span><button id="board-confirm" class="primary" ${targets.length===count?'':'disabled'}>Confirm placement</button></div>`:''}<p class="board-scroll-hint muted">${boardZoom?'Scroll sideways to explore the enlarged board.':'Select any territory for details. Enlarge the board for a closer look.'}</p>`;
 }
 function cardHTML(c) {
   const i = selected.indexOf(c.instanceId), label = i >= 0 ? (state.players.length === 2 && i === 1 ? 'Discard' : 'Play') : '';
@@ -81,12 +89,17 @@ function focusedControl() {
 }
 function render() {
   const focus=focusedControl();
+  const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
-  const saved=saveGame(state,{selected,buildingId,targets,inspected});
-  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${p.hand.length} cards · ${p.parchments.length} parchments</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel">${board()}<p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? draftPanel() : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
-  app.insertAdjacentHTML('beforeend',`<p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`);
+  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom});
+  app.innerHTML = `<div class="game-heading"><div><p class="eyebrow">ROUND ${state.round} OF 4</p><h1>${({draft:'Explore the New World',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div><div class="players">${state.players.map(p => `<div class="player" style="--player:${p.color}"><b>${p.name}</b><span>${p.score} <small>points</small></span><small>${Object.values(state.cells).filter(c=>c.owner===p.id).length} territories · ${p.parchments.length} parchments</small><small>${state.phase==='draft'?p.hand.length+' cards in hand':['construction','markets'].includes(state.phase)?(p.ready?'✓ Ready':'Choosing'):''}</small></div>`).join('')}</div><div class="game-layout"><section class="map-panel panel" id="map-panel" tabindex="-1">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll horizontally in the enlarged view">${board()}</div><p class="legend">♣ Forest / wood &nbsp; ▾ Field / carrots &nbsp; ≈ Sea / fish &nbsp; ▲ Mountain &nbsp; · Plains &nbsp; ♜ City<br><span class="lava-key">━</span> Lava blocks a shared edge</p>${inspectionPanel()}${privateCardsPanel()}</section><aside class="panel" id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">YOUR HAND · PICK ${state.draftTurn}</p><h2>Choose your cards</h2><p>${state.players.length===2?'Play 1 card and discard 1. A reserve card is added before each pick.':'Choose 2 cards each pick.'} Pass ${state.round%2?'left':'right'}.</p>`:''}<div id="error" role="alert">${error ? `<p class="error">${escape(error)}</p>` : ''}</div><div id="actions">${state.phase === 'draft' ? draftPanel() : constructionPanel()}</div><details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside></div>`;
+  app.insertAdjacentHTML('beforeend',`<nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a><a href="#turn-panel">${({draft:'Choose cards',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav><p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · Seed ${escape(state.seed)}</p>`);
   document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
+  document.querySelector('.board-scroll').scrollLeft=boardScroll;
+  document.querySelector('#board-zoom').onclick=()=>{boardZoom=!boardZoom;render();};
+  const boardConfirm=document.querySelector('#board-confirm');
+  if(boardConfirm)boardConfirm.onclick=()=>document.querySelector('#place-building').click();
   bindConstruction();
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
     const id = button.dataset.card;

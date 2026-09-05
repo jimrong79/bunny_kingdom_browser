@@ -17,3 +17,18 @@
 .draft-controls #confirm-draft{margin:10px 0 0}.card.discard-selected{outline-color:#a64737;background:#f9e9e0}
 input:focus-visible,select:focus-visible{outline:3px solid #a17525;outline-offset:2px}
 .placement-guide{font:13px/1.5 system-ui;background:#edf2e6;border-left:3px solid #9e6c17;padding:12px;margin:14px 0;border-radius:6px}.placement-guide p{margin:5px 0}.placement-guide span{color:#63715e}
+
+.game-layout>*{min-width:0}.board-scroll{overflow-x:auto;padding:3px;overscroll-behavior-x:contain;scrollbar-color:#8b9e7c #edf1e4;border-radius:10px}.board-large{min-width:600px}
+.board-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px}.board-toolbar h2{font-size:21px;margin:0}.board-toolbar .quiet{font:12px system-ui;padding:9px 12px;white-space:nowrap}.board-scroll-hint{margin:10px 0}
+.board-placement{display:flex;align-items:center;justify-content:space-between;gap:10px;font:13px system-ui;background:#edf2e6;padding:10px;margin-top:12px;border-radius:8px}.board-placement .primary{padding:10px;font-size:12px}
+.bunny{font-size:0;width:14px;height:14px;left:5px;bottom:4px;border-radius:50%;background:var(--owner);border:1px solid #fffdf7;box-shadow:0 1px 2px #253e3450}.piece{z-index:1}
+.game-nav{display:none}#map-panel,#turn-panel{scroll-margin-top:14px}.board-scroll:focus-visible{outline:3px solid #a17525}
+@media(max-width:900px){
+  main{padding-bottom:100px}.game-nav{position:fixed;bottom:0;left:0;right:0;z-index:6;display:flex;background:#fffdf7f5;border-top:1px solid #c5d0c1;padding:10px 16px calc(10px + env(safe-area-inset-bottom));gap:12px;box-shadow:0 -3px 16px #263b2415}
+  .game-nav a{flex:1;text-align:center;text-decoration:none;background:#e8eee0;border-radius:8px;padding:12px;font:600 14px system-ui}.game-nav a:last-child{background:#244b39;color:#fffdf7}
+}
+@media(max-width:600px){
+  .board:not(.board-large) .cell{font-size:15px}.board:not(.board-large) .cell small{font-size:7px;top:2px;left:2px}.board:not(.board-large) .carrot{width:16px;height:16px}
+  .board:not(.board-large) .bunny{width:8px;height:8px;bottom:2px;left:2px}.board:not(.board-large) .piece{font-size:8px;padding:0 1px;right:1px;bottom:1px}
+  .board-large .cell{font-size:24px}.board-large .cell small{font-size:10px}.board-large .piece{font-size:12px}.game-heading{gap:12px}.game-heading>.quiet{white-space:nowrap}
+}
