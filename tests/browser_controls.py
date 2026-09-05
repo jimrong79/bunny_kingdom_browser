@@ -35,6 +35,66 @@ def draft_controls(page, url):
     print('Draft: selection, keyboard focus, swap, clear, and play/discard effects passed.', flush=True)
 
 
+def scenario(page, phase, cards, owners):
+    """Prepare an isolated interaction while retaining all 182 physical cards."""
+    page.evaluate("""({phase,cards,owners})=>{
+        const saved=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1'));
+        const s=saved.game;
+        s.deck.push(...s.players.flatMap(p=>['hand','reserve','played','parchments','discarded'].flatMap(k=>p[k])));
+        for(const p of s.players) {
+            for(const k of ['hand','reserve','played','parchments','discarded','buildings','harvests'])p[k]=[];
+            p.ready=p.bot;p.score=0;
+        }
+        for(const c of Object.values(s.cells)) {
+            c.owner=owners[c.coordinate]??null;
+            if(c.building?.instanceId)c.building=null;
+        }
+        for(const {id,playerId=0} of cards) {
+            const index=s.deck.findIndex(c=>c.id===id);
+            if(index<0)throw Error('Missing fixture card: '+id);
+            const [card]=s.deck.splice(index,1),player=s.players[playerId];
+            if(card.category==='parchment')player.parchments.push(card);
+            else {player.played.push(card);player.buildings.push(card);}
+        }
+        s.phase=phase;s.scoringDecisions={copies:{},rulings:{},copyResolutions:{}};
+        saved.ui={};localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(saved));
+    }""", {'phase': phase, 'cards': cards, 'owners': owners})
+    page.reload()
+    page.locator('#resume-game').click()
+
+
+def construction_controls(page):
+    scenario(page, 'construction', [{'id': 'sky_tower'}, {'id': 'trading_post'}],
+             {'A1': 0, 'A2': 0, 'J1': 0})
+    tower = page.locator('[data-building^=sky_tower]')
+    tower.click()
+    assert page.locator('#place-building').is_disabled()
+    page.locator('[data-cell=A1]').click()
+    assert page.locator('#place-building').is_disabled()
+    assert 'eligible' not in page.locator('[data-cell=A2]').get_attribute('class')
+    page.locator('[data-cell=A2]').click()
+    assert page.locator('.cell.target').count() == 1
+    page.locator('[data-cell=J1]').click()
+    assert page.locator('#place-building').is_enabled()
+    page.locator('#place-building').click()
+    state = snapshot(page)
+    assert state['cells']['A1']['building']['pairId'] == state['cells']['J1']['building']['pairId']
+    page.locator('[data-building^=trading_post]').click()
+    page.locator('[data-cell=A2]').click()
+    page.locator('#place-building').click()
+    page.locator('#finish-building').click()
+    assert page.locator('#confirm-markets').is_disabled()
+    page.locator('[data-market=A2]').select_option('fish')
+    assert page.locator('#confirm-markets').is_enabled()
+    page.locator('#confirm-markets').click()
+    assert snapshot(page)['phase'] == 'harvest'
+    scenario(page, 'construction', [{'id': 'sky_tower'}], {'A1': 0, 'A2': 0})
+    page.locator('[data-building^=sky_tower]').click()
+    assert page.locator('.cell.eligible').count() == 0
+    assert 'No legal pair' in page.locator('.placement-guide').inner_text()
+    print('Construction: separate Sky Tower fiefs, incomplete placement, and required market choices passed.', flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://127.0.0.1:8000')
@@ -45,6 +105,7 @@ if __name__ == '__main__':
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         draft_controls(page, args.url)
+        construction_controls(page)
         assert not errors, errors
         browser.close()
     print('All control checks passed.')

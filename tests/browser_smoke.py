@@ -43,16 +43,13 @@ def build(page):
             page.locator('#cancel-building').click()
             continue
         if card_id.startswith('sky_tower'):
-            # Try separate candidate endpoints; the UI must reject a same-fief pair.
-            for other in reversed(eligible[1:]):
-                page.locator('#cancel-building').click()
-                button.click()
-                page.locator(f'[data-cell="{eligible[0]}"]').click()
-                page.locator(f'[data-cell="{other}"]').click()
-                page.locator('#place-building').click()
-                if not page.locator('.error').count():
-                    placed += 1
-                    break
+            page.locator(f'[data-cell="{eligible[0]}"]').click()
+            assert page.locator('#place-building').is_disabled()
+            # After the first endpoint, only separate fiefs should be highlighted.
+            page.locator('.cell.eligible:not(.target)').first.click()
+            page.locator('#place-building').click()
+            assert not page.locator('.error').count()
+            placed += 1
         else:
             page.locator(f'[data-cell="{eligible[0]}"]').click()
             page.locator('#place-building').click()

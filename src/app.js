@@ -31,12 +31,31 @@ function resume(saved) {
 }
 function board() {
   const blocked = new Set(state.blockedConnections.flatMap(e => [e.from + ':' + e.to, e.to + ':' + e.from]));
+  const valid=placementOptions();
   return `<div class="board" aria-label="New World board">${Object.values(state.cells).map(c => {
-    const card = state.players[0].buildings.find(b=>b.instanceId===buildingId);
-    const valid = card ? eligibleTerritories(state,0,card) : [];
     const right = c.row + (c.column + 1), down = String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column;
     return `<button class="cell ${c.terrain} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some(id=>state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" aria-label="${c.coordinate}, ${c.terrain}, ${c.owner===null?'unclaimed':state.players[c.owner].name}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}"><small>${c.coordinate}</small>${c.owner === null ? '' : `<i class="bunny" aria-label="${state.players[c.owner].name}">●</i>`}<span>${icons[c.terrain]}</span>${c.building ? `<b class="piece">${c.building.category === 'city' ? '♜' + c.building.strength : c.building.category === 'farm' ? (resourceMarks[c.building.resource||c.building.choice]||'?') : c.building.category === 'camp' ? '⚑' + c.building.priority : '↗'+c.building.pairId.split('_').at(-1)}</b>` : ''}</button>`;
   }).join('')}</div>`;
+}
+
+function placementOptions() {
+  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  if(!card)return [];
+  const eligible=eligibleTerritories(state,0,card);
+  if(card.category!=='sky_tower')return eligible;
+  const groups=fiefs(state,0).filter(f=>f.coordinates.some(id=>eligible.includes(id)));
+  if(groups.length<2)return [];
+  const first=groups.find(f=>f.coordinates.includes(targets[0]));
+  return eligible.filter(id=>targets.includes(id)||!first?.coordinates.includes(id));
+}
+
+function placementGuide() {
+  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  if(!card)return '<p class="muted">Choose a building below to see its available territories.</p>';
+  const count=card.category==='sky_tower'?2:1;
+  let guidance=targets.length===count?'Ready to place. Confirm below.':count===2&&targets.length?'Choose the second endpoint in another highlighted fief.':'Choose a highlighted territory on the board.';
+  if(!placementOptions().length)guidance=card.category==='sky_tower'?'No legal pair is available. You need empty building slots in two separate fiefs.':'No eligible territory is available for this building.';
+  return `<div class="placement-guide" role="status"><b>${escape(card.name)}</b><p>${escape(guidance)}</p><span>${targets.length} / ${count} territories selected${targets.length?': '+targets.join(' + '):''}</span></div>`;
 }
 function cardHTML(c) {
   const i = selected.indexOf(c.instanceId), label = i >= 0 ? (state.players.length === 2 && i === 1 ? 'Discard' : 'Play') : '';
@@ -90,13 +109,15 @@ function render() {
 function constructionPanel() {
   if(state.phase==='camps') {
     const current=state.campQueue[0];
-    return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2><p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
+    return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2>${placementGuide()}<p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
   }
-  if(state.phase==='markets') return `<h2>Choose your Trading Posts</h2><p class="help">Each Trading Post produces one basic resource this round. Round 4 choices also apply to parchment scoring.</p>${tradingPosts(state,0).map(c=>`<label>${c.coordinate}<select data-market="${c.coordinate}"><option value="">Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${r}</option>`).join('')}</select></label>`).join('') || '<p>You have no Trading Posts to assign.</p>'}<div class="actions"><button id="confirm-markets" class="primary">Confirm & harvest</button></div>`;
+  if(state.phase==='markets') return `<h2>Choose your Trading Posts</h2><p class="help">Each Trading Post produces one basic resource this round. Round 4 choices also apply to parchment scoring.</p>${tradingPosts(state,0).map(c=>`<label>${c.coordinate}<select data-market="${c.coordinate}"><option value="" disabled>Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${r}</option>`).join('')}</select></label>`).join('') || '<p>You have no Trading Posts to assign.</p>'}<div class="actions"><button id="confirm-markets" class="primary" ${tradingPosts(state,0).some(c=>!c.building.choice)?'disabled':''}>Confirm & harvest</button></div>`;
   if(state.phase==='harvest') return `<h2>Round ${state.round} harvest</h2><table class="table"><thead><tr><th>Player</th><th>Harvest</th><th>Total</th></tr></thead><tbody>${state.lastHarvest.map(h=>`<tr><td>${state.players[h.playerId].name}</td><td>+${h.points}</td><td>${state.players[h.playerId].score}</td></tr>`).join('')}</tbody></table>${state.lastHarvest.map(h=>`<details class="fief-list"><summary>${state.players[h.playerId].name}: fief breakdown</summary>${h.fiefs.map(f=>`<p>${f.coordinates.join(', ')}: ${f.strength} strength × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`).join('')}<div class="actions"><button id="next-round" class="primary">${state.round===4?'Reveal parchments':'Begin round '+(state.round+1)} →</button></div>`;
   if(['parchments','finished'].includes(state.phase)) return scoringPanel(state);
   const available = state.players[0].buildings;
-  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p><div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${targets.length ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building">Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+  const card=available.find(c=>c.instanceId===buildingId);
+  const complete=card&&targets.length===(card.category==='sky_tower'?2:1);
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
 function attempt(action) { try { error=''; action(); } catch(e) {error=e.message;} render(); }
 function driveBots() {
@@ -125,10 +146,10 @@ function bindConstruction() {
   document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
     const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
     inspected=b.dataset.cell;
-    if(!card || !eligibleTerritories(state,0,card).includes(b.dataset.cell)) {render();return;}
+    if(!card || !placementOptions().includes(b.dataset.cell)) {render();return;}
     const id=b.dataset.cell, count=card.category==='sky_tower'?2:1;
     if(targets.includes(id)) targets=targets.filter(c=>c!==id);
-    else targets=count===1?[id]:[...targets,id].slice(-count);
+    else targets=count===1?[id]:targets.length?[targets[0],id]:[id];
     render();
   });
   const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
