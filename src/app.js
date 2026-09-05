@@ -18,6 +18,7 @@ const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
 const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
+const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===2;
 let boardZoom=matchMedia('(max-width:600px)').matches;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -86,7 +87,8 @@ function cardHTML(c,index=0) {
   return `<button class="card ${c.category} ${c.parchmentType||''} ${c.farmType==='luxury'?'luxury-card':''} ${i>=0?'selected':''} ${label==='Discard'?'discard-selected':''}" style="--fan-angle:${offset*.65}deg;--fan-drop:${Math.abs(offset)*1.5}px;--card-order:${index}" data-card="${c.instanceId}" aria-pressed="${i>=0}" aria-label="${escape(c.name+': '+cardText(c,state)+(label?' — '+label:''))}"><span class="tag">${escape(type)}</span><span class="card-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p>${label?`<span class="choice-ribbon">${label==='Discard'?'×':'✓'} ${label}</span>`:''}</button>`;
 }
 function handPanel() {
-  return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · Pass ${state.round%2?'left ←':'right →'}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${sortedHand(state.players[0].hand).map(cardHTML).join('')}</div></section>`;
+  const instruction=forcedFinalPick()?'Both remaining cards will be played':`${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · Pass ${state.round%2?'left ←':'right →'}`;
+  return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${instruction}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${sortedHand(state.players[0].hand).map(cardHTML).join('')}</div></section>`;
 }
 function playerPanels() { return renderPlayerPanels(state); }
 
@@ -94,13 +96,13 @@ function cardPreview(card) {
   return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location.</p>';
 }
 function draftPanel() {
-  const twoPlayers=state.players.length===2;
+  const twoPlayers=state.players.length===2,forced=forcedFinalPick();
   const slots=[0,1].map(i=>{
     const card=state.players[0].hand.find(c=>c.instanceId===selected[i]);
     const label=twoPlayers?(i===0?'Play':'Discard'):'Play '+(i+1);
     return `<div class="draft-slot ${twoPlayers&&i===1?'discard-slot':''}"><b>${label}</b><span>${card?escape(card.name):'Choose a card'}</span></div>`;
   }).join('');
-  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div><div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div><button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">Click a selected card to remove it.</p>`;
+  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div>${forced?'':`<div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div>`}<button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${forced?'Continue →':selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${forced?'Your last two cards are ready. Continue to finish exploration.':'Click a selected card to remove it.'}</p>`;
 }
 function focusedControl() {
   const element=document.activeElement;
@@ -112,6 +114,7 @@ function focusedControl() {
   return null;
 }
 function render() {
+  if(forcedFinalPick())selected=state.players[0].hand.map(c=>c.instanceId);
   const focus=focusedControl();
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
@@ -143,6 +146,7 @@ function render() {
   bindKingdomInspection(state,inspected);
   document.querySelectorAll('[data-recent-cell]').forEach(button=>button.onclick=()=>{inspected=button.dataset.recentCell;render();});
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
+    if(forcedFinalPick())return;
     const id = button.dataset.card;
     if (selected.includes(id)) selected = selected.filter(x => x !== id);
     else if (selected.length < 2) selected.push(id);

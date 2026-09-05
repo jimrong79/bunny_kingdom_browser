@@ -74,6 +74,24 @@ def game(browser, bots, screenshots):
     for round_number in range(1, 5):
         for turn in range(turns):
             cards = page.locator('[data-card]').evaluate_all('(els)=>els.map(el=>el.dataset.card)')
+            if bots > 1 and turn == turns - 1:
+                assert len(cards) == 2
+                if round_number == 1:
+                    # Older saves may reach the final pair without any selection.
+                    page.evaluate("""()=>{const key='bunny-kingdom-save-v1',saved=JSON.parse(localStorage.getItem(key));saved.ui.selected=[];localStorage.setItem(key,JSON.stringify(saved));}""")
+                    page.reload()
+                    page.locator('#resume-game').click()
+                assert page.locator('#confirm-draft').inner_text() == 'Continue →'
+                assert page.locator('.card.selected').count() == 2
+                assert page.locator('#clear-draft').count() == 0
+                page.locator('#confirm-draft').click()
+                state = snapshot(page)
+                assert state['phase'] in ('camps', 'construction')
+                assert all(not p['hand'] for p in state['players'])
+                played = state['players'][0]['played'] + state['players'][0]['parchments']
+                assert set(cards) <= {c['instanceId'] for c in played}
+                continue
+            assert page.locator('#confirm-draft').is_disabled()
             territories = [c for c in cards if c.startswith('territory_')]
             buildings = [c for c in cards if c.startswith(('trading_post', 'camp_', 'city_', 'farm_', 'sky_tower'))]
             buildings.sort(key=lambda c: (not c.startswith('trading_post'), c))
