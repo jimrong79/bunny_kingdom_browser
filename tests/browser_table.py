@@ -77,7 +77,7 @@ if __name__ == '__main__':
         args.screenshots.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page()
+        page = browser.new_page(reduced_motion='reduce')
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         for bots, width, height in [(3,1440,1000), (2,1366,768), (2,1024,768), (1,1440,900)]:

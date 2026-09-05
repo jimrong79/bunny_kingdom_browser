@@ -62,7 +62,7 @@ def build(page):
 
 
 def game(browser, bots, screenshots):
-    page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+    page = browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(ARGS.url)

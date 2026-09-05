@@ -11,9 +11,11 @@ import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js'
 import { sortedHand } from './hand-order.js';
 import { lastTurnPanel } from './last-turn.js';
 import { playerPanels as renderPlayerPanels, bindKingdomInspection } from './kingdom-ui.js';
+import { capturePresentation, animationEvents, playAnimation } from './turn-animation.js';
 import { saveGame, loadGame } from './storage.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
+let animationsEnabled=true,playing=false;
 let boardZoom=matchMedia('(max-width:600px)').matches;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -32,6 +34,7 @@ function setup() {
 function resume(saved) {
   state=saved.game;const ui=saved.ui||{};
   for(const player of state.players)player.color=COLORS[player.id];
+  animationsEnabled=ui.animationsEnabled??true;
   boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
   selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,2);
   buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)?ui.buildingId:null;
@@ -110,14 +113,14 @@ function render() {
   const focus=focusedControl();
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
-  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom});
+  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled});
   const handScroll=document.querySelector('.hand')?.scrollLeft||0;
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
   const recap=document.querySelector('.last-turn-panel');
   const recapScroll=recap?.dataset.turn===(state.lastTurn?state.lastTurn.round+'-'+state.lastTurn.pick:'none')?recap.scrollTop:0;
   app.classList.add('at-table');
   app.innerHTML = `
-    <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><button id="new-game" class="quiet">New game</button></div>
+    <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><div class="heading-actions"><button id="toggle-animation" class="quiet" aria-pressed="${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches}" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'disabled title="Your device requests reduced motion"':''}>Animations: ${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'on':'off'}</button><button id="new-game" class="quiet">New game</button></div></div>
     <div class="game-layout table-layout" data-phase="${state.phase}">
       <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend" id="fief-readout"></p></div></div></section>
       <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
@@ -129,6 +132,7 @@ function render() {
   document.querySelector('.last-turn-panel').scrollTop=recapScroll;
   document.querySelectorAll('details').forEach(el=>{if(openPanels.includes(el.querySelector('summary')?.textContent))el.open=true;});
   document.querySelector('#new-game').onclick = setup;
+  document.querySelector('#toggle-animation').onclick=()=>{animationsEnabled=!animationsEnabled;render();};
   document.querySelector('.board-scroll').scrollLeft=boardScroll;
   document.querySelector('#board-zoom').onclick=()=>{boardZoom=!boardZoom;render();};
   const boardConfirm=document.querySelector('#board-confirm');
@@ -182,7 +186,17 @@ function constructionPanel() {
   const complete=card&&targets.length===(card.category==='sky_tower'?2:1);
   return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
-function attempt(action) { try { error=''; action(); } catch(e) {error=e.message;} render(); }
+async function attempt(action) {
+  if(playing)return;
+  const before=capturePresentation(state);
+  try {error='';action();} catch(e) {error=e.message;render();return;}
+  const events=animationEvents(before,state,data.buildings.cards);
+  playing=animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&events.length>0;
+  render();
+  if(!playing)return;
+  try {await playAnimation(before,state,events);} catch(e) {console.warn('Turn saved; animation interrupted.',e);}
+  finally {playing=false;app.inert=false;render();document.querySelector('#turn-panel')?.focus({preventScroll:true});}
+}
 function driveBots() {
   while(state.phase==='camps') {
     const next=state.campQueue[0];

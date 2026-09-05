@@ -22,6 +22,12 @@ The hand groups territories on the left, buildings and Provisions in the middle,
 
 The **Last turn** panel sits to the left of the board and groups the most recently confirmed Exploration pick by player. It includes territory claims, replaced Camps, reserved buildings, and all effects from Provisions, including chains. Parchments and face-down discards remain anonymous. Coordinates open territory inspection. The round/pick label identifies the recap through later phases; the next confirmed pick replaces it. Recaps autosave. Older saves begin recording one on their next pick. On phones the panel appears below the board.
 
+Player panels show production counts for Wood, Fish, and Carrots, plus acquired luxury resources. These count repeated production from natural terrain and farms; the fief readout separately shows distinct resource types for harvest scoring. Unassigned Trading Posts are marked. Building buttons open each player's public tray; parchment stacks reveal only your own cards until final scoring. Hovering, keyboard-focusing, or tapping a territory highlights its fief using actual lava and Sky Tower connectivity. Tapping pins the inspection while other hovered fiefs can be previewed.
+
+All 37 parchments have original vector pictograms shared across hands, inventory, and scoring. Treasure cards use numbered gold shields; gloves also show the paired value and left/right marker. Missions use resource tools, crowns, border/corner maps, Camp cards, treasure motifs, and directional copy arrows. The [picture guide](../review/parchments/index.html) pairs all illustrations with the supplied full card summaries.
+
+Turn playback uses the public recap and newly placed board buildings. Rabbits hop to claims, building cards enter trays, and anonymous card backs enter parchment stacks. Construction animates placement, including both Sky Tower endpoints and Camp priority. Phone playback brings off-screen territories into view and uses the visible player badge when the player's panel is off screen. The engine settles and autosaves before animation starts. Playback changes presentation only; input is paused until it finishes or is skipped. **Skip**, **Esc**, the saved **Animations** toggle, and device reduced-motion preferences support faster or motion-free play. Refreshing resumes the settled state without replaying effects.
+
 ## Rules still requiring a ruling
 
 The user-supplied catalog defines every card, but four corner-case groups remain unverified. The engine does not silently choose their answers:
@@ -54,6 +60,9 @@ The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed p
 | `src/bots.js` | Heuristic choices from each bot's permitted view |
 | `src/storage.js` | Save/load and basic save-integrity checks |
 | `src/app.js`, `src/scoring-ui.js`, `src/card-text.js` | Browser controls, board/card inspection, score review |
+| `src/kingdom-ui.js`, `src/interaction.css` | Production, public/private inventories, colored fief inspection |
+| `src/art.js`, `src/parchment-art.js` | Original terrain, pieces, resources, and parchment illustrations |
+| `src/turn-animation.js`, `src/turn-animation.css` | Public event timeline and cancellable visual playback |
 
 ## Validation
 
@@ -67,6 +76,8 @@ python3 -m playwright install chromium
 python3 tests/browser_smoke.py
 python3 tests/browser_controls.py
 python3 tests/browser_table.py
+python3 tests/browser_interactions.py
+python3 tests/browser_animations.py
 ```
 
 Keep the local server running while executing that script. It completes games at every player count through the actual controls, places human buildings and Camps, selects Trading Post resources and copy targets, verifies totals and card conservation, and checks refresh/resume and mobile overflow. Use `--screenshots /tmp/bunny-browser-checks` to capture review images. Explicit rulings selected by the test are test inputs, not assertions about the unresolved official rules.
@@ -74,5 +85,7 @@ Keep the local server running while executing that script. It completes games at
 The separate control checks exercise keyboard card selection, Play/Discard swaps, Sky Tower endpoint guidance, required Trading Post choices, and mobile board navigation and placement.
 
 The table checks cover every card position in overlapping hands, complete-text previews, territory highlights, desktop/laptop viewport fit, artwork coverage, and updating the fourth player's color in older saves. Pass `--screenshots /tmp/bunny-table-checks` to save layout images.
+
+Interaction checks cover repeated resource production, Trading Posts, luxury farms, lava/Sky fief highlighting, and inventory privacy. Animation checks use real motion to exercise all players, Provisions, hidden card backs, counter updates, input locking, skipping, refreshing mid-flight, saved preferences, building placement, mobile panning, and reduced motion. The other browser suites request reduced motion so long playthroughs need not wait for playback.
 
 The existing `build_map_review.py`, `build_card_review.py`, and `build_parchment_review.py` checks still validate the source catalogs and their exports separately from engine behavior.

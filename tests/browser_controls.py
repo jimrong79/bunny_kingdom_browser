@@ -201,7 +201,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+        page = browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         draft_controls(page, args.url)

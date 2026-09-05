@@ -20,11 +20,11 @@ def kingdom_controls(page):
     page.locator('[data-cell=B1]').hover()
     assert set(page.locator('.fief-highlight').evaluate_all('(els)=>els.map(e=>e.dataset.cell)')) == {'B1', 'J1'}
     assert '2 territories' in page.locator('#fief-readout').inner_text()
-    page.locator('[data-pile=parchments][data-pile-player="1"]').click()
+    page.locator('.pile-button[data-pile=parchments][data-pile-player="1"]').click()
     assert '1 face-down parchment' in page.locator('#inventory-dialog').inner_text()
     assert 'Royal Ring' not in page.locator('#inventory-dialog').inner_html()
     page.keyboard.press('Escape')
-    page.locator('[data-pile=parchments][data-pile-player="0"]').click()
+    page.locator('.pile-button[data-pile=parchments][data-pile-player="0"]').click()
     assert 'Royal Carrot' in page.locator('#inventory-dialog').inner_text()
     page.keyboard.press('Escape')
     scenario(page, 'construction', [{'id': 'farm_wood'}, {'id': 'trading_post'}, {'id': 'farm_diamond'}],

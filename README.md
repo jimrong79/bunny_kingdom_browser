@@ -8,6 +8,8 @@ From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open 
 
 Player panels show total production (including farms and assigned Trading Posts), public building trays, and parchment stacks. Hover, focus, or tap a territory to highlight its connected fief and see its harvest value. Each parchment has an original pictogram; use the [picture guide](review/parchments/index.html) to learn all 37. Gold shields identify treasures and their values.
 
+Confirmed picks animate every player's claims and card pickups; construction moves buildings from the tray onto the board. Select **Skip**, press **Esc**, or turn **Animations off** in the heading for faster play. Device reduced-motion settings are respected. Moves save before playback, so skipping or refreshing cannot repeat or lose an effect.
+
 Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, rule limitations, and browser checks](docs/implementation.md).
 
 ## Local workspace
