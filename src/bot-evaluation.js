@@ -1,5 +1,6 @@
 import {playerStats,basePoints} from './scoring.js';
 import {eligibleTerritories} from './construction.js';
+import {knownTerritories} from './bot-memory.js';
 
 // Search estimates are deliberately separate from the scoring engine and its unresolved rulings.
 export const harvestsLeft=view=>['parchments','finished'].includes(view.phase)?0:view.phase==='harvest'?4-view.round:5-view.round;
@@ -48,27 +49,47 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
   return value;
 }
 
-export function positionValue(view,playerId,{forecast=true}={}) {
-  const stats=playerStats(view,playerId),remaining=harvestsLeft(view);
+export function positionValue(view,playerId,{forecast=true,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)}={}) {
+  const remaining=harvestsLeft(view);
   const future=forecast?Math.max(0,remaining-1):0;
   let value=stats.groups.reduce((n,f)=>n+f.points*remaining,0);
   for(const f of stats.groups) {
     // Early strength and resource variety can find their missing counterpart through expansion.
     value+=future*(f.strength*Math.max(0,3-f.wealth)*.35+f.wealth*Math.min(3,Math.sqrt(f.coordinates.length))*.35);
   }
+  if(forecast&&picksLeft(view)>0)value+=frontierValue(view,stats,knowledge);
   value+=parchmentValue(view,playerId,Array.isArray(view.players[playerId].parchments)?view.players[playerId].parchments:[],stats,forecast);
   return value;
 }
 
-export function idleBuildingValue(view,playerId,card) {
+function frontierValue(view,stats,{unavailable,circulating}) {
+  const groups=stats.groups;
+  const indexes=new Map(groups.flatMap((f,i)=>f.coordinates.map(c=>[c,i])));
+  const blocked=new Set(view.blockedConnections.flatMap(e=>[e.from+':'+e.to,e.to+':'+e.from]));
+  const gains=[];
+  for(const c of Object.values(view.cells)) {
+    if(c.owner!==null||unavailable.has(c.coordinate))continue;
+    const adjacent=[c.row+(c.column-1),c.row+(c.column+1),String.fromCharCode(c.row.charCodeAt(0)-1)+c.column,String.fromCharCode(c.row.charCodeAt(0)+1)+c.column];
+    const neighbors=[...new Set(adjacent.filter(id=>indexes.has(id)&&!blocked.has(c.coordinate+':'+id)).map(id=>indexes.get(id)))].map(i=>groups[i]);
+    if(!neighbors.length)continue;
+    const resources=new Set(neighbors.flatMap(f=>f.resources));if(c.baseResource)resources.add(c.baseResource);
+    const strength=neighbors.reduce((n,f)=>n+f.strength,0)+(c.building?.strength||0);
+    const gain=strength*resources.size-neighbors.reduce((n,f)=>n+f.points,0);
+    gains.push(Math.max(0,gain)*(circulating.has(c.coordinate)?.18:.025));
+  }
+  return gains.sort((a,b)=>b-a).slice(0,6).reduce((n,v)=>n+v,0)*Math.min(2,picksLeft(view)*.12);
+}
+
+export function idleBuildingValue(view,playerId,card,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)) {
   const picks=picksLeft(view),remaining=harvestsLeft(view);
   if(!picks||!remaining)return 0;
-  const open=Object.values(view.cells).filter(c=>!c.building&&c.owner===null);
+  const {unavailable}=knowledge;
+  const open=Object.values(view.cells).filter(c=>!c.building&&c.owner===null&&!unavailable.has(c.coordinate));
   const suitable=open.filter(c=>!card.placement?.allowedTerrains||card.placement.allowedTerrains.includes(c.terrain));
   const legal=eligibleTerritories(view,playerId,card).length;
   const fraction=suitable.length/Math.max(1,open.length);
   const chance=legal?1:1-Math.exp(-picks*fraction*.65);
-  const groups=playerStats(view,playerId).groups;
+  const groups=stats.groups;
   const wealth=Math.max(2,...groups.map(f=>f.wealth)),strength=Math.max(2,...groups.map(f=>f.strength));
   let potential=0;
   if(card.category==='city')potential=card.effect.strength*wealth;
@@ -80,6 +101,6 @@ export function idleBuildingValue(view,playerId,card) {
   return potential*Math.max(.3,remaining-.7)*chance*.45/Math.sqrt(Math.max(1,waiting));
 }
 
-export function inventoryValue(view,playerId) {
-  return view.players[playerId].buildings.reduce((n,c)=>n+idleBuildingValue(view,playerId,c),0);
+export function inventoryValue(view,playerId,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)) {
+  return view.players[playerId].buildings.reduce((n,c)=>n+idleBuildingValue(view,playerId,c,stats,knowledge),0);
 }

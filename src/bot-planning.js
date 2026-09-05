@@ -1,6 +1,8 @@
 import {fiefs} from './fiefs.js';
 import {eligibleTerritories,placeBuilding} from './construction.js';
 import {forkPosition,positionValue,inventoryValue,picksLeft} from './bot-evaluation.js';
+import {playerStats} from './scoring.js';
+import {knownTerritories} from './bot-memory.js';
 const basics=['wood','fish','carrots'];
 
 function slotPressure(view,playerId,coordinate,cardId) {
@@ -46,7 +48,10 @@ export function applyBuilding(view,playerId,action) {
 }
 
 export function planBuildings(view,playerId,{depth=3,width=4,camps=false,inventory=true}={}) {
-  const evaluate=s=>positionValue(s,playerId)+(inventory?inventoryValue(s,playerId):0);
+  const evaluate=s=>{
+    const stats=playerStats(s,playerId),knowledge=knownTerritories(s,playerId);
+    return positionValue(s,playerId,{stats,knowledge})+(inventory?inventoryValue(s,playerId,stats,knowledge):0);
+  };
   const initial={view,actions:[],value:evaluate(view)};
   let beam=[initial],best=initial;
   for(let step=0;step<Math.min(depth,view.players[playerId].buildings.length);step++) {

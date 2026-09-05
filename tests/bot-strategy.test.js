@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {data} from './fixtures.js';
 import {createGame,publicView} from '../src/game.js';
 import {placeBuilding} from '../src/construction.js';
-import {cardValue,chooseBuilding,chooseMarkets,chooseCopies} from '../src/bots.js';
+import {cardValue,chooseDraft,chooseBuilding,chooseMarkets,chooseCopies} from '../src/bots.js';
 const card=id=>({...structuredClone([...data.buildings.cards,...data.parchments.cards].find(c=>c.id===id)),instanceId:id+'_test'});
 function position(coordinates,round=1) {
   const s=createGame(data,2,'strategy');s.round=round;s.draftTurn=round===4?6:1;
@@ -41,4 +41,25 @@ test('copying a glove values the increase to the existing glove too',()=>{
   s.players[0].parchments=[card('left_glove'),card('liberal')];
   s.players[2].parchments=[card('royal_carrot'),card('right_glove')];
   assert.equal(chooseCopies(publicView(s,0),0,{copies:{}}).liberal_test,'right_glove_test');
+});
+const territory=coordinate=>({category:'territory',coordinate,id:'territory_'+coordinate,instanceId:'territory_'+coordinate,name:coordinate});
+test('drafting evaluates two territories that only become powerful together',()=>{
+  const s=position(['A1','B1','A4','A5','A6'],4);s.draftTurn=5;
+  s.cells.A1.building={category:'city',strength:2};s.cells.A6.building={category:'city',strength:2};
+  s.cells.B1.building={category:'farm',farmType:'basic',resource:'carrots'};
+  s.players[0].hand=[territory('A2'),territory('A3'),card('royal_chalice'),card('royal_scepter')];
+  assert.deepEqual(new Set(chooseDraft(publicView(s,0),0).play),new Set(['territory_A2','territory_A3']));
+});
+test('drafting pairs a mountain territory with an otherwise unplaceable strength-3 city',()=>{
+  const s=position(['A1','A2','A3','A4','A5'],4);s.draftTurn=5;
+  s.cells.A2.building={category:'farm',farmType:'basic',resource:'carrots'};
+  s.players[0].hand=[territory('B1'),card('city_3'),card('royal_carrot'),card('royal_ring')];
+  assert.deepEqual(new Set(chooseDraft(publicView(s,0),0).play),new Set(['territory_B1','city_3_test']));
+});
+test('two-player discards deny a rival connection instead of discarding the second-best own card',()=>{
+  const s=position(['A1'],4);s.players.pop();s.draftTurn=9;
+  for(const coordinate of ['A4','A5','A6','B4','B5'])s.cells[coordinate].owner=1;
+  for(const coordinate of ['A6','B4','B5'])s.cells[coordinate].building={category:'city',strength:2};
+  s.players[0].hand=[card('royal_carrot'),card('royal_crown'),territory('A3')];
+  assert.deepEqual(chooseDraft(publicView(s,0),0),{play:['royal_carrot_test'],discard:['territory_A3']});
 });

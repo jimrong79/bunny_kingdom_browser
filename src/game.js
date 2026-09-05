@@ -1,3 +1,4 @@
+import {observeDraftHands} from './bot-memory.js';
 export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b'];
 export function requireRule(ok, message) { if (!ok) throw new Error(message); }
 export function randomSource(seed) {
@@ -41,7 +42,11 @@ export function beginRound(state) {
 export function publicView(state, playerId) {
   const view = structuredClone(state);
   view.deck = { count: state.deck.length };
-  view.players = view.players.map(p => p.id === playerId ? { ...p, reserve: { count: p.reserve.length } } : { ...p, hand: { count: p.hand.length }, reserve: { count: p.reserve.length }, parchments: ['parchments','finished'].includes(state.phase) ? p.parchments : { count: p.parchments.length }, discarded: { count: p.discarded.length } });
+  view.players = view.players.map(p => {
+    if(p.id===playerId)return {...p,reserve:{count:p.reserve.length}};
+    const {draftMemory,...visible}=p;
+    return {...visible,hand:{count:p.hand.length},reserve:{count:p.reserve.length},parchments:['parchments','finished'].includes(state.phase)?p.parchments:{count:p.parchments.length},discarded:{count:p.discarded.length}};
+  });
   return view;
 }
 
@@ -79,6 +84,7 @@ export function resolveDraft(state, selections) {
     const ids = [...pick.play, ...pick.discard];
     requireRule(new Set(ids).size === ids.length && ids.every(id => p.hand.some(c => c.instanceId === id)), 'Select distinct cards from your own hand.');
   }
+  observeDraftHands(state);
   const plays = state.players.map(p => {
     const pick = selections[p.id], cards = pick.play.map(id => p.hand.find(c => c.instanceId === id));
     p.discarded.push(...p.hand.filter(c => pick.discard.includes(c.instanceId)));

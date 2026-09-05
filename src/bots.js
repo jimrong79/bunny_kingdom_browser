@@ -24,8 +24,28 @@ export function cardValue(view,playerId,card,base=projectedValue(view,playerId))
 }
 export function chooseDraft(view,playerId) {
   const base=projectedValue(view,playerId);
-  const cards=view.players[playerId].hand.map(card=>({card,value:cardValue(view,playerId,card,base)})).sort((a,b)=>b.value-a.value||a.card.instanceId.localeCompare(b.card.instanceId));
-  return {play:cards.slice(0,view.players.length===2?1:2).map(c=>c.card.instanceId),discard:view.players.length===2?[cards[1].card.instanceId]:[]};
+  const cards=[...view.players[playerId].hand].sort((a,b)=>a.instanceId.localeCompare(b.instanceId));
+  const next=(playerId+(view.round%2?1:-1)+view.players.length)%view.players.length;
+  // Judge the recipient's opportunities from public land/buildings, without their secret objectives.
+  const rival=forkPosition(view,next),rivalBase=projectedValue(rival,next);
+  const threats=new Map(cards.map(c=>[c.instanceId,Math.max(0,cardValue(rival,next,c,rivalBase))]));
+  const ownValues=view.players.length===2?new Map(cards.map(c=>[c.instanceId,cardValue(view,playerId,c,base)])):null;
+  let best=null,bestValue=-Infinity;
+  for(let i=0;i<cards.length;i++)for(let j=i+1;j<cards.length;j++) {
+    const remaining=cards.filter((_,k)=>k!==i&&k!==j).map(c=>threats.get(c.instanceId)).sort((a,b)=>b-a);
+    if(view.players.length===2) {
+      for(const [play,discard] of [[cards[i],cards[j]],[cards[j],cards[i]]]) {
+        const value=ownValues.get(play.instanceId)-.65*(remaining[0]||0);
+        if(value>bestValue){bestValue=value;best={play:[play.instanceId],discard:[discard.instanceId]};}
+      }
+    } else {
+      const pair=[cards[i],cards[j]],trial=draftPosition(view,playerId,pair);
+      const value=projectedValue(trial,playerId)-base+pair.filter(c=>c.category==='provisions').length*provisionsValue(view)
+        -.12*((remaining[0]||0)+(remaining[1]||0));
+      if(value>bestValue){bestValue=value;best={play:pair.map(c=>c.instanceId),discard:[]};}
+    }
+  }
+  return best;
 }
 
 export function chooseBuilding(view,playerId) {
