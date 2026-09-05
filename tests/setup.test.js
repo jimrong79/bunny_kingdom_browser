@@ -1,8 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { data } from './fixtures.js';
 import { createGame, makeDeck, publicView } from '../src/game.js';
-export const data = Object.fromEntries([['map','maps/original-board'],['buildings','cards/base-buildings-and-provisions'],['parchments','cards/base-parchments']].map(([key,path])=>[key,JSON.parse(readFileSync(new URL(`../data/${path}.json`,import.meta.url)))]));
 test('complete deck and reproducible player-count-specific deals', () => {
   assert.equal(makeDeck(data).length,182);
   for(const bots of [1,2,3]) {

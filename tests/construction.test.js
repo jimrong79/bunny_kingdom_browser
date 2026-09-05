@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { data } from './setup.test.js';
+import { data } from './fixtures.js';
 import { createGame } from '../src/game.js';
 import { fiefs, resourcesAt } from '../src/fiefs.js';
 import { placeBuilding } from '../src/construction.js';

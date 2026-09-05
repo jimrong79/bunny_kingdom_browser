@@ -1,8 +1,9 @@
 import { createGame, publicView, resolveDraft } from './game.js';
-import { chooseDraft, chooseBuilding, chooseCamp } from './bots.js';
+import { chooseDraft, chooseBuilding, chooseCamp, chooseMarkets } from './bots.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
 import { fiefs } from './fiefs.js';
 import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
+import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './harvest.js';
 const app = document.querySelector('#app');
 let data, state, selected = [], buildingId = null, targets = [], error = "";
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -51,7 +52,9 @@ function constructionPanel() {
     const current=state.campQueue[0];
     return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2><p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
   }
-  if (state.phase === 'markets') return '<h2>Trading Posts</h2><p>All players have finished building. Trading Post selection and harvest follow next.</p>';
+  if(state.phase==='markets') return `<h2>Choose your Trading Posts</h2><p class="help">Each Trading Post produces one basic resource this round. Round 4 choices also apply to parchment scoring.</p>${tradingPosts(state,0).map(c=>`<label>${c.coordinate}<select data-market="${c.coordinate}"><option value="">Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${r}</option>`).join('')}</select></label>`).join('') || '<p>You have no Trading Posts to assign.</p>'}<div class="actions"><button id="confirm-markets" class="primary">Confirm & harvest</button></div>`;
+  if(state.phase==='harvest') return `<h2>Round ${state.round} harvest</h2><table class="table"><thead><tr><th>Player</th><th>Harvest</th><th>Total</th></tr></thead><tbody>${state.lastHarvest.map(h=>`<tr><td>${state.players[h.playerId].name}</td><td>+${h.points}</td><td>${state.players[h.playerId].score}</td></tr>`).join('')}</tbody></table>${state.lastHarvest.map(h=>`<details class="fief-list"><summary>${state.players[h.playerId].name}: fief breakdown</summary>${h.fiefs.map(f=>`<p>${f.coordinates.join(', ')}: ${f.strength} strength × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`).join('')}<div class="actions"><button id="next-round" class="primary">${state.round===4?'Reveal parchments':'Begin round '+(state.round+1)} →</button></div>`;
+  if(state.phase==='parchments') return `<h2>Four rounds complete</h2><p>All parchments are revealed. Final scoring and copy choices follow next.</p>${state.players.map(p=>`<h3>${p.name}</h3><p>${p.parchments.map(c=>escape(c.name)).join(', ')||'No parchments'}</p>`).join('')}`;
   const available = state.players[0].buildings;
   return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p><div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.category}</span><h3>${escape(c.name)}</h3><p>${c.placement.allowedTerrains?.join(', ') || 'Any terrain'}${c.category==='camp'?' · Announce priority '+c.effect.priority:''}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${targets.length ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building">Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
@@ -63,11 +66,14 @@ function driveBots() {
     respondCamp(state,next.playerId,chooseCamp(publicView(state,next.playerId),next.playerId,next.cardId));
   }
   buildingId=null;targets=[];
-  if (state.phase !== 'construction') return;
-  for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
+  if (state.phase === 'construction') for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
     let action;
     while ((action=chooseBuilding(publicView(state,p.id),p.id))) placeBuilding(state,p.id,action.cardId,action.coordinates);
     finishConstruction(state,p.id);
+  }
+  if(state.phase==='markets') for(const p of state.players.filter(p=>p.bot&&!p.ready)) {
+    for(const c of chooseMarkets(publicView(state,p.id),p.id)) chooseResource(state,p.id,c.coordinate,c.resource);
+    finishMarkets(state,p.id);
   }
 }
 function bindConstruction() {
@@ -82,6 +88,9 @@ function bindConstruction() {
   });
   const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
   bind('place-building',()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}});
+  document.querySelectorAll('[data-market]').forEach(select=>select.onchange=()=>attempt(()=>chooseResource(state,0,select.dataset.market,select.value)));
+  bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
+  bind('next-round',()=>{advanceRound(state);selected=[];buildingId=null;targets=[];});
   bind('save-camp',()=>{respondCamp(state,0);driveBots();});
   bind('cancel-building',()=>{buildingId=null;targets=[];});
   bind('finish-building',()=>{finishConstruction(state,0);buildingId=null;targets=[];driveBots();});

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, publicView, resolveDraft, playCard } from '../src/game.js';
 import { chooseDraft } from '../src/bots.js';
-import { data } from './setup.test.js';
+import { data } from './fixtures.js';
 test('complete exploration for every player count and keep private information private',()=>{
  for(const bots of [1,2,3]) {
   const s=createGame(data,bots,123);let turns=0;

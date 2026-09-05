@@ -41,7 +41,7 @@ export function beginRound(state) {
 export function publicView(state, playerId) {
   const view = structuredClone(state);
   view.deck = { count: state.deck.length };
-  view.players = view.players.map(p => p.id === playerId ? { ...p, reserve: { count: p.reserve.length } } : { ...p, hand: { count: p.hand.length }, reserve: { count: p.reserve.length }, parchments: { count: p.parchments.length }, discarded: { count: p.discarded.length } });
+  view.players = view.players.map(p => p.id === playerId ? { ...p, reserve: { count: p.reserve.length } } : { ...p, hand: { count: p.hand.length }, reserve: { count: p.reserve.length }, parchments: ['parchments','finished'].includes(state.phase) ? p.parchments : { count: p.parchments.length }, discarded: { count: p.discarded.length } });
   return view;
 }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { data } from './setup.test.js';
+import { data } from './fixtures.js';
 import { createGame, playCard } from '../src/game.js';
 import { beginCampOffers, requestCamp, respondCamp } from '../src/camps.js';
 function give(s,pid,n){const c=structuredClone(data.buildings.cards.find(c=>c.id===`camp_${n}`));c.instanceId=c.id;s.players[pid].buildings.push(c);return c.instanceId;}

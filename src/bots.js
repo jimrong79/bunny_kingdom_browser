@@ -58,3 +58,26 @@ export function chooseCamp(view, playerId, cardId) {
   }
   return best;
 }
+
+import { BASIC_RESOURCES, tradingPosts } from './harvest.js';
+import { resourcesAt } from './fiefs.js';
+export function chooseMarkets(view, playerId) {
+  const posts=tradingPosts(view,playerId);
+  let best=[],bestValue=-Infinity;
+  function visit(index, choices) {
+    if(index<posts.length) {for(const resource of BASIC_RESOURCES) visit(index+1,[...choices,{coordinate:posts[index].coordinate,resource}]);return;}
+    const trial=structuredClone(view);
+    for(const c of choices) trial.cells[c.coordinate].building.choice=c.resource;
+    let value=positionValue(trial,playerId);
+    if(view.round===4) {
+      const production=Object.values(trial.cells).filter(c=>c.owner===playerId).flatMap(resourcesAt);
+      for(const card of trial.players[playerId].parchments) {
+        const s=card.scoringSpec,n=production.filter(r=>r===s.resource).length;
+        if(s.type==='points_per_resource') value+=n*s.pointsPerUnit;
+        if(s.type==='resource_threshold'&&n>=s.minimum) value+=s.points;
+      }
+    }
+    if(value>bestValue) {bestValue=value;best=choices;}
+  }
+  visit(0,[]);return best;
+}
