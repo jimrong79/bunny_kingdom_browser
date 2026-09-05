@@ -18,6 +18,8 @@ Draft controls show both selected cards; two-player games offer a Play/Discard s
 
 The table places an illustrated, overlapping hand below the board. Hover or keyboard focus lifts a card and shows its full text above the hand; territory previews highlight their coordinates. Short laptop screens use compact card faces so the board and hand remain visible together. Phones use a horizontally scrolling hand. The layout was informed by [IELLO's public BGA screenshots](https://iello.fr/bunny-kingdom-sur-board-game-arena/); the vector terrain, rabbits, and building pieces are original code in `src/art.js`. Cities show strength, Camps show priority, and Sky Towers show their pair number. Luxury farms have gold rims. Bot 3 uses green, including when older saves are resumed.
 
+The hand groups territories on the left, buildings and Provisions in the middle, and parchments on the right. Territories sort by row A–J and then column 1–10; other categories group together and sort naturally by name. Sorting applies to the display copy, so selections keep their Play/Discard roles when the hand is redrawn.
+
 ## Rules still requiring a ruling
 
 The user-supplied catalog defines every card, but four corner-case groups remain unverified. The engine does not silently choose their answers:
