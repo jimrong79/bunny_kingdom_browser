@@ -2,9 +2,11 @@
 export function cardValue(view, playerId, card) {
   const own = Object.values(view.cells).filter(c => c.owner === playerId);
   if (card.category === 'territory') {
-    const cell = view.cells[card.coordinate];
-    const neighbors = own.filter(c => Math.abs(c.row.charCodeAt(0) - cell.row.charCodeAt(0)) + Math.abs(c.column - cell.column) === 1).length;
-    return 4 + neighbors * 3 + (cell.baseResource ? 3 : 0) + (cell.building?.category === 'city' ? cell.building.strength * 3 : 0) + (cell.owner === playerId ? -6 : 0);
+    const cell=view.cells[card.coordinate],trial=structuredClone(view);
+    trial.cells[card.coordinate].owner=playerId;
+    if(trial.cells[card.coordinate].building?.category==='camp')trial.cells[card.coordinate].building=null;
+    const gain=positionValue(trial,playerId)-positionValue(view,playerId);
+    return 2+gain+(cell.owner===playerId?0.5:0)+(cell.owner!==null&&cell.owner!==playerId?2:0);
   }
   if (card.category === 'provisions') return 12;
   if (card.category === 'city') return own.length ? card.effect.strength * 3 + 2 : 3;
@@ -13,7 +15,9 @@ export function cardValue(view, playerId, card) {
   if (card.category === 'sky_tower') return own.length > 3 ? 7 : 2;
   if (card.category === 'parchment') {
     const s = card.scoringSpec;
+    const estimated=basePoints(card,playerStats(view,playerId),[...view.players[playerId].parchments,card]);
     if (s.type === 'fixed_points') return s.points;
+    if(estimated!==null&&estimated>0)return estimated+(5-view.round)*0.7;
     if (s.resource) return 2 + own.filter(c => c.baseResource === s.resource).length * (s.pointsPerUnit || 2);
     if (s.type === 'copy_parchment') return 6;
     return 4 + view.round;
@@ -28,10 +32,16 @@ export function chooseDraft(view, playerId) {
 import { fiefs } from './fiefs.js';
 import { eligibleTerritories, placeBuilding } from './construction.js';
 export function positionValue(view, playerId) {
-  return fiefs(view,playerId).reduce((sum,f) => sum + f.points * (5-view.round) + f.wealth * 1.5 + f.strength + f.coordinates.length * 0.15, 0);
+  const groups=fiefs(view,playerId), player=view.players[playerId];
+  let value=groups.reduce((sum,f)=>sum+f.points*(5-view.round)+f.wealth*1.5+f.strength+f.coordinates.length*0.15,0);
+  if(Array.isArray(player.parchments)&&player.parchments.length) {
+    const stats=playerStats(view,playerId);
+    for(const card of player.parchments)value+=basePoints(card,stats,player.parchments)||0;
+  }
+  return value;
 }
 export function chooseBuilding(view, playerId) {
-  let best = null, bestValue = -Infinity;
+  let best = null, bestValue = positionValue(view,playerId) + 0.01;
   for (const card of view.players[playerId].buildings.filter(c=>c.category!=='camp')) {
     const eligible = eligibleTerritories(view,playerId,card);
     const groups = fiefs(view,playerId);
@@ -89,7 +99,8 @@ export function chooseCopies(view, playerId, decisions) {
     const options=copyOptions(view,playerId,copy).cards.filter(c=>!isCopy(c));
     let best=null,bestValue=-Infinity;
     for(const target of options) {
-      const effective=player.parchments.map(c=>c.instanceId===copy.instanceId?target:c);
+      const all=view.players.flatMap(p=>Array.isArray(p.parchments)?p.parchments:[]);
+      const effective=player.parchments.map(c=>c.instanceId===copy.instanceId?target:all.find(t=>t.instanceId===(result[c.instanceId]||decisions.copies[c.instanceId]))||c);
       let value=basePoints(target,stats,effective) ?? 5;
       if(target.scoringSpec.type==='multiply_treasure_values') {
         const already=effective.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length>1;
