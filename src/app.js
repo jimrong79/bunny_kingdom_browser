@@ -1,4 +1,4 @@
-import { createGame, publicView, resolveDraft } from './game.js';
+import { COLORS, createGame, publicView, resolveDraft } from './game.js';
 import { chooseDraft, chooseBuilding, chooseCamp, chooseMarkets, chooseCopies } from './bots.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
 import { fiefs } from './fiefs.js';
@@ -26,6 +26,7 @@ function setup() {
 }
 function resume(saved) {
   state=saved.game;const ui=saved.ui||{};
+  for(const player of state.players)player.color=COLORS[player.id];
   boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
   selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,2);
   buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)?ui.buildingId:null;

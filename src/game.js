@@ -1,4 +1,4 @@
-export const COLORS = ['#c84164', '#3978a8', '#a37514', '#655bb5'];
+export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b'];
 export function requireRule(ok, message) { if (!ok) throw new Error(message); }
 export function randomSource(seed) {
   let value = 2166136261;
