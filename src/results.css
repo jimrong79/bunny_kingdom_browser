@@ -1,0 +1,60 @@
+.at-results{max-width:1160px;padding-top:24px;padding-bottom:40px}
+.results-screen{padding:22px 32px 28px;border:1px solid #3e6550;border-radius:22px;background:radial-gradient(ellipse at 50% 0,#4b6946,transparent 65%),#244637;color:#fff8df;box-shadow:0 14px 44px #1c38262b}
+.results-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.results-toolbar .eyebrow{color:#e5cb88;font-size:10px;letter-spacing:2px}
+.results-toolbar .quiet,.results-actions .quiet{color:#fff3cc;border-color:#94a17b;font:13px system-ui}
+.results-intro{text-align:center;margin:4px 0 30px}
+.results-crown{width:72px;height:54px;margin:0 auto 8px}
+.results-crown svg{width:100%;height:100%}
+.results-intro h1{font-size:clamp(32px,5vw,52px);margin:0 0 10px;color:#fff3cc}
+.results-intro p{font:14px/1.5 system-ui;color:#d9e0c5;margin:0}
+.final-standings{display:grid;grid-template-columns:repeat(var(--players),minmax(0,1fr));gap:16px;list-style:none;padding:0;margin:0 auto;max-width:calc(var(--players) * 260px)}
+.result-player{position:relative;min-width:0;padding:14px 16px 0;border:2px solid #e0e1c9;border-radius:15px;background:#f8f6e9;color:#2e4b3a;text-align:center;box-shadow:0 5px 15px #11271a33}
+.result-winner{border-color:#e9bf54;background:linear-gradient(160deg,#fff9dd,#f3e5af);box-shadow:0 0 0 3px #dcb65725,0 6px 20px #11271a44}
+.result-rank{display:flex;justify-content:space-between;align-items:center;gap:4px;min-height:28px;font:600 12px system-ui;color:#747a61}
+.winner-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:5px;background:#e8bd59;color:#493919;white-space:nowrap;font:700 11px system-ui}
+.winner-badge svg{width:20px;height:16px}
+.result-rabbit{position:relative;width:128px;max-width:100%;height:130px;margin:14px auto 4px;color:var(--player);isolation:isolate}
+.result-rabbit:before{content:"";position:absolute;inset:22% 5% 4%;border-radius:50%;background:var(--player);opacity:.1;z-index:-1}
+.result-rabbit svg{width:100%;height:100%;filter:drop-shadow(0 4px 2px #19392425)}
+.result-player h2{margin:0 0 6px;font-size:23px}
+.result-score{font:700 52px/1.1 Georgia;font-variant-numeric:tabular-nums}
+.result-points-label{font:12px system-ui;color:#68735b}
+.result-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px -16px 0;padding:13px 8px;border-top:1px solid #bbc6a44d;background:#ffffff33;border-radius:0 0 12px 12px;font:11px system-ui}
+.result-breakdown dd{margin:4px 0 0;font-size:16px;font-weight:700}
+.result-breakdown dt{color:#627255}
+.results-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:28px 0 12px}
+.results-actions .primary{background:#ebc46c;color:#304735;min-width:170px}
+.results-actions .quiet{min-width:150px}
+.results-save{text-align:center;color:#cad6b9;font:11px/1.5 system-ui;overflow-wrap:anywhere;margin:0}
+.results-details{margin-top:24px;background:#fffaf0;border:1px solid #d3d8bd;border-radius:10px;color:#2e4b3a}
+.results-details>summary{padding:16px 18px;cursor:pointer;font:600 14px system-ui}
+.results-details>div{padding:0 18px 20px;max-width:780px;margin:auto}
+.results-details .fief-list{margin-top:14px}
+.results-details .table{font-size:13px}
+@media(max-width:760px){
+  .at-results{padding:16px 12px 28px}
+  .results-screen{padding:16px 16px 20px}
+  .final-standings{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:520px}
+  .result-player{padding:10px 10px 0}
+  .result-breakdown{margin-left:-10px;margin-right:-10px}
+}
+@media(max-width:420px){
+  .results-screen{padding:12px 10px 18px;border-radius:16px}
+  .results-toolbar .eyebrow{font-size:9px;letter-spacing:1px}
+  .results-toolbar .quiet{padding:8px;font-size:11px}
+  .results-intro{margin:12px 0 22px}
+  .results-intro p{font-size:12px}
+  .final-standings{gap:10px}
+  .result-rank{font-size:10px;flex-wrap:wrap;align-content:flex-start;min-height:44px}
+  .winner-badge{font-size:10px;padding:4px}
+  .result-rabbit{height:102px;margin:2px auto 4px}
+  .result-player h2{font-size:20px}
+  .result-score{font-size:42px}
+  .result-breakdown{font-size:10px;gap:4px;padding:10px 4px}
+  .results-actions{gap:8px;margin-top:22px}
+  .results-actions .primary,.results-actions .quiet{min-width:0;flex:1;padding:12px 8px}
+  .results-details>div{padding:0 10px 14px}
+  .results-details .table{font-size:11px}
+  .results-details .table td,.results-details .table th{padding:6px 4px}
+}

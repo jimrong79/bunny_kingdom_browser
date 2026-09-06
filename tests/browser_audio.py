@@ -95,7 +95,7 @@ def audio_controls(page):
     assert page.evaluate('audioProbe.starts') == starts
     page.evaluate("delete document.hidden; document.dispatchEvent(new Event('visibilitychange'))")
     page.locator('[data-sound-toggle]').click()
-    page.locator('#new-game').click()
+    page.locator('#play-again').click()
     assert page.locator('[data-sound-toggle]').get_attribute('aria-pressed') == 'false'
     assert page.evaluate('audioProbe.peak') < .2
     print('Native output, silent load/resume, saved mute, mute during playback, skip, reduced motion, scoring, and hidden-tab silence passed.', flush=True)

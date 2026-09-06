@@ -7,6 +7,7 @@ import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
 import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './harvest.js';
 import { finalizeScoring } from './scoring.js';
 import { scoringPanel } from './scoring-ui.js';
+import { resultsScreen } from './results-ui.js';
 import { cardText, buildingText, resourceNames } from './card-text.js';
 import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { sortedHand } from './hand-order.js';
@@ -20,6 +21,7 @@ app.addEventListener('pointerdown',()=>soundEffects.unlock());
 app.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key))soundEffects.unlock();});
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
+let reviewingFinalBoard=false;
 const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
 const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===2;
 let boardZoom=matchMedia('(max-width:600px)').matches;
@@ -32,7 +34,8 @@ try {
 } catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
 function setup() {
   soundEffects.stop();
-  app.classList.remove('at-table');
+  reviewingFinalBoard=false;
+  app.classList.remove('at-table','at-results');
   const saved=loadGame();
   app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
   document.querySelector('#setup').insertAdjacentHTML('beforebegin',soundToggleHTML());bindSoundToggles();
@@ -40,6 +43,7 @@ function setup() {
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
 }
 function resume(saved) {
+  reviewingFinalBoard=false;
   state=saved.game;const ui=saved.ui||{};
   for(const player of state.players)player.color=COLORS[player.id];
   animationsEnabled=ui.animationsEnabled??true;
@@ -124,11 +128,12 @@ function render() {
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
   const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled});
+  if(state.phase==='finished'&&!reviewingFinalBoard){renderResults(saved);return;}
   const handScroll=document.querySelector('.hand')?.scrollLeft||0;
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
   const recap=document.querySelector('.last-turn-panel');
   const recapScroll=recap?.dataset.turn===(state.lastTurn?state.lastTurn.round+'-'+state.lastTurn.pick:'none')?recap.scrollTop:0;
-  app.classList.add('at-table');
+  app.classList.remove('at-results');app.classList.add('at-table');
   app.innerHTML = `
     <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><div class="heading-actions"><button id="toggle-animation" class="quiet" aria-pressed="${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches}" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'disabled title="Your device requests reduced motion"':''}>Animations: ${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'on':'off'}</button><button id="new-game" class="quiet">New game</button></div></div>
     <div class="game-layout table-layout" data-phase="${state.phase}">
@@ -138,6 +143,10 @@ function render() {
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
     <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · ${state.botDifficulty==='easy'?'Easy':'Normal'} bots · Seed ${escape(state.seed)}</p>`;
   document.querySelector('.heading-actions').insertAdjacentHTML('afterbegin',soundToggleHTML());bindSoundToggles();
+  if(state.phase==='finished') {
+    document.querySelector('.heading-actions').insertAdjacentHTML('afterbegin','<button id="show-results" class="quiet">Results</button>');
+    document.querySelector('#show-results').onclick=()=>{reviewingFinalBoard=false;render();};
+  }
   const hand=document.querySelector('.hand');if(hand)hand.scrollLeft=handScroll;
   document.querySelector('.table-sidebar').scrollTop=sideScroll;
   document.querySelector('.last-turn-panel').scrollTop=recapScroll;
@@ -183,6 +192,18 @@ function render() {
   const clear=document.querySelector('#clear-draft');
   if(clear)clear.onclick=()=>{selected=[];render();soundEffects.play('deselect');};
   if(focus)document.querySelector(focus)?.focus({preventScroll:true});
+}
+
+function renderResults(saved) {
+  app.classList.remove('at-table');app.classList.add('at-results');
+  app.innerHTML=resultsScreen(state,saved);
+  bindSoundToggles();
+  document.querySelector('#play-again').onclick=setup;
+  document.querySelector('#review-board').onclick=()=>{
+    reviewingFinalBoard=true;render();
+    document.querySelector('#map-panel').focus({preventScroll:true});window.scrollTo(0,0);
+  };
+  document.querySelector('#results-title').focus({preventScroll:true});window.scrollTo(0,0);
 }
 
 function constructionPanel() {

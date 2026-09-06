@@ -140,9 +140,13 @@ def game(browser, bots, screenshots):
     page.locator('#finish-scoring').click()
     state = snapshot(page)
     assert state['phase'] == 'finished' and state['winners']
+    assert page.locator('.results-screen').is_visible()
+    assert page.locator('[data-result-player]').count() == bots + 1
+    assert set(page.locator('.result-winner').evaluate_all('(els)=>els.map(e=>Number(e.dataset.resultPlayer))')) == set(state['winners'])
     for p in state['players']:
         scored = state['finalScoring']['players'][p['id']]
         assert p['score'] == sum(h['points'] for h in p['harvests']) + sum(r['points'] for r in scored['rows'])
+        assert page.locator(f'[data-result-player="{p["id"]}"] .result-score').inner_text() == str(p['score'])
     all_cards = state['deck'] + [c for p in state['players'] for key in ('hand', 'reserve', 'played', 'parchments', 'discarded') for c in p[key]]
     assert len(all_cards) == len({c['instanceId'] for c in all_cards}) == 182
     page.reload()

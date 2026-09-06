@@ -14,6 +14,8 @@ Confirmed picks animate every player's claims and card pickups; construction mov
 
 Quiet sound effects accompany card selection, rabbit claims, building placement, and scoring. Use **Sound on/off** on the start screen, in the heading, or during animation playback; the preference stays saved across games. With animations off, each move gets a single short cue. Effects are synthesized locally, start after interaction, and fall silent when the tab is hidden.
 
+Confirming the final score opens a results screen with each player's colored rabbit, ranked point total, and harvest/parchment breakdown. Gold badges mark winners, including ties. Review the board or full scoring details, or select **Play again**. Reopening a completed save returns to the results screen.
+
 Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, rule limitations, and browser checks](docs/implementation.md).
 
 ## Local workspace

@@ -74,6 +74,7 @@ The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed p
 | `src/art.js`, `src/parchment-art.js` | Original terrain, pieces, resources, and parchment illustrations |
 | `src/turn-animation.js`, `src/turn-animation.css` | Public event timeline and cancellable visual playback |
 | `src/sound.js` | Synthesized effects, saved sound preference, and audio lifecycle |
+| `src/results-ui.js`, `src/results.css` | Final standings, winner badges, and results presentation |
 
 ## Validation
 
@@ -90,6 +91,7 @@ python3 tests/browser_table.py
 python3 tests/browser_interactions.py
 python3 tests/browser_animations.py
 python3 tests/browser_audio.py
+python3 tests/browser_results.py
 python3 tests/browser_bot_difficulty.py
 ```
 
@@ -102,6 +104,8 @@ The table checks cover every card position in overlapping hands, complete-text p
 Interaction checks cover repeated resource production, Trading Posts, luxury farms, lava/Sky fief highlighting, and inventory privacy. Animation checks use real motion to exercise all players, Provisions, hidden card backs, counter updates, input locking, skipping, refreshing mid-flight, saved preferences, building placement, mobile panning, and reduced motion. The other browser suites request reduced motion so long playthroughs need not wait for playback.
 
 Audio checks measure native Web Audio output and verify silent loading/resuming, persistent mute, muting during animation, skip cancellation, reduced-motion feedback, scoring cues, hidden-tab silence, and continued play when Web Audio is unavailable.
+
+Results checks cover ranked totals, player colors, tied winners, score details, board review, saved results, mobile layout, and starting another game. Full browser games also verify that the results screen agrees with final scoring at every player count.
 
 Bot checks exercise paired connections, mountain/city combinations, constrained building slots, final Trading Post tradeoffs, glove-copy interactions, opponent-aware discards, private observations, and invariance to hidden cards or the game seed. The difficulty browser check verifies both policies' actual decisions, saved settings, old-save compatibility, and mobile setup.
 
