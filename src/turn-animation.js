@@ -76,6 +76,8 @@ export async function playAnimation(before,state,events) {
         const production=productionCounts(virtual,player.id);
         for(const el of panel.querySelectorAll('[data-production] b'))el.textContent=production.counts[el.parentElement.dataset.production];
         panel.querySelector('[data-player-stats]').textContent=`${production.territories} territories · ${fiefs(virtual,player.id).length} fiefs`;
+        panel.querySelector('[data-city-count]').textContent=production.cities;
+        panel.querySelector('[data-city-strength]').textContent=production.cityStrength;
         for(const pile of ['buildings','parchments'])panel.querySelector(`[data-pile="${pile}"] [data-pile-count]`).textContent=counts[player.id][pile];
       }
     };

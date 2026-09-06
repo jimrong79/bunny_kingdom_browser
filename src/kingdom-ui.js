@@ -8,7 +8,8 @@ export function productionCounts(state,playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId);
   const counts=Object.fromEntries(Object.keys(resourceNames).map(r=>[r,0]));
   for(const resource of cells.flatMap(resourcesAt))counts[resource]++;
-  return {counts,territories:cells.length,pending:cells.filter(c=>c.building?.farmType==='trading_post'&&!c.building.choice).length};
+  const cities=cells.filter(c=>c.building?.category==='city');
+  return {counts,territories:cells.length,cities:cities.length,cityStrength:cities.reduce((sum,c)=>sum+c.building.strength,0),pending:cells.filter(c=>c.building?.farmType==='trading_post'&&!c.building.choice).length};
 }
 
 export function cardBackArt() {
@@ -17,9 +18,9 @@ export function cardBackArt() {
 
 export function playerPanels(state) {
   return `<div class="players">${state.players.map(p=>{
-    const {counts,territories,pending}=productionCounts(state,p.id);
+    const {counts,territories,cities,cityStrength,pending}=productionCounts(state,p.id);
     const resources=Object.keys(resourceNames).filter(r=>['carrots','fish','wood'].includes(r)||counts[r]);
-    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
+    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="city-summary" title="Controlled cities only, including starting cities. Strength is the total number of towers; Camps and Sky Towers are excluded.">${pieceArt({category:'city',strength:1})}<span><b data-city-count>${cities}</b> cities · <b data-city-strength>${cityStrength}</b> strength</span></div><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
   }).join('')}</div>`;
 }
 
