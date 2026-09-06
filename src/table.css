@@ -1,4 +1,5 @@
 /* Table composition: the board is central, with a physical hand below it. */
+.draft-route{font:12px/1.6 system-ui;margin:8px 0 12px;overflow-wrap:anywhere}.pass-player{display:inline-flex;align-items:center;gap:5px;max-width:100%;vertical-align:bottom}.pass-player i{width:9px;height:9px;flex-shrink:0;border-radius:50%;background:var(--player);box-shadow:0 0 0 1px #30463833}.pass-player b{font-weight:700;color:#344d3c;overflow-wrap:anywhere}.hand-heading .pass-player b{font-weight:700;color:#344d3c}
 body:has(.at-table){background:radial-gradient(ellipse at 15% 35%,#c5dad0 0,transparent 55%),linear-gradient(130deg,#e9efdb,#dce9e4 60%,#c9dcdf)}
 body:has(.at-table)>header{padding:12px 3vw;background:#fffaf0bb;border-color:#c6d2ba}.at-table{max-width:1640px;padding:12px 24px 20px}
 .at-table .game-heading{justify-content:start;gap:14px;margin-bottom:12px}.round-token{width:46px;height:54px;flex-shrink:0;border:2px solid #b7974f;border-radius:8px 8px 45% 45%;background:#faf0cf;box-shadow:inset 0 0 0 3px #fff8e0;text-align:center;font:700 25px/1.3 Georgia;padding-top:3px}.round-token small{display:block;font:700 10px system-ui;color:#8c794e}

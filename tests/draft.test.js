@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, publicView, resolveDraft, playCard } from '../src/game.js';
+import { createGame, publicView, resolveDraft, playCard, draftRecipient } from '../src/game.js';
 import { chooseDraft } from '../src/bots.js';
 import { data } from './fixtures.js';
 test('complete exploration for every player count and keep private information private',()=>{
@@ -31,12 +31,15 @@ test('Provisions chains and does not place buildings early; territory overrides 
 });
 
 test('hands pass left in odd rounds and right in even rounds',()=>{
- for(const round of [1,2,3,4]) {
-  const s=createGame(data,3,'passing');s.round=round;
+ for(const bots of [1,2,3])for(const round of [1,2,3,4]) {
+  const s=createGame(data,bots,'passing');s.round=round;
   const remaining=s.players.map(p=>p.hand.slice(2).map(c=>c.instanceId));
-  const picks=s.players.map(p=>({play:p.hand.slice(0,2).map(c=>c.instanceId),discard:[]}));
+  const picks=s.players.map(p=>({play:p.hand.slice(0,bots===1?1:2).map(c=>c.instanceId),discard:bots===1?[p.hand[1].instanceId]:[]}));
   resolveDraft(s,picks);
-  const source=round%2?3:1;
-  assert.deepEqual(s.players[0].hand.map(c=>c.instanceId),remaining[source]);
+  for(const player of s.players) {
+   const recipient=draftRecipient(s,player.id);
+   assert.equal(recipient,(player.id+(round%2?1:bots))%(bots+1));
+   assert.deepEqual(s.players[recipient].hand.slice(0,remaining[player.id].length).map(c=>c.instanceId),remaining[player.id]);
+  }
  }
 });

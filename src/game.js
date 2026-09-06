@@ -51,6 +51,9 @@ export function publicView(state, playerId) {
 }
 
 export function pickCount(state) { return state.players.length === 2 ? 1 : 2; }
+export function draftRecipient(state, playerId) {
+  return (playerId + (state.round % 2 ? 1 : -1) + state.players.length) % state.players.length;
+}
 export function playCard(state, playerId, card, actions=null) {
   const player = state.players[playerId];
   if (card.category === 'parchment') { player.parchments.push(card); actions?.push({type:'parchment'}); state.log.push(`${player.name} kept a parchment.`); return; }
@@ -102,8 +105,8 @@ export function resolveDraft(state, selections) {
     state.phase = 'construction'; state.log.push('Exploration finished. Construction begins.');
     return;
   }
-  const hands = state.players.map(p => p.hand), direction = state.round % 2 ? 1 : -1;
-  for (const p of state.players) p.hand = hands[(p.id - direction + hands.length) % hands.length];
+  const hands = state.players.map(p => p.hand);
+  for (const p of state.players) state.players[draftRecipient(state,p.id)].hand = hands[p.id];
   if (state.players.length === 2) for (const p of state.players) {
     requireRule(p.reserve.length > 0, 'Missing two-player reserve card.');
     p.hand.push(p.reserve.shift());

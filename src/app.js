@@ -1,4 +1,4 @@
-import { COLORS, createGame, publicView, resolveDraft } from './game.js';
+import { COLORS, createGame, publicView, resolveDraft, draftRecipient } from './game.js';
 import * as normalBots from './bots.js';
 import * as easyBots from './bots-baseline.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
@@ -96,10 +96,16 @@ function cardHTML(c,index=0) {
   return `<button class="card ${c.category} ${c.parchmentType||''} ${c.farmType==='luxury'?'luxury-card':''} ${i>=0?'selected':''} ${label==='Discard'?'discard-selected':''}" style="--fan-angle:${offset*.65}deg;--fan-drop:${Math.abs(offset)*1.5}px;--card-order:${index}" data-card="${c.instanceId}" aria-pressed="${i>=0}" aria-label="${escape(c.name+': '+cardText(c,state)+(label?' — '+label:''))}"><span class="tag">${escape(type)}</span><span class="card-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p>${label?`<span class="choice-ribbon">${label==='Discard'?'×':'✓'} ${label}</span>`:''}</button>`;
 }
 function handPanel() {
-  const instruction=forcedFinalPick()?'Both remaining cards will be played':`${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · Pass ${state.round%2?'left ←':'right →'}`;
+  const instruction=forcedFinalPick()?'Both remaining cards will be played · No cards to pass':`${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · ${passDestination()}`;
   return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${instruction}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${sortedHand(state.players[0].hand).map(cardHTML).join('')}</div></section>`;
 }
 function playerPanels() { return renderPlayerPanels(state); }
+
+function passDestination() {
+  if(state.players[0].hand.length===2)return 'Final pick · No cards to pass';
+  const next=state.players[draftRecipient(state,0)];
+  return `<span class="pass-destination" data-pass-player="${next.id}">Pass ${state.round%2?'left':'right'} to <span class="pass-player" style="--player:${next.color}"><i aria-hidden="true"></i><b>${escape(next.name)}</b></span></span>`;
+}
 
 function cardPreview(card) {
   return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location.</p>';
@@ -111,7 +117,7 @@ function draftPanel() {
     const label=twoPlayers?(i===0?'Play':'Discard'):'Play '+(i+1);
     return `<div class="draft-slot ${twoPlayers&&i===1?'discard-slot':''}"><b>${label}</b><span>${card?escape(card.name):'Choose a card'}</span></div>`;
   }).join('');
-  return `<div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div>${forced?'':`<div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div>`}<button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${forced?'Continue →':selected.length===2?'Confirm cards & pass →':`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${forced?'Your last two cards are ready. Continue to finish exploration.':'Click a selected card to remove it.'}</p>`;
+  return `<p class="draft-route">${passDestination()}</p><div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div>${forced?'':`<div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div>`}<button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${forced?'Continue →':selected.length===2?(state.players[0].hand.length===2?'Confirm final cards →':'Confirm cards & pass →'):`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${forced?'Your last two cards are ready. Continue to finish exploration.':'Click a selected card to remove it.'}</p>`;
 }
 function focusedControl() {
   const element=document.activeElement;
@@ -138,7 +144,7 @@ function render() {
     <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><div class="heading-actions"><button id="toggle-animation" class="quiet" aria-pressed="${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches}" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'disabled title="Your device requests reduced motion"':''}>Animations: ${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'on':'off'}</button><button id="new-game" class="quiet">New game</button></div></div>
     <div class="game-layout table-layout" data-phase="${state.phase}">
       <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend" id="fief-readout"></p></div></div></section>
-      <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn} · PASS ${state.round%2?'LEFT':'RIGHT'}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
+      <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn}${state.players[0].hand.length===2?' · FINAL PICK':''}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
     <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · ${state.botDifficulty==='easy'?'Easy':'Normal'} bots · Seed ${escape(state.seed)}</p>`;
