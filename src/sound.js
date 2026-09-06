@@ -71,6 +71,7 @@ const cues={
   reveal:()=>[392,523,659].forEach((f,i)=>note(f,i*.085,.35,.15)),
   round:()=>[392,523,659].forEach((f,i)=>note(f,i*.07,.22,.14,'triangle')),
   finish:()=>[523,659,784,1047,784,1047].forEach((f,i)=>note(f,i*.12,.4,.16)),
+  lose:()=>[392,349,311,262].forEach((f,i)=>note(f,i*.16,i===3?.65:.3,.15,'triangle')),
   error:()=>note(180,0,.14,.15,'sine',120),
 };
 

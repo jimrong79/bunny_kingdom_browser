@@ -247,7 +247,7 @@ async function attempt(action) {
   const before=capturePresentation(state),phase=state.phase;
   try {error='';action();} catch(e) {error=e.message;render();soundEffects.play('error');return;}
   const events=animationEvents(before,state,data.buildings.cards);
-  const transition=phase!==state.phase?({harvest:'harvest',parchments:'reveal',finished:'finish',draft:'round'})[state.phase]:null;
+  const transition=phase!==state.phase?({harvest:'harvest',parchments:'reveal',finished:state.winners?.includes(0)?'finish':'lose',draft:'round'})[state.phase]:null;
   playing=animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&events.length>0;
   render();
   if(!playing) {
