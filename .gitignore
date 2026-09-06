@@ -5,6 +5,8 @@
 # Local match exports for review; these contain the full saved game.
 /reference/games/*
 !/reference/games/README.md
+/data/game_history/*
+!/data/game_history/README.md
 
 # Local environment and operating-system files.
 .env

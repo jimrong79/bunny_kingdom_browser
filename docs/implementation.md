@@ -107,6 +107,8 @@ Audio checks measure native Web Audio output and verify silent loading/resuming,
 
 Results checks cover ranked totals, player colors, tied winners, score details, board review, saved results, mobile layout, and starting another game. Full browser games also verify that the results screen agrees with final scoring at every player count.
 
+For recorded matches, `scripts/audit-game.js` reconstructs draft selections and placement history, checks every final field, independently calculates scoring, and checks bot decisions for dependence on hidden information. See [local game history and audit limitations](../data/game_history/README.md).
+
 Bot checks exercise paired connections, mountain/city combinations, constrained building slots, final Trading Post tradeoffs, glove-copy interactions, opponent-aware discards, private observations, and invariance to hidden cards or the game seed. The difficulty browser check verifies both policies' actual decisions, saved settings, old-save compatibility, and mobile setup.
 
 The existing `build_map_review.py`, `build_card_review.py`, and `build_parchment_review.py` checks still validate the source catalogs and their exports separately from engine behavior.
