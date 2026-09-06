@@ -1,4 +1,6 @@
 /* Ownership and connected fiefs take precedence over terrain decoration. */
+.parchment-estimate{margin-top:10px;padding:10px;border:1px solid #cdb774;border-radius:7px;background:#f3e8c4;font:12px/1.45 system-ui;color:#3d563e}.parchment-estimate>strong{display:block}.parchment-estimate>small{display:block;margin-top:5px;font:11px/1.45 system-ui;color:#65705a}.hand-preview .parchment-estimate p{font:12px/1.4 system-ui;margin:5px 0}
+@media(max-width:900px){.hand-preview{max-height:calc(100dvh - 96px)}}
 .copy-score-help{font:12px/1.5 system-ui;color:#65725e;margin:10px 0}.copy-choice select{width:100%;max-width:100%;text-overflow:ellipsis}.copy-card-detail{font:12px/1.45 system-ui;font-weight:400;color:#65725e}
 .city-summary{display:flex;align-items:center;flex-wrap:wrap;gap:3px;font:10px/1.4 system-ui;color:#4a604b}.city-summary>svg{width:18px;height:18px;flex-shrink:0}.city-summary b{font-weight:700}
 .player-name{display:grid;grid-template-columns:18px minmax(0,1fr);column-gap:5px}.player-name>b{min-width:0;overflow-wrap:anywhere;line-height:1.3}.player-score{grid-column:1/-1;justify-self:start;margin-left:0}.inventory-heading h2,.turn-player h3,#fief-readout,.table td{overflow-wrap:anywhere}

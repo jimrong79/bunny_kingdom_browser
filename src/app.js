@@ -8,7 +8,7 @@ import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './har
 import { finalizeScoring } from './scoring.js';
 import { scoringPanel } from './scoring-ui.js';
 import { resultsScreen } from './results-ui.js';
-import { copyChoiceDecisions } from './parchment-preview.js';
+import { copyChoiceDecisions, draftParchmentPreview } from './parchment-preview.js';
 import { cardText, buildingText, resourceNames } from './card-text.js';
 import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { sortedHand } from './hand-order.js';
@@ -110,7 +110,14 @@ function passDestination() {
 }
 
 function cardPreview(card) {
-  return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location.</p>';
+  return card?`<span class="eyebrow">CARD DETAILS</span><h3>${escape(card.name)}</h3><p>${escape(cardText(card,state))}</p>${parchmentEstimate(card)}`:'<span class="eyebrow">CARD DETAILS</span><p>Hover over a card or focus it to read its effect. Territory cards also highlight their location; parchments show their current point value.</p>';
+}
+function parchmentEstimate(card) {
+  const preview=draftParchmentPreview(state,0,card);
+  if(!preview)return '';
+  if(preview.points===null)return `<div class="parchment-estimate"><strong>Value pending</strong><p>${escape(preview.reason)}</p></div>`;
+  const signed=n=>n>0?'+'+n:String(n);
+  return `<div class="parchment-estimate"><strong>If scored now: ${signed(preview.gain)} parchment ${preview.gain===1?'point':'points'}</strong>${preview.otherPoints?`<p>${preview.points} on this card · ${signed(preview.otherPoints)} from your other parchments.</p>`:''}<small>Current board and kept parchments; future moves can change this.${preview.notes.length?' '+escape(preview.notes.join(' ')):''}</small></div>`;
 }
 function draftPanel() {
   const twoPlayers=state.players.length===2,forced=forcedFinalPick();

@@ -1,4 +1,5 @@
 import { cardArt } from './art.js';
+import { cardText } from './card-text.js';
 import { copyOptions, evaluateFinal, isCopy } from './scoring.js';
 import { copyScoreOptions } from './parchment-preview.js';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -25,7 +26,7 @@ export function scoringPanel(state,{showPlayAgain=true}={}) {
   const copies=finished?'':state.players[0].parchments.filter(isCopy).map(c=>{
     const options=copyOptions(state,0,c),ranked=copyScoreOptions(state,0,c,d);
     const selected=ranked.find(o=>o.card.instanceId===d.copies[c.instanceId]);
-    return `<label class="copy-choice">${esc(c.name)} · copy from ${esc(state.players[options.playerId].name)}<select data-copy="${c.instanceId}" ${options.cards.length?'':'disabled'}><option value="">${options.cards.length?'Choose a parchment':'No parchment available'}</option>${ranked.map(o=>`<option value="${o.card.instanceId}" ${d.copies[c.instanceId]===o.card.instanceId?'selected':''}>${esc(o.card.name)} — ${o.points===null?'points pending':o.points+' pts'} · ${o.complete?o.total+' total':'total pending'}</option>`).join('')}</select>${selected?`<small class="copy-card-detail">${esc(selected.card.sourceText)}</small>`:''}</label>`;
+    return `<label class="copy-choice">${esc(c.name)} · copy from ${esc(state.players[options.playerId].name)}<select data-copy="${c.instanceId}" ${options.cards.length?'':'disabled'}><option value="">${options.cards.length?'Choose a parchment':'No parchment available'}</option>${ranked.map(o=>`<option value="${o.card.instanceId}" ${d.copies[c.instanceId]===o.card.instanceId?'selected':''}>${esc(o.card.name)} — ${o.points===null?'points pending':o.points+' pts'} · ${o.complete?o.total+' total':'total pending'}</option>`).join('')}</select>${selected?`<small class="copy-card-detail">${esc(cardText(selected.card,state))}</small>`:''}</label>`;
   }).join('');
   const questions=finished?'':result.issues.filter(i=>i.kind!=='copy').map(issue=>`<div class="ruling"><p>${esc(issue.label)}</p><p class="muted">This case is still awaiting an official clarification. Your explicit ruling is recorded with this game.</p>${issue.kind==='copy_resolution'?`<select data-copy-resolution="${issue.key}"><option value="">Select the final copied card</option>${cards.filter(c=>!isCopy(c)).map(c=>`<option value="${c.instanceId}">${esc(c.holder)}: ${esc(c.name)}</option>`).join('')}</select>`:`<select data-ruling="${issue.key}"><option value="">Choose a ruling</option>${issue.options.map(n=>`<option value="${n}">${n}${issue.kind==='multiplier'?'× treasure value':' points'}</option>`).join('')}</select>`}</div>`).join('');
   const title=finished?(state.winners.length===1&&state.winners[0]===0?'You win!':`${state.winners.map(id=>state.players[id].name).join(' & ')} ${state.winners.length>1?'share the victory':'wins'}!`):'Reveal the royal parchments';
