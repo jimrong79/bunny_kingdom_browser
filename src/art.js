@@ -3,7 +3,7 @@ import { parchmentArt } from './parchment-art.js';
 const svg=(body,cls='',viewBox='0 0 64 64')=>`<svg class="${cls}" viewBox="${viewBox}" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export function rabbitArt() {
-  return svg('<path d="M22 28C13 12 15 3 21 4C26 5 28 17 29 24C32 13 37 3 42 6C48 10 39 24 37 29C46 35 47 46 40 51L44 57H18L21 51C11 46 13 34 22 28Z" fill="currentColor" stroke="#fff9de" stroke-width="3" stroke-linejoin="round"/><circle cx="35" cy="34" r="2" fill="#20352f"/><path d="M23 13L27 24M39 14L34 25" stroke="#fff9de" stroke-width="2" stroke-linecap="round" opacity=".6"/><ellipse cx="25" cy="46" rx="5" ry="4" fill="#fff9de" opacity=".65"/>','rabbit-art');
+  return svg('<path d="M22 28C13 12 15 3 21 4C26 5 28 17 29 24C32 13 37 3 42 6C48 10 39 24 37 29C46 35 47 46 40 51L44 57H18L21 51C11 46 13 34 22 28Z" fill="currentColor" stroke="#fff9de" stroke-width="3" stroke-linejoin="round"/><g fill="#20352f"><circle cx="24" cy="34" r="2"/><circle cx="35" cy="34" r="2"/></g><path d="M27 39Q29.5 37 32 39L29.5 42Z" fill="#fff9de"/><path d="M23 13L27 24M39 14L34 25" stroke="#fff9de" stroke-width="2" stroke-linecap="round" opacity=".6"/><ellipse cx="29.5" cy="48" rx="5" ry="4" fill="#fff9de" opacity=".65"/>','rabbit-art');
 }
 
 export function resourceArt(resource) {
