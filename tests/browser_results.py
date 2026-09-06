@@ -1,5 +1,6 @@
 """Check final standings, tied winners, saved results, and board review in Chromium."""
 from playwright.sync_api import sync_playwright
+import json
 from browser_smoke import snapshot
 from browser_controls import scenario
 
@@ -48,6 +49,15 @@ def results_controls(page):
     page.locator('#resume-game').click()
     assert page.locator('.results-screen').is_visible()
     assert snapshot(page) == state
+    with page.expect_download() as pending:
+        page.locator('#download-game').click()
+    download = pending.value
+    assert download.suggested_filename == f'bunny-kingdom-{state["seed"]}.json'
+    download.save_as('/tmp/bunny-export-check.json')
+    with open('/tmp/bunny-export-check.json') as file:
+        exported = json.load(file)
+    assert exported['format'] == 1 and exported['game'] == state
+    assert snapshot(page) == state
     for width in (320, 390):
         page.set_viewport_size({'width': width, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -65,7 +75,7 @@ def results_controls(page):
     page.locator('#setup button').click()
     assert snapshot(page)['phase'] == 'draft'
     assert page.locator('.results-screen').count() == 0
-    print('Ranked totals, colored rabbits, tied winners, score breakdown, board review, saved results, mobile fit, and play again passed.', flush=True)
+    print('Ranked totals, colored rabbits, tied winners, score breakdown, board review, saved results, exact game export, mobile fit, and play again passed.', flush=True)
 
 
 if __name__ == '__main__':

@@ -14,3 +14,7 @@ export function saveGame(game,ui={},storage) {
 export function loadGame(storage) {
   try {const value=JSON.parse((storage||globalThis.localStorage).getItem(KEY));return value?.format===1&&validSave(value.game)?value:null;}catch{return null;}
 }
+export function exportGame(game,ui={}) {
+  const seed=String(game.seed).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,100)||'saved';
+  return {filename:`bunny-kingdom-${seed}.json`,text:JSON.stringify({format:1,savedAt:new Date().toISOString(),game,ui},null,2)+'\n'};
+}

@@ -54,6 +54,7 @@
   .result-breakdown{font-size:10px;gap:4px;padding:10px 4px}
   .results-actions{gap:8px;margin-top:22px}
   .results-actions .primary,.results-actions .quiet{min-width:0;flex:1;padding:12px 8px}
+  .results-actions #download-game{flex-basis:100%}
   .results-details>div{padding:0 10px 14px}
   .results-details .table{font-size:11px}
   .results-details .table td,.results-details .table th{padding:6px 4px}

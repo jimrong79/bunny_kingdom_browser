@@ -16,6 +16,8 @@ Quiet sound effects accompany card selection, rabbit claims, building placement,
 
 Confirming the final score opens a results screen with each player's colored rabbit, ranked point total, and harvest/parchment breakdown. Gold badges mark winners, including ties. Review the board or full scoring details, or select **Play again**. Reopening a completed save returns to the results screen.
 
+Use **Download game** on the results screen to export the full match as JSON for review. Put exports in [`reference/games/`](reference/games/), which stays local. The seed reproduces the deal; the export also captures the actual moves and final position.
+
 Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, rule limitations, and browser checks](docs/implementation.md).
 
 ## Local workspace

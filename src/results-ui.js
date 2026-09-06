@@ -24,7 +24,7 @@ export function resultsScreen(state,saved) {
         </li>`;
       }).join('')}
     </ol>
-    <div class="results-actions"><button id="play-again" class="primary">Play again</button><button id="review-board" class="quiet">Review board</button></div>
+    <div class="results-actions"><button id="play-again" class="primary">Play again</button><button id="review-board" class="quiet">Review board</button><button id="download-game" class="quiet">Download game</button></div>
     <p class="results-save">${saved?'Result saved in this browser':'Keep this tab open to retain your result'} · Seed ${esc(state.seed)}</p>
     <details class="results-details"><summary>Full scoring breakdown</summary><div>${scoringPanel(state,{showPlayAgain:false})}</div></details>
   </section>`;

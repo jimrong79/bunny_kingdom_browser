@@ -14,7 +14,7 @@ import { sortedHand } from './hand-order.js';
 import { lastTurnPanel } from './last-turn.js';
 import { playerPanels as renderPlayerPanels, bindKingdomInspection } from './kingdom-ui.js';
 import { capturePresentation, animationEvents, playAnimation } from './turn-animation.js';
-import { saveGame, loadGame } from './storage.js';
+import { saveGame, loadGame, exportGame } from './storage.js';
 import { soundEffects, soundToggleHTML, bindSoundToggles } from './sound.js';
 const app = document.querySelector('#app');
 app.addEventListener('pointerdown',()=>soundEffects.unlock());
@@ -199,6 +199,13 @@ function renderResults(saved) {
   app.innerHTML=resultsScreen(state,saved);
   bindSoundToggles();
   document.querySelector('#play-again').onclick=setup;
+  document.querySelector('#download-game').onclick=()=>{
+    const file=exportGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled});
+    const url=URL.createObjectURL(new Blob([file.text],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download=file.filename;
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
   document.querySelector('#review-board').onclick=()=>{
     reviewingFinalBoard=true;render();
     document.querySelector('#map-panel').focus({preventScroll:true});window.scrollTo(0,0);
