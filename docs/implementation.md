@@ -73,6 +73,7 @@ The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed p
 | `src/kingdom-ui.js`, `src/interaction.css` | Production, public/private inventories, colored fief inspection |
 | `src/art.js`, `src/parchment-art.js` | Original terrain, pieces, resources, and parchment illustrations |
 | `src/turn-animation.js`, `src/turn-animation.css` | Public event timeline and cancellable visual playback |
+| `src/sound.js` | Synthesized effects, saved sound preference, and audio lifecycle |
 
 ## Validation
 
@@ -88,6 +89,7 @@ python3 tests/browser_controls.py
 python3 tests/browser_table.py
 python3 tests/browser_interactions.py
 python3 tests/browser_animations.py
+python3 tests/browser_audio.py
 python3 tests/browser_bot_difficulty.py
 ```
 
@@ -98,6 +100,8 @@ The separate control checks exercise keyboard card selection, Play/Discard swaps
 The table checks cover every card position in overlapping hands, complete-text previews, territory highlights, desktop/laptop viewport fit, artwork coverage, and updating the fourth player's color in older saves. Pass `--screenshots /tmp/bunny-table-checks` to save layout images.
 
 Interaction checks cover repeated resource production, Trading Posts, luxury farms, lava/Sky fief highlighting, and inventory privacy. Animation checks use real motion to exercise all players, Provisions, hidden card backs, counter updates, input locking, skipping, refreshing mid-flight, saved preferences, building placement, mobile panning, and reduced motion. The other browser suites request reduced motion so long playthroughs need not wait for playback.
+
+Audio checks measure native Web Audio output and verify silent loading/resuming, persistent mute, muting during animation, skip cancellation, reduced-motion feedback, scoring cues, hidden-tab silence, and continued play when Web Audio is unavailable.
 
 Bot checks exercise paired connections, mountain/city combinations, constrained building slots, final Trading Post tradeoffs, glove-copy interactions, opponent-aware discards, private observations, and invariance to hidden cards or the game seed. The difficulty browser check verifies both policies' actual decisions, saved settings, old-save compatibility, and mobile setup.
 

@@ -14,7 +14,10 @@ import { lastTurnPanel } from './last-turn.js';
 import { playerPanels as renderPlayerPanels, bindKingdomInspection } from './kingdom-ui.js';
 import { capturePresentation, animationEvents, playAnimation } from './turn-animation.js';
 import { saveGame, loadGame } from './storage.js';
+import { soundEffects, soundToggleHTML, bindSoundToggles } from './sound.js';
 const app = document.querySelector('#app');
+app.addEventListener('pointerdown',()=>soundEffects.unlock());
+app.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key))soundEffects.unlock();});
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
 const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
@@ -28,10 +31,12 @@ try {
   setup();
 } catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
 function setup() {
+  soundEffects.stop();
   app.classList.remove('at-table');
   const saved=loadGame();
   app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); };
+  document.querySelector('#setup').insertAdjacentHTML('beforebegin',soundToggleHTML());bindSoundToggles();
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now()); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
 }
 function resume(saved) {
@@ -132,6 +137,7 @@ function render() {
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
     <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · ${state.botDifficulty==='easy'?'Easy':'Normal'} bots · Seed ${escape(state.seed)}</p>`;
+  document.querySelector('.heading-actions').insertAdjacentHTML('afterbegin',soundToggleHTML());bindSoundToggles();
   const hand=document.querySelector('.hand');if(hand)hand.scrollLeft=handScroll;
   document.querySelector('.table-sidebar').scrollTop=sideScroll;
   document.querySelector('.last-turn-panel').scrollTop=recapScroll;
@@ -148,8 +154,8 @@ function render() {
   document.querySelectorAll('[data-card]').forEach(button => button.onclick = () => {
     if(forcedFinalPick())return;
     const id = button.dataset.card;
-    if (selected.includes(id)) selected = selected.filter(x => x !== id);
-    else if (selected.length < 2) selected.push(id);
+    if (selected.includes(id)) {selected = selected.filter(x => x !== id);soundEffects.play('deselect');}
+    else if (selected.length < 2) {selected.push(id);soundEffects.play('select');}
     render();
   });
   document.querySelectorAll('[data-card]').forEach(button=>{
@@ -173,9 +179,9 @@ function render() {
     resolveDraft(state, choices); selected = []; if(state.phase==='construction') beginCampOffers(state); driveBots();
   });
   const swap=document.querySelector('#swap-draft');
-  if(swap)swap.onclick=()=>{selected.reverse();render();};
+  if(swap)swap.onclick=()=>{selected.reverse();render();soundEffects.play('select');};
   const clear=document.querySelector('#clear-draft');
-  if(clear)clear.onclick=()=>{selected=[];render();};
+  if(clear)clear.onclick=()=>{selected=[];render();soundEffects.play('deselect');};
   if(focus)document.querySelector(focus)?.focus({preventScroll:true});
 }
 
@@ -194,12 +200,19 @@ function constructionPanel() {
 }
 async function attempt(action) {
   if(playing)return;
-  const before=capturePresentation(state);
-  try {error='';action();} catch(e) {error=e.message;render();return;}
+  soundEffects.unlock();
+  const before=capturePresentation(state),phase=state.phase;
+  try {error='';action();} catch(e) {error=e.message;render();soundEffects.play('error');return;}
   const events=animationEvents(before,state,data.buildings.cards);
+  const transition=phase!==state.phase?({harvest:'harvest',parchments:'reveal',finished:'finish',draft:'round'})[state.phase]:null;
   playing=animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&events.length>0;
   render();
-  if(!playing)return;
+  if(!playing) {
+    // Fast play gets one compact cue instead of stacking every player's sounds.
+    if(transition||events.length)soundEffects.play(transition||(events.length===1?events[0].type:'confirm'));
+    return;
+  }
+  soundEffects.play('confirm');
   try {await playAnimation(before,state,events);} catch(e) {console.warn('Turn saved; animation interrupted.',e);}
   finally {playing=false;app.inert=false;render();document.querySelector('#turn-panel')?.focus({preventScroll:true});}
 }
@@ -225,7 +238,7 @@ function driveBots() {
   }
 }
 function bindConstruction() {
-  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp'){requestCamp(state,0,buildingId);driveBots();}}));
+  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];soundEffects.play('select');const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp'){requestCamp(state,0,buildingId);driveBots();}}));
   document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
     const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
     inspected=b.dataset.cell;
@@ -233,6 +246,7 @@ function bindConstruction() {
     const id=b.dataset.cell, count=card.category==='sky_tower'?2:1;
     if(targets.includes(id)) targets=targets.filter(c=>c!==id);
     else targets=count===1?[id]:targets.length?[targets[0],id]:[id];
+    soundEffects.play('select');
     render();
   });
   const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};

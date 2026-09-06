@@ -1,6 +1,7 @@
 import { rabbitArt, cardArt, pieceArt } from './art.js';
 import { cardBackArt, productionCounts } from './kingdom-ui.js';
 import { fiefs } from './fiefs.js';
+import { soundEffects, soundToggleHTML, bindSoundToggles } from './sound.js';
 const turnKey=state=>state.lastTurn?`${state.lastTurn.round}:${state.lastTurn.pick}`:null;
 
 // The timeline contains public events only. It never needs a rival's hand or parchment identities.
@@ -45,14 +46,15 @@ export async function playAnimation(before,state,events) {
   const active=new Set(),sprites=new Set();let skipped=false;
   const overlay=document.createElement('section');overlay.id='turn-animation';overlay.className='turn-animation';
   overlay.setAttribute('aria-label','Turn playback');
-  overlay.innerHTML='<span class="animation-origin"></span><div class="animation-caption"><small class="animation-progress"></small><b role="status" aria-live="polite"></b></div><span class="animation-destination"></span><button id="skip-animation" class="quiet">Skip <small>Esc</small></button>';
+  overlay.innerHTML='<span class="animation-origin"></span><div class="animation-caption"><small class="animation-progress"></small><b role="status" aria-live="polite"></b></div><span class="animation-destination"></span><button id="skip-animation" class="quiet">Skip <small>Esc</small></button>'+soundToggleHTML();
   document.body.append(overlay);app.inert=true;
+  bindSoundToggles();
   if(innerWidth>900)sidebar.scrollTop=0;
-  const skip=()=>{skipped=true;for(const a of active)a.cancel();};
+  const skip=()=>{skipped=true;soundEffects.stop();for(const a of active)a.cancel();};
   const escape=e=>{if(e.key==='Escape'){e.preventDefault();skip();}};
   const reduce=matchMedia('(prefers-reduced-motion: reduce)');
   document.addEventListener('keydown',escape);reduce.addEventListener('change',skip);
-  overlay.querySelector('button').onclick=skip;overlay.querySelector('button').focus({preventScroll:true});
+  overlay.querySelector('#skip-animation').onclick=skip;overlay.querySelector('#skip-animation').focus({preventScroll:true});
   try {
     const origin=overlay.querySelector('.animation-origin'),destination=overlay.querySelector('.animation-destination');
     const virtual={cells:structuredClone(before.cells),blockedConnections:state.blockedConnections};
@@ -113,6 +115,7 @@ export async function playAnimation(before,state,events) {
       const from=event.type==='place'?document.querySelector(`[data-pile="buildings"][data-pile-player="${player.id}"]`):document.querySelector(`[data-player-origin="${player.id}"]`);
       await fly(art,visibleCenter(from)||visibleCenter(origin),visibleCenter(to)||visibleCenter(destination),player.color,event.type);
       if(skipped)break;
+      soundEffects.play(event.type);
       if(event.type==='reserve')counts[player.id].buildings++;
       if(event.type==='parchment')counts[player.id].parchments++;
       if(event.type==='claim'||event.type==='place') {
