@@ -8,6 +8,7 @@ import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './har
 import { finalizeScoring } from './scoring.js';
 import { scoringPanel } from './scoring-ui.js';
 import { resultsScreen } from './results-ui.js';
+import { copyChoiceDecisions } from './parchment-preview.js';
 import { cardText, buildingText, resourceNames } from './card-text.js';
 import { terrainArt, rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { sortedHand } from './hand-order.js';
@@ -289,7 +290,7 @@ function bindConstruction() {
   document.querySelectorAll('[data-market]').forEach(select=>select.onchange=()=>attempt(()=>chooseResource(state,0,select.dataset.market,select.value)));
   bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
   bind('next-round',()=>{advanceRound(state);selected=[];buildingId=null;targets=[];driveBots();});
-  document.querySelectorAll('[data-copy]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copies[s.dataset.copy]=s.value;state.scoringDecisions.copyResolutions={};state.scoringDecisions.rulings={};}));
+  document.querySelectorAll('[data-copy]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions=copyChoiceDecisions(state.scoringDecisions,s.dataset.copy,s.value);}));
   document.querySelectorAll('[data-ruling]').forEach(s=>s.onchange=()=>attempt(()=>{if(s.value!=='')state.scoringDecisions.rulings[s.dataset.ruling]=Number(s.value);}));
   document.querySelectorAll('[data-copy-resolution]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copyResolutions[s.dataset.copyResolution]=s.value;state.scoringDecisions.rulings={};}));
   document.querySelectorAll('[data-reset-ruling]').forEach(b=>b.onclick=()=>attempt(()=>{
