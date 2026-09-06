@@ -109,6 +109,8 @@ export function auditGame(saved) {
   const canonical=new Map(makeDeck(data).map(c=>[c.instanceId,c]));
   for(const card of [...target.deck,...target.players.flatMap(p=>[...p.played,...p.parchments,...p.buildings])])assert.deepEqual(card,canonical.get(card.instanceId),`Changed card data: ${card.instanceId}`);
   let state=createGame(data,target.players.length-1,target.seed);
+  // Keep the names recorded when this match was played, including older Bot 1 saves.
+  state.players.forEach((player,i)=>{player.name=target.players[i].name;});
   if(Object.hasOwn(target,'botDifficulty'))state.botDifficulty=target.botDifficulty;
   const policy=state.botDifficulty==='easy'?easy:normal;
   const report={seed:state.seed,players:state.players.length,difficulty:state.botDifficulty||'normal',draftPicks:0,
@@ -138,12 +140,14 @@ export function auditGame(saved) {
     return decision;
   };
   const nextPlacement=()=>{
-    const match=/^(You|Bot \d) placed (.+) at ([A-J]\d+(?: \+ [A-J]\d+)?)\.$/.exec(target.log[state.log.length]||'');
-    if(!match)return null;
-    const player=state.players.find(p=>p.name===match[1]);
-    const card=player.buildings.find(c=>c.name===match[2]);
-    assert.ok(card,`Unavailable building: ${match[0]}`);
-    return {pid:player.id,card,coordinates:match[3].split(' + ')};
+    const line=target.log[state.log.length]||'';
+    for(const player of state.players)for(const card of player.buildings) {
+      const prefix=`${player.name} placed ${card.name} at `;
+      if(!line.startsWith(prefix))continue;
+      const match=/^([A-J]\d+(?: \+ [A-J]\d+)?)\.$/.exec(line.slice(prefix.length));
+      if(match)return {pid:player.id,card,coordinates:match[1].split(' + ')};
+    }
+    return null;
   };
   for(let round=1;round<=4;round++) {
     while(state.phase==='draft') {

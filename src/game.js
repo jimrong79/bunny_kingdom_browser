@@ -1,4 +1,5 @@
 import {observeDraftHands} from './bot-memory.js';
+import {playerNames} from './player-names.js';
 export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b'];
 export function requireRule(ok, message) { if (!ok) throw new Error(message); }
 export function randomSource(seed) {
@@ -13,15 +14,15 @@ export function makeDeck(data) {
   requireRule(deck.length === 182 && new Set(deck.map(c => c.instanceId)).size === 182, 'The base deck must contain 182 unique cards.');
   return deck;
 }
-export function createGame(data, botCount, seed = Date.now()) {
+export function createGame(data, botCount, seed = Date.now(), playerName = '') {
   requireRule(Number.isInteger(botCount) && botCount >= 1 && botCount <= 3, 'Choose 1, 2, or 3 opponents.');
-  const deck = makeDeck(data), rng = randomSource(seed);
+  const deck = makeDeck(data), rng = randomSource(seed), names = playerNames(playerName);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   const state = {
     version: 1, seed: String(seed), round: 0, phase: 'setup', draftTurn: 0, deck,
     cells: Object.fromEntries(data.map.cells.map(c => [c.coordinate, { ...c, owner: null, building: c.startingCityStrength ? { category: 'city', strength: c.startingCityStrength, initial: true } : null }])),
     blockedConnections: structuredClone(data.map.blockedConnections),
-    players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: id ? `Bot ${id}` : 'You', bot: id !== 0, color: COLORS[id], score: 0, hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),
+    players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: names[id], bot: id !== 0, color: COLORS[id], score: 0, hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),
     log: [], history: [], lastTurn: null,
   };
   beginRound(state);

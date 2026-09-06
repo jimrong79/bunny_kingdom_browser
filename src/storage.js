@@ -1,9 +1,10 @@
+import {validPlayerName} from './player-names.js';
 const KEY='bunny-kingdom-save-v1';
 const phases=['draft','camps','construction','markets','harvest','parchments','finished'];
 export function validSave(game) {
   if(!game||game.version!==1||!phases.includes(game.phase)||!Number.isInteger(game.round)||game.round<1||game.round>4)return false;
   if(!Array.isArray(game.players)||game.players.length<2||game.players.length>4||!Array.isArray(game.deck)||Object.keys(game.cells||{}).length!==100)return false;
-  if(!game.players.every((p,i)=>p.id===i&&p.name===(i?`Bot ${i}`:'You')&&Number.isFinite(p.score)&&['hand','reserve','played','parchments','discarded','buildings','harvests'].every(k=>Array.isArray(p[k]))))return false;
+  if(!game.players.every((p,i)=>p.id===i&&validPlayerName(p.name)&&Number.isFinite(p.score)&&['hand','reserve','played','parchments','discarded','buildings','harvests'].every(k=>Array.isArray(p[k]))))return false;
   const cards=[...game.deck,...game.players.flatMap(p=>[...p.hand,...p.reserve,...p.played,...p.parchments,...p.discarded])];
   if(cards.length!==182||cards.some(c=>!c||typeof c.instanceId!=='string')||new Set(cards.map(c=>c.instanceId)).size!==182)return false;
   return game.phase!=='camps'||(Array.isArray(game.campQueue)&&game.campQueue.length>0);

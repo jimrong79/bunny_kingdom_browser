@@ -1,4 +1,5 @@
 /* Ownership and connected fiefs take precedence over terrain decoration. */
+.player-name{display:grid;grid-template-columns:18px minmax(0,1fr);column-gap:5px}.player-name>b{min-width:0;overflow-wrap:anywhere;line-height:1.3}.player-score{grid-column:1/-1;justify-self:start;margin-left:0}.inventory-heading h2,.turn-player h3,#fief-readout,.table td{overflow-wrap:anywhere}
 .cell .owner-overlay{position:absolute;inset:0;background:var(--owner);opacity:.25;z-index:1;pointer-events:none}
 .cell.owned .coordinate{color:white;background:var(--owner);border:1px solid #fff7dc;padding:0 2px;box-shadow:0 1px 2px #22382f55}
 .cell.owned .bunny{width:49%;height:73%;bottom:3%;left:0;filter:drop-shadow(0 1px 1px #172b24)}

@@ -24,6 +24,8 @@ def finish_with_scores(page, scores):
 
 def results_controls(page):
     page.goto('http://127.0.0.1:8000')
+    name = 'Jim <Bunny> & "Co"'
+    page.locator('[name=playerName]').fill(name)
     page.locator('[name=bots]').select_option('3')
     page.locator('#setup button').click()
     state = finish_with_scores(page, [180, 216, 216, 140])
@@ -34,6 +36,7 @@ def results_controls(page):
     assert page.locator('.winner-badge').all_inner_texts() == ['Joint winner', 'Joint winner']
     for player in state['players']:
         card = page.locator(f'[data-result-player="{player["id"]}"]')
+        assert card.locator('h2').inner_text() == player['name']
         assert card.locator('.result-score').inner_text() == str(player['score'])
         assert card.locator('.rabbit-art').count() == 1
         assert card.evaluate('(el)=>el.style.getPropertyValue("--player")') == player['color']
@@ -72,6 +75,7 @@ def results_controls(page):
     page.screenshot(path='/tmp/bunny-results-mobile.png', full_page=True)
     page.locator('#play-again').click()
     assert page.locator('#setup').is_visible()
+    assert page.locator('[name=playerName]').input_value() == name
     page.locator('#setup button').click()
     assert snapshot(page)['phase'] == 'draft'
     assert page.locator('.results-screen').count() == 0
