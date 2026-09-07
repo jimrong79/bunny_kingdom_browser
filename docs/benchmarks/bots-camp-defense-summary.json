@@ -1,0 +1,320 @@
+{
+  "date": "2026-09-07",
+  "candidateCommit": "fdd3323ea812dad5eaee60ac43f079795a8f2f5e",
+  "candidateCheckpoint": "bots-v3-camp-defense",
+  "baselineCommit": "5886555",
+  "baselineCheckpoint": "bots-v2-before-camp-defense",
+  "runtime": "Node.js 22.20.0 on Linux",
+  "rulingConvention": "low; copy resolutions choose the first sorted card ID",
+  "totalExecutedGames": 360,
+  "evaluationCandidateGames": 220,
+  "evaluationControlGames": 80,
+  "validation": {
+    "nodeTestsPassed": 59,
+    "browserPolicyRoutingAndResume": "passed",
+    "savedJ2PositionsInNodeAndChromium": "pick 1 unchanged; pick 4 selects A4 + J2"
+  },
+  "notes": [
+    "One candidate plays frozen Normal opponents; deterministic all-frozen control scores are reused across seats.",
+    "No policy tuning followed development or evaluation. After an initial -1.0 two-player mean margin change, 20 extra two-player deals were evaluated; confirmation mean was +2.35. Both batches are included.",
+    "Seat rotations are related samples. Results are descriptive, not a guarantee against regressions in individual games.",
+    "Control timing samples seat 0; candidate timing samples every rotated seat. Evaluation processes ran concurrently.",
+    "Private human game exports are excluded."
+  ],
+  "combinedEvaluation": {
+    "2": {
+      "deals": 40,
+      "candidateGames": 80,
+      "candidateWinRate": 0.5375,
+      "controlWinRate": 0.5,
+      "meanMarginChange": 0.675,
+      "withoutRulings": {
+        "games": 69,
+        "meanMarginChange": 1.1159420289855073
+      }
+    },
+    "3": {
+      "deals": 20,
+      "candidateGames": 60,
+      "candidateWinRate": 0.38333333333333336,
+      "controlWinRate": 0.3333333333333333,
+      "meanMarginChange": 2.533333333333333,
+      "withoutRulings": {
+        "games": 56,
+        "meanMarginChange": 2.6964285714285716
+      }
+    },
+    "4": {
+      "deals": 20,
+      "candidateGames": 80,
+      "candidateWinRate": 0.3,
+      "controlWinRate": 0.25,
+      "meanMarginChange": 1.1,
+      "withoutRulings": {
+        "games": 65,
+        "meanMarginChange": 0.5384615384615384
+      }
+    }
+  },
+  "batches": [
+    {
+      "purpose": "development",
+      "seedPrefix": "camp-defense-development",
+      "seedsPerPlayerCount": 5,
+      "results": {
+        "2": {
+          "candidate": {
+            "games": 10,
+            "winRate": 0.5,
+            "averageMargin": 1.8,
+            "averageScore": 138,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "mean": 37.39362904250006,
+              "p95": 110.52684099999897,
+              "max": 144.3132289999994
+            }
+          },
+          "control": {
+            "games": 10,
+            "winRate": 0.5,
+            "averageMargin": 0,
+            "averageScore": 138.3,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "mean": 36.98565663999997,
+              "p95": 97.22960400000011,
+              "max": 142.61546299999998
+            }
+          },
+          "meanMarginChange": 1.8,
+          "changedResults": 4,
+          "withoutRulings": {
+            "games": 10,
+            "meanMarginChange": 1.8
+          }
+        },
+        "3": {
+          "candidate": {
+            "games": 15,
+            "winRate": 0.4,
+            "averageMargin": -11.133333333333333,
+            "averageScore": 169.86666666666667,
+            "gamesWithRulings": 5,
+            "draftMs": {
+              "mean": 76.46748836111114,
+              "p95": 254.61095699999714,
+              "max": 529.7023489999992
+            }
+          },
+          "control": {
+            "games": 15,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -15.333333333333334,
+            "averageScore": 167.8,
+            "gamesWithRulings": 6,
+            "draftMs": {
+              "mean": 54.41522590833198,
+              "p95": 147.77624199999264,
+              "max": 354.5115000000078
+            }
+          },
+          "meanMarginChange": 4.200000000000001,
+          "changedResults": 4,
+          "withoutRulings": {
+            "games": 9,
+            "meanMarginChange": 6.444444444444445
+          }
+        },
+        "4": {
+          "candidate": {
+            "games": 20,
+            "winRate": 0.3,
+            "averageMargin": -12.7,
+            "averageScore": 116.65,
+            "gamesWithRulings": 5,
+            "draftMs": {
+              "mean": 42.31720326250077,
+              "p95": 153.14247699998668,
+              "max": 416.9703739999968
+            }
+          },
+          "control": {
+            "games": 20,
+            "winRate": 0.25,
+            "averageMargin": -15.15,
+            "averageScore": 113.8,
+            "gamesWithRulings": 8,
+            "draftMs": {
+              "mean": 40.497452170001054,
+              "p95": 163.56524699999136,
+              "max": 268.9146910000127
+            }
+          },
+          "meanMarginChange": 2.450000000000001,
+          "changedResults": 8,
+          "withoutRulings": {
+            "games": 12,
+            "meanMarginChange": 2.3333333333333335
+          }
+        }
+      }
+    },
+    {
+      "purpose": "evaluation",
+      "seedPrefix": "camp-defense-held-out-v1",
+      "seedsPerPlayerCount": 20,
+      "results": {
+        "2": {
+          "candidate": {
+            "games": 40,
+            "winRate": 0.5,
+            "averageMargin": -1,
+            "averageScore": 139.125,
+            "gamesWithRulings": 3,
+            "draftMs": {
+              "mean": 39.214832982500155,
+              "p95": 121.77319599999464,
+              "max": 251.7209079999884
+            }
+          },
+          "control": {
+            "games": 40,
+            "winRate": 0.5,
+            "averageMargin": 0,
+            "averageScore": 139.65,
+            "gamesWithRulings": 4,
+            "draftMs": {
+              "mean": 37.74645698250022,
+              "p95": 111.72342200001003,
+              "max": 205.17604100001336
+            }
+          },
+          "meanMarginChange": -1,
+          "changedResults": 10,
+          "withoutRulings": {
+            "games": 36,
+            "meanMarginChange": -0.5277777777777778
+          }
+        }
+      }
+    },
+    {
+      "purpose": "evaluation",
+      "seedPrefix": "camp-defense-held-out-v1",
+      "seedsPerPlayerCount": 20,
+      "results": {
+        "3": {
+          "candidate": {
+            "games": 60,
+            "winRate": 0.38333333333333336,
+            "averageMargin": -8.45,
+            "averageScore": 173.16666666666666,
+            "gamesWithRulings": 3,
+            "draftMs": {
+              "mean": 99.74587050347222,
+              "p95": 338.8315439999569,
+              "max": 1030.7341819999856
+            }
+          },
+          "control": {
+            "games": 60,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -10.983333333333333,
+            "averageScore": 170.1,
+            "gamesWithRulings": 3,
+            "draftMs": {
+              "mean": 75.63896119999907,
+              "p95": 239.70539800002007,
+              "max": 609.9777910000121
+            }
+          },
+          "meanMarginChange": 2.533333333333333,
+          "changedResults": 28,
+          "withoutRulings": {
+            "games": 56,
+            "meanMarginChange": 2.6964285714285716
+          }
+        }
+      }
+    },
+    {
+      "purpose": "evaluation",
+      "seedPrefix": "camp-defense-held-out-v1",
+      "seedsPerPlayerCount": 20,
+      "results": {
+        "4": {
+          "candidate": {
+            "games": 80,
+            "winRate": 0.3,
+            "averageMargin": -15.55,
+            "averageScore": 119.8875,
+            "gamesWithRulings": 13,
+            "draftMs": {
+              "mean": 51.69182744375057,
+              "p95": 167.2083200000052,
+              "max": 746.2506290000165
+            }
+          },
+          "control": {
+            "games": 80,
+            "winRate": 0.25,
+            "averageMargin": -16.65,
+            "averageScore": 118.975,
+            "gamesWithRulings": 12,
+            "draftMs": {
+              "mean": 46.26944547249984,
+              "p95": 141.15916699997615,
+              "max": 568.0089560000342
+            }
+          },
+          "meanMarginChange": 1.0999999999999979,
+          "changedResults": 28,
+          "withoutRulings": {
+            "games": 65,
+            "meanMarginChange": 0.5384615384615384
+          }
+        }
+      }
+    },
+    {
+      "purpose": "confirmation",
+      "seedPrefix": "camp-defense-confirm-2p-v1",
+      "seedsPerPlayerCount": 20,
+      "results": {
+        "2": {
+          "candidate": {
+            "games": 40,
+            "winRate": 0.575,
+            "averageMargin": 2.35,
+            "averageScore": 147.4,
+            "gamesWithRulings": 6,
+            "draftMs": {
+              "mean": 38.591084127499876,
+              "p95": 113.69534900000144,
+              "max": 397.2898219999988
+            }
+          },
+          "control": {
+            "games": 40,
+            "winRate": 0.5,
+            "averageMargin": 0,
+            "averageScore": 146.65,
+            "gamesWithRulings": 6,
+            "draftMs": {
+              "mean": 38.96845164750024,
+              "p95": 116.31144700000004,
+              "max": 237.3084900000249
+            }
+          },
+          "meanMarginChange": 2.35,
+          "changedResults": 10,
+          "withoutRulings": {
+            "games": 33,
+            "meanMarginChange": 2.909090909090909
+          }
+        }
+      }
+    }
+  ]
+}

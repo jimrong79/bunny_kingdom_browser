@@ -12,10 +12,10 @@ import {chooseResource,finishMarkets,advanceRound} from '../src/harvest.js';
 import {evaluateFinal,finalizeScoring} from '../src/scoring.js';
 import {validSave} from '../src/storage.js';
 
-export function runMatch(players,seed,seat,{ruling='low',challenger=candidate}={}) {
+export function runMatch(players,seed,seat,{ruling='low',challenger=candidate,opponent=baseline}={}) {
   const state=createGame(data,players-1,seed),timings=[];
   const decide=(pid,method,...args)=>{
-    const bot=pid===seat?challenger:baseline,view=publicView(state,pid),start=performance.now();
+    const bot=pid===seat?challenger:opponent,view=publicView(state,pid),start=performance.now();
     const result=bot[method](view,pid,...args);
     if(pid===seat)timings.push({method,ms:performance.now()-start});
     return result;
