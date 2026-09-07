@@ -4,6 +4,7 @@ import {fiefs} from './fiefs.js';
 import {playerStats,copyOptions,isCopy} from './scoring.js';
 import {forkPosition,positionValue,parchmentValue} from './bot-evaluation.js';
 import {planBuildings} from './bot-planning.js';
+import {campExposure,passedCampPenalty} from './bot-camp-defense.js';
 export {positionValue} from './bot-evaluation.js';
 
 export function draftPosition(view,playerId,cards) {
@@ -30,18 +31,29 @@ export function chooseDraft(view,playerId) {
   const rival=forkPosition(view,next),rivalBase=projectedValue(rival,next);
   const threats=new Map(cards.map(c=>[c.instanceId,Math.max(0,cardValue(rival,next,c,rivalBase))]));
   const ownValues=view.players.length===2?new Map(cards.map(c=>[c.instanceId,cardValue(view,playerId,c,base)])):null;
+  const camps=cards.filter(c=>c.category==='territory'&&view.cells[c.coordinate].owner===playerId
+    &&view.cells[c.coordinate].building?.category==='camp');
+  const exposure=campExposure(view,cards.length);
+  // Camp penalties are nonnegative; only contenders need the extra placement search.
   let best=null,bestValue=-Infinity;
   for(let i=0;i<cards.length;i++)for(let j=i+1;j<cards.length;j++) {
     const remaining=cards.filter((_,k)=>k!==i&&k!==j).map(c=>threats.get(c.instanceId)).sort((a,b)=>b-a);
+    const passedCamps=camps.filter(c=>c!==cards[i]&&c!==cards[j]);
     if(view.players.length===2) {
       for(const [play,discard] of [[cards[i],cards[j]],[cards[j],cards[i]]]) {
-        const value=ownValues.get(play.instanceId)-.65*(remaining[0]||0);
+        let value=ownValues.get(play.instanceId)-.65*(remaining[0]||0);
+        if(passedCamps.length&&value>bestValue) {
+          const trial=draftPosition(view,playerId,[play]);
+          value-=passedCampPenalty(trial,playerId,passedCamps,exposure,projectedValue(trial,playerId));
+        }
         if(value>bestValue){bestValue=value;best={play:[play.instanceId],discard:[discard.instanceId]};}
       }
     } else {
       const pair=[cards[i],cards[j]],trial=draftPosition(view,playerId,pair);
-      const value=projectedValue(trial,playerId)-base+pair.filter(c=>c.category==='provisions').length*provisionsValue(view)
+      const secureValue=projectedValue(trial,playerId);
+      let value=secureValue-base+pair.filter(c=>c.category==='provisions').length*provisionsValue(view)
         -.12*((remaining[0]||0)+(remaining[1]||0));
+      if(passedCamps.length&&value>bestValue)value-=passedCampPenalty(trial,playerId,passedCamps,exposure,secureValue);
       if(value>bestValue){bestValue=value;best={play:pair.map(c=>c.instanceId),discard:[]};}
     }
   }
