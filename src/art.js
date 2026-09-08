@@ -1,5 +1,6 @@
 // Original vector pieces and terrain illustrations, shared by the board and cards.
 import { parchmentArt } from './parchment-art.js';
+import {skyResourceDrawing,skyPieceDrawing,cloudDrawing} from './sky-art.js';
 const svg=(body,cls='',viewBox='0 0 64 64')=>`<svg class="${cls}" viewBox="${viewBox}" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export function rabbitArt() {
@@ -19,7 +20,7 @@ export function resourceArt(resource) {
     gold:'<path d="M7 46L18 20H44L58 46L47 55H18Z" fill="#e6b947" stroke="#947032" stroke-width="3"/><path d="M18 20L29 44H58M29 44L18 55" fill="none" stroke="#fff0a2" stroke-width="3"/>',
     steel:'<path d="M8 42L20 18H48L58 43L45 54H17Z" fill="#8eabb4" stroke="#425966" stroke-width="3"/><path d="M20 18L29 42H58M29 42L17 54" fill="none" stroke="#e7f0e7" stroke-width="3"/>',
   };
-  return svg(drawings[resource]||'<path d="M13 24L31 10L51 24L31 39ZM13 39L31 53L51 39" fill="none" stroke="#74876c" stroke-width="6"/>','resource-art');
+  return svg(drawings[resource]||skyResourceDrawing(resource)||'<path d="M13 24L31 10L51 24L31 39ZM13 39L31 53L51 39" fill="none" stroke="#74876c" stroke-width="6"/>','resource-art');
 }
 
 export function terrainArt(terrain) {
@@ -32,12 +33,14 @@ export function terrainArt(terrain) {
     plains:'<path d="M0 37Q23 27 43 38T70 37V64H0Z" fill="#b9cc83"/><path d="M9 24L11 18L14 25M39 48L42 41L45 48M50 16L53 10L56 17M17 54L19 47" fill="none" stroke="#899f58" stroke-width="2"/><circle cx="31" cy="20" r="2" fill="#f5e2a4"/><circle cx="54" cy="54" r="2" fill="#f5e2a4"/>',
     city:'<path d="M4 58L27 36L20 0H37L39 33L64 45V59L33 46L19 64Z" fill="#d2b989"/><path d="M9 12L15 6L21 12V21H9M44 9L50 3L57 9V19H44M47 45L54 38L61 45V57H47M3 41L9 35L15 41V51H3" fill="#e9d4a0" stroke="#9d936b" stroke-width="1.5"/>',
   };
-  return svg(terrainDrawings[terrain]||terrainDrawings.plains,'terrain-art');
+  return svg(terrainDrawings[terrain]||({nimbus:cloudDrawing,wondrous:cloudDrawing,rainbow:skyPieceDrawing({category:'rainbow'})})[terrain]||terrainDrawings.plains,'terrain-art');
 }
 
 export function pieceArt(building) {
-  if(building.category==='farm')return `<span class="farm-token ${building.farmType==='luxury'?'luxury-token':''}">${resourceArt(building.resource||building.choice)}${building.farmType==='trading_post'?'<span class="post-mark">↔</span>':''}</span>`;
+  const sky=skyPieceDrawing(building);if(sky)return svg(sky,'sky-piece-art');
+  if(building.category==='farm')return `<span class="farm-token ${building.farmType==='luxury'?'luxury-token':building.farmType==='wondrous'?'wondrous-token':''}">${resourceArt(building.resource||building.choice)}${building.farmType==='trading_post'?'<span class="post-mark">↔</span>':''}</span>`;
   if(building.category==='city') {
+    if(building.cityType==='carrotadel')return svg('<path d="M8 55V24H17V34H26V11L32 3L38 11V34H47V24H56V55Z" fill="#d8bce9" stroke="#785e9b" stroke-width="3"/><path d="M27 55V43Q32 33 37 43V55" fill="#785e9b"/><path d="M6 23L13 12L20 23M44 23L51 12L58 23" fill="#a675bb" stroke="#785e9b" stroke-width="2"/>','carrotadel-art');
     const towers=building.strength===3?[8,26,44]:building.strength===2?[12,40]:[26];
     return svg(`<ellipse cx="32" cy="56" rx="29" ry="6" fill="#3b423b" opacity=".2"/><path d="M10 35H54V55H10Z" fill="#d3bc8f" stroke="#736452" stroke-width="2"/>${towers.map((x,i)=>`<path d="M${x-5} 45V${15+i%2*5}H${x-8}V${7+i%2*5}H${x-3}V${11+i%2*5}H${x+1}V${7+i%2*5}H${x+6}V${11+i%2*5}H${x+10}V${7+i%2*5}H${x+15}V${15+i%2*5}H${x+12}V45Z" fill="#f3e3b7" stroke="#736452" stroke-width="2" stroke-linejoin="round"/><path d="M${x+1} 24H${x+5}V32H${x+1}Z" fill="#7a7660"/>`).join('')}<path d="M27 56V45Q33 35 39 45V56Z" fill="#796f58"/>`,'city-art');
   }
@@ -46,7 +49,7 @@ export function pieceArt(building) {
 }
 
 export function cardArt(card) {
-  if(card.category==='territory')return `<span class="card-landscape ${card.terrain}">${terrainArt(card.terrain)}<strong>${card.coordinate}</strong></span>`;
+  if(card.category==='territory')return `<span class="card-landscape ${card.terrain}">${terrainArt(card.terrain)}${card.printedResource?`<span class="territory-resource">${resourceArt(card.printedResource)}</span>`:''}<strong>${card.coordinate}</strong></span>`;
   if(card.category==='parchment')return parchmentArt(card,{resourceArt,pieceArt,rabbitArt});
   if(card.category==='provisions')return svg('<path d="M12 27H53L49 56H17Z" fill="#b88b51" stroke="#705c3b" stroke-width="3"/><path d="M23 29V17Q32 2 43 17V29" fill="none" stroke="#705c3b" stroke-width="4"/><path d="M18 37H49M19 47H48M26 29V55M38 29V55" stroke="#e1bb77" stroke-width="3"/>','provisions-art');
   return pieceArt({...card,strength:card.effect?.strength,resource:card.effect?.resource});
