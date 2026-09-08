@@ -4,6 +4,7 @@ import {fiefs} from './fiefs.js';
 import {playerStats,copyPaths,isCopy,evaluateFinal} from './scoring.js';
 import {forkPosition,positionValue,parchmentValue} from './bot-evaluation.js';
 import {planBuildings} from './bot-planning.js';
+import {planCamps} from './bot-camps.js';
 import {campExposure,passedCampPenalty} from './bot-camp-defense.js';
 import {hasExpansion,cardsPerPick} from './config.js';
 import {districtSnapshot,awardNewDistricts} from './districts.js';
@@ -112,10 +113,7 @@ export function chooseBuilding(view,playerId) {
   return action?{cardId:action.cardId,coordinates:action.coordinates}:null;
 }
 export function chooseCamp(view,playerId,cardId) {
-  const trial=prepareMarkets(view,playerId);
-  trial.players[playerId].buildings=trial.players[playerId].buildings.filter(c=>c.instanceId===cardId);
-  const plan=planBuildings(trial,playerId,{depth:1,width:1,camps:true});
-  return plan.actions[0]?.coordinates[0]??null;
+  return planCamps(prepareMarkets(view,playerId),playerId,cardId);
 }
 
 function marketPlan(view,playerId,posts,score) {
