@@ -1,6 +1,7 @@
 import {observeDraftHands} from './bot-memory.js';
 import {playerNames} from './player-names.js';
 import {hasExpansion, dealSize, cardsPerPick} from './config.js';
+import {districtSnapshot,awardNewDistricts,gainCoins} from './districts.js';
 export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b', '#8254b1'];
 export function requireRule(ok, message) { if (!ok) throw new Error(message); }
 export function randomSource(seed) {
@@ -60,22 +61,30 @@ export function pickCount(state) { return cardsPerPick(state); }
 export function draftRecipient(state, playerId) {
   return (playerId + (state.round % 2 ? 1 : -1) + state.players.length) % state.players.length;
 }
-export function playCard(state, playerId, card, actions=null) {
+export function playCard(state, playerId, card, actions=null, deferCoins=false) {
   const player = state.players[playerId];
   if (card.category === 'parchment') { player.parchments.push(card); actions?.push({type:'parchment'}); state.log.push(`${player.name} kept a parchment.`); return; }
   player.played.push(card);
   if (card.category === 'territory') {
+    const before=deferCoins?null:districtSnapshot(state,playerId);
     const cell = state.cells[card.coordinate];
     actions?.push({type:'territory',coordinate:card.coordinate,campOwner:cell.building?.category==='camp'?cell.owner:null});
     if (cell.building?.category === 'camp') cell.building = null;
     cell.owner = playerId;
+    if(card.rainbow) {
+      player.buildings.push({...card,category:'rainbow',name:`Rainbow ${card.rainbow.split('_').at(-1)}`,placement:{allowedTerrains:null,allowedBoards:['new_world']},effect:{pairId:card.rainbow,cloud:card.coordinate}});
+      actions?.push({type:'building',name:'Rainbow'});
+    }
     state.log.push(`${player.name} claimed ${card.coordinate}.`);
+    awardNewDistricts(state,playerId,before,[card.coordinate]);
+  } else if(card.category==='tax_collector') {
+    gainCoins(state,playerId,2,'Tax Collector');actions?.push({type:'coins',count:2});
   } else if (card.category === 'provisions') {
     requireRule(state.deck.length >= 2, 'Not enough cards for Provisions.');
     const drawn = state.deck.splice(0, 2);
     actions?.push({type:'provisions'});
     state.log.push(`${player.name} played Provisions and drew 2 cards.`);
-    for (const extra of drawn) playCard(state, playerId, extra, actions);
+    for (const extra of drawn) playCard(state, playerId, extra, actions,deferCoins);
   } else {
     player.buildings.push(card);
     actions?.push({type:'building',name:card.name});
@@ -101,11 +110,15 @@ export function resolveDraft(state, selections) {
     return cards;
   });
   const lastTurn={round:state.round,pick:state.draftTurn,players:state.players.map(p=>({playerId:p.id,actions:[]}))};
+  const beforeDistricts=state.players.map(p=>districtSnapshot(state,p.id));
   for (const p of state.players) {
     const actions=lastTurn.players[p.id].actions;
-    for (const card of plays[p.id]) playCard(state, p.id, card, actions);
+    for (const card of plays[p.id]) playCard(state, p.id, card, actions,true);
     if(selections[p.id].discard.length)actions.push({type:'discard',count:selections[p.id].discard.length});
   }
+  // Selected cards are played simultaneously; compare the completed pick with
+  // its initial position, so array order cannot manufacture District coins.
+  for(const p of state.players)awardNewDistricts(state,p.id,beforeDistricts[p.id],lastTurn.players[p.id].actions.filter(a=>a.type==='territory').map(a=>a.coordinate));
   state.lastTurn=lastTurn;
   if (state.players.every(p => p.hand.length === 0)) {
     state.phase = 'construction'; state.log.push('Exploration finished. Construction begins.');

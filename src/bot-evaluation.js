@@ -10,7 +10,7 @@ export function picksLeft(view) {
 }
 export function forkPosition(view,playerId) {
   return {...view,cells:Object.fromEntries(Object.entries(view.cells).map(([id,c])=>[id,{...c,building:c.building?{...c.building}:null}])),
-    players:view.players.map(p=>p.id===playerId?{...p,buildings:[...p.buildings],parchments:Array.isArray(p.parchments)?[...p.parchments]:[],played:[...p.played],ready:false}:p),log:[]};
+    players:view.players.map(p=>p.id===playerId?{...p,...(p.coinEvents?{coinEvents:[...p.coinEvents]}:{}),buildings:[...p.buildings],parchments:Array.isArray(p.parchments)?[...p.parchments]:[],played:[...p.played],ready:false}:p),log:[]};
 }
 
 export function parchmentValue(view,playerId,cards,stats=playerStats(view,playerId),forecast=true) {

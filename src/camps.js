@@ -1,5 +1,6 @@
 import { requireRule } from './game.js';
 import { eligibleTerritories } from './construction.js';
+import {districtSnapshot,awardNewDistricts} from './districts.js';
 function availableCamps(state) {
   return state.players.flatMap(p=>p.buildings.filter(c=>c.category==='camp').map(card=>({playerId:p.id,cardId:card.instanceId,priority:card.effect.priority}))).sort((a,b)=>a.priority-b.priority);
 }
@@ -25,10 +26,12 @@ export function respondCamp(state, playerId, coordinate=null) {
   requireRule(card,'Camp card is no longer available.');
   if(coordinate!==null) {
     requireRule(eligibleTerritories(state,playerId,card).includes(coordinate),'Camps need a territory with no rabbit or building.');
+    const before=districtSnapshot(state,playerId);
     state.cells[coordinate].owner=playerId;
     state.cells[coordinate].building={category:'camp',instanceId:card.instanceId,cardId:card.id,priority:card.effect.priority};
     player.buildings=player.buildings.filter(c=>c.instanceId!==card.instanceId);
     state.log.push(`${player.name} placed Camp ${card.effect.priority} at ${coordinate}.`);
+    awardNewDistricts(state,playerId,before,[coordinate]);
   } else state.log.push(`${player.name} saved Camp ${card.effect.priority} for later.`);
   state.campQueue.shift();
   if(!state.campQueue.length) state.phase='construction';
