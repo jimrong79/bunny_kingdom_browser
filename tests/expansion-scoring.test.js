@@ -4,7 +4,19 @@ import {skyGame,skyCard} from './sky-fixture.js';
 import {fiefs} from '../src/fiefs.js';
 import {playerStats,basePoints,evaluateFinal} from '../src/scoring.js';
 import {chooseChimney,finishMarkets,chooseResource} from '../src/harvest.js';
+import {draftParchmentPreview} from '../src/parchment-preview.js';
 const own=(s,id,building=null,resource=null)=>Object.assign(s.cells[id],{owner:0,building,baseResource:resource});
+test('Explorer counts exactly four corners per board, including legacy saves and copies',()=>{
+ const s=skyGame(),card=skyCard('explorer');
+ for(const id of ['A1','A10','J1','J10','C1-1','C1-5','C5-1','C5-7','C3-1','C3-7'])s.cells[id].owner=0;
+ for(const c of Object.values(s.cells).filter(c=>c.boardId==='great_cloud'))c.isCorner=null;
+ assert.equal(draftParchmentPreview(s,0,card).points,24);
+ s.phase='parchments';s.players[0].parchments=[skyCard('socialist')];s.players[1].parchments=[card];
+ const result=evaluateFinal(s,{copies:{socialist_1:card.instanceId},rulings:{},copyResolutions:{}});
+ assert.ok(result.complete);assert.equal(result.players[0].parchmentPoints,24);
+ for(const id of ['A1','A10','J1','J10','C1-1','C1-5','C5-1','C5-7'])s.cells[id].owner=null;
+ assert.equal(playerStats(s,0).metrics.controlled_corner_territories,0);
+});
 test('Chimneys broadcast only to New World fiefs without creating production or duplicate wealth',()=>{
  const s=skyGame();s.phase='markets';
  own(s,'C3-3',{category:'chimney'},'wood');own(s,'A1',{category:'city',strength:2},'fish');own(s,'J10',{category:'city',strength:1},'wood');own(s,'C1-5',{category:'city',strength:1});

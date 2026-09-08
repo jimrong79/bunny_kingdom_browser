@@ -6,6 +6,8 @@ export const cloud=JSON.parse(readFileSync(new URL('../data/maps/great-cloud.jso
 export const expansion=JSON.parse(readFileSync(new URL('../data/cards/in-the-sky.json',import.meta.url)));
 test('expansion inventory preserves all 50 cards and source parchment text',()=>{
  assert.equal(cloud.cells.length,31);
+ assert.ok(cloud.cells.every(c=>typeof c.isCorner==='boolean'));
+ assert.deepEqual(cloud.cells.filter(c=>c.isCorner).map(c=>c.coordinate),['C1-1','C1-5','C5-1','C5-7']);
  assert.deepEqual([1,2,3,4,5].map(r=>cloud.cells.filter(c=>c.row===String(r)).length),[5,6,7,6,7]);
  assert.equal(expansion.cards.reduce((n,c)=>n+c.copies,0)+expansion.parchments.length+cloud.cells.length,50);
  assert.equal(expansion.parchments.filter(c=>c.parchmentType==='treasure').length,2);

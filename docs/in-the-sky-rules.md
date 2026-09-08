@@ -25,9 +25,10 @@ The [expansion catalog](../data/cards/in-the-sky.json) preserves all supplied pa
 
 Trading Posts are selected before confirming Chimneys. Changing a Trading Post invalidates a Chimney choice if that basic resource is no longer present. Chimneys with no available basic resource require no selection. Harvest breakdowns distinguish shared access from production.
 
+Explorer counts four corners on each board: A1, A10, J1, J10 and C1-1, C1-5, C5-1, C5-7. C3-1 and C3-7 do not count. This user confirmation (2026-09-08) also applies to previews, copied Explorer effects, and older unfinished saves.
+
 ## Details awaiting confirmation
 
-- **Cloud corners for Explorer:** the publisher says to include cloud corners but does not identify them on the staggered outline. End-of-row candidates retain an unknown classification. If an Explorer effect controls a candidate, its preview says pending and final scoring requests an explicit award. No corner award is silently guessed. The map review exposes these candidates for confirmation.
 - **District timing within a pick:** the current implementation compares the board before and after all selected cards and Provisions effects resolve together, following the base game's simultaneous play step. Selecting the same cards in a different click order therefore cannot manufacture a Coin. The expansion rulebook does not explicitly discuss cases where resolving individual territories sequentially would create an intermediate District. This is a documented interpretation awaiting confirmation, not a claimed publisher clarification.
 - The original game's existing copy-chain, stacked Treasure Hunter, and Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
 

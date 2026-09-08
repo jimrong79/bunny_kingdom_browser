@@ -17,8 +17,9 @@ export function playerStats(state, playerId) {
   const minRow=Math.min(...rows), maxRow=Math.max(...rows), minCol=Math.min(...columns), maxCol=Math.max(...columns);
   const rowEdge=c=>[minRow,maxRow].includes(c.row.charCodeAt(0)), colEdge=c=>[minCol,maxCol].includes(c.column);
   const cloud=cells.filter(c=>boardOf(c)==='great_cloud');
-  const knownCorners=cells.filter(c=>boardOf(c)==='great_cloud'?c.isCorner===true:rowEdge(c)&&colEdge(c)).length;
-  const unknownCorners=cloud.filter(c=>c.isCorner===null&&(c.column===1||!Object.values(state.cells).some(d=>boardOf(d)==='great_cloud'&&d.row===c.row&&d.column===c.column+1)));
+  // The four confirmed cloud corners also apply to older saves with null metadata.
+  const knownCorners=cells.filter(c=>boardOf(c)==='great_cloud'?['C1-1','C1-5','C5-1','C5-7'].includes(c.coordinate):rowEdge(c)&&colEdge(c)).length;
+  const unknownCorners=[];
   const coins=state.players[playerId].coins||0, uniqueResources=[...new Set(production.filter(r=>resourceKind(state,r)!=='basic'))];
   const cloudRows=[...new Set(cloud.map(c=>c.row))];
   const cloudRowsLed=cloudRows.filter(row=>state.players.every(p=>p.id===playerId||cloud.filter(c=>c.row===row).length>Object.values(state.cells).filter(c=>boardOf(c)==='great_cloud'&&c.owner===p.id&&c.row===row).length)).length;
@@ -27,7 +28,7 @@ export function playerStats(state, playerId) {
     controlled_cloud_rows:cloudRows.length,controlled_cloud_territories:cloud.length,cloud_rows_led:cloudRowsLed,
     controlled_cities:cityCount,
     controlled_border_territories:cells.filter(c=>boardOf(c)==='great_cloud'?c.isEdge:rowEdge(c)||colEdge(c)).length,
-    controlled_corner_territories:unknownCorners.length?null:knownCorners,
+    controlled_corner_territories:knownCorners,
     controlled_mountain_territories:cells.filter(c=>c.terrain==='mountain').length,
     controlled_fiefs:groups.length,
     cities_in_fiefs_with_no_resource_production:groups.filter(f=>!f.production.length).reduce((sum,f)=>sum+f.coordinates.filter(id=>state.cells[id].building?.category==='city').length,0),
@@ -87,9 +88,6 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
       if(!card)return {id:original.instanceId,name:original.name,points:entry.empty?0:null,note:entry.empty?'No parchment available to copy.':'Awaiting copy choice.'};
       const s=card.scoringSpec;
       let points=basePoints(card,stats[p.id],cards);
-      if(s.metric==='controlled_corner_territories'&&stats[p.id].unknownCorners.length) {
-        const own=stats[p.id];points=ask(`cloud-corners:${original.instanceId}`,'points',`${p.name}: Explorer's cloud corners need a ruling for ${own.unknownCorners.map(c=>c.coordinate).join(', ')}. Choose its total award, including ${own.knownCorners} confirmed corners.`,Array.from({length:own.unknownCorners.length+1},(_,i)=>(own.knownCorners+i)*s.pointsPerItem));
-      }
       if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length===territoryMax&&leaders===1?s.points:0;
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
       return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};

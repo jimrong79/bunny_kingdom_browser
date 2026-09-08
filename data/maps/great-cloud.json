@@ -13,7 +13,7 @@
       "Staggered rows: 5,6,7,6,7 cells. Shared partial sides connect; corner contact does not.",
       "Starting city strengths cross-checked against publisher setup diagram, page 2.",
       "Resource names describe artwork, not printed titles.",
-      "Corner classification awaits clarification; null is not false."
+      "User confirmed on 2026-09-08: exactly four cloud corners, C1-1, C1-5, C5-1, C5-7; C3-1 and C3-7 do not count."
     ]
   },
   "cells": [
@@ -28,7 +28,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": true,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -52,7 +52,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-1",
         "C1-3",
@@ -71,7 +71,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-2",
         "C1-4",
@@ -90,7 +90,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -115,7 +115,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": true,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -139,7 +139,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -164,7 +164,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-1",
         "C1-2",
@@ -185,7 +185,7 @@
       "baseResource": null,
       "startingCityStrength": 3,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-2",
         "C1-3",
@@ -206,7 +206,7 @@
       "baseResource": null,
       "startingCityStrength": 1,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-3",
         "C1-4",
@@ -227,7 +227,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -254,7 +254,7 @@
       "baseResource": null,
       "startingCityStrength": 2,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C1-5",
         "C2-5",
@@ -273,7 +273,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -297,7 +297,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -324,7 +324,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C2-2",
         "C2-3",
@@ -345,7 +345,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C2-3",
         "C2-4",
@@ -366,7 +366,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C2-4",
         "C2-5",
@@ -387,7 +387,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -414,7 +414,7 @@
       "baseResource": "wood",
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C2-6",
         "C3-6",
@@ -432,7 +432,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -458,7 +458,7 @@
       "baseResource": "fish",
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C3-2",
         "C3-3",
@@ -479,7 +479,7 @@
       "baseResource": "fish",
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C3-3",
         "C3-4",
@@ -500,7 +500,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -527,7 +527,7 @@
       "baseResource": null,
       "startingCityStrength": 1,
       "isEdge": false,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C3-5",
         "C3-6",
@@ -548,7 +548,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -574,7 +574,7 @@
       "baseResource": "carrots",
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": true,
       "neighbors": [
         "C4-1",
         "C5-2"
@@ -591,7 +591,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "rainbow",
         "pairId": "rainbow_1",
@@ -616,7 +616,7 @@
       "baseResource": "carrots",
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C4-2",
         "C4-3",
@@ -635,7 +635,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "farm",
         "farmType": "wondrous",
@@ -660,7 +660,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "neighbors": [
         "C4-4",
         "C4-5",
@@ -679,7 +679,7 @@
       "baseResource": null,
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": false,
       "startingBuilding": {
         "category": "rainbow",
         "pairId": "rainbow_2",
@@ -704,7 +704,7 @@
       "baseResource": "wood",
       "startingCityStrength": 0,
       "isEdge": true,
-      "isCorner": null,
+      "isCorner": true,
       "neighbors": [
         "C4-6",
         "C5-6"

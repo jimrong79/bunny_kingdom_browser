@@ -4,7 +4,7 @@ Branch: `feat/in-the-sky`, starting from `4625daf` / `bots-v3-camp-defense`. Kee
 
 ## Current implementation
 
-The main entry point now offers the playable expansion. Map/card data, setup, two-board interaction, expansion mechanics, endgame scoring, bots, and save/resume have been implemented in separate commits. See [rules and validation](in-the-sky-rules.md) for the remaining cloud-corner and District-timing review. The isolated layout preview below remains the original illustrative prototype.
+The main entry point now offers the playable expansion. Map/card data, setup, two-board interaction, expansion mechanics, endgame scoring, bots, and save/resume have been implemented in separate commits. See [rules and validation](in-the-sky-rules.md) for the remaining rules review. The isolated layout preview below remains the original illustrative prototype.
 
 ## Try the layout
 
