@@ -1,3 +1,4 @@
+import {neighborsOf} from './topology.js';
 export function resourcesAt(cell) {
   const produced = cell.baseResource ? [cell.baseResource] : [];
   if (cell.building?.category === 'farm') {
@@ -22,7 +23,7 @@ export function fiefs(state, playerId) {
     pending.delete(queue[0]);
     while (queue.length) {
       const id = queue.shift(), c = state.cells[id]; cells.push(c);
-      const adjacent = [c.row + (c.column - 1), c.row + (c.column + 1), String.fromCharCode(c.row.charCodeAt(0) - 1) + c.column, String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column].filter(to => !blocked.has(id + ':' + to));
+      const adjacent = neighborsOf(state,c);
       if (c.building?.category === 'sky_tower') adjacent.push(...pairs.get(c.building.pairId));
       for (const next of adjacent) if (pending.delete(next)) queue.push(next);
     }

@@ -1,28 +1,33 @@
 import {observeDraftHands} from './bot-memory.js';
 import {playerNames} from './player-names.js';
-export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b'];
+import {hasExpansion, dealSize, cardsPerPick} from './config.js';
+export const COLORS = ['#c84164', '#3978a8', '#a37514', '#23834b', '#8254b1'];
 export function requireRule(ok, message) { if (!ok) throw new Error(message); }
 export function randomSource(seed) {
   let value = 2166136261;
   for (const char of String(seed)) value = Math.imul(value ^ char.charCodeAt(0), 16777619);
   return () => { value += 0x6D2B79F5; let t = value; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-export function makeDeck(data) {
-  const territories = data.map.cells.map(cell => ({ id: `territory_${cell.coordinate}`, instanceId: `territory_${cell.coordinate}`, category: 'territory', name: cell.coordinate, coordinate: cell.coordinate, terrain: cell.terrain }));
-  const others = [...data.buildings.cards, ...data.parchments.cards].flatMap(card => Array.from({ length: card.copies }, (_, i) => ({ ...structuredClone(card), instanceId: `${card.id}_${i + 1}` })));
+export function makeDeck(data, expansion = false) {
+  requireRule(!expansion || data.cloud && data.expansion, 'Expansion data is missing.');
+  const territories = [...data.map.cells,...(expansion?data.cloud.cells:[])].map(cell => ({ id: `territory_${cell.coordinate}`, instanceId: `territory_${cell.coordinate}`, category: 'territory', name: cell.coordinate, coordinate: cell.coordinate, terrain: cell.terrain, ...(cell.boardId?{boardId:cell.boardId}:{}), ...(cell.startingBuilding?.category==='rainbow'?{rainbow:cell.startingBuilding.pairId}:{}) }));
+  const others = [...data.buildings.cards, ...data.parchments.cards,...(expansion?[...data.expansion.cards,...data.expansion.parchments]:[])].flatMap(card => Array.from({ length: card.copies }, (_, i) => ({ ...structuredClone(card), instanceId: `${card.id}_${i + 1}` })));
   const deck = [...territories, ...others];
-  requireRule(deck.length === 182 && new Set(deck.map(c => c.instanceId)).size === 182, 'The base deck must contain 182 unique cards.');
+  const expected=expansion?232:182;
+  requireRule(deck.length === expected && new Set(deck.map(c => c.instanceId)).size === expected, `The deck must contain ${expected} unique cards.`);
   return deck;
 }
-export function createGame(data, botCount, seed = Date.now(), playerName = '') {
-  requireRule(Number.isInteger(botCount) && botCount >= 1 && botCount <= 3, 'Choose 1, 2, or 3 opponents.');
-  const deck = makeDeck(data), rng = randomSource(seed), names = playerNames(playerName);
+export function createGame(data, botCount, seed = Date.now(), playerName = '', options = {}) {
+  const expansion=options.expansion==='in_the_sky';
+  requireRule(Number.isInteger(botCount) && botCount >= 1 && botCount <= (expansion?4:3), 'Choose a supported number of opponents.');
+  const deck = makeDeck(data,expansion), rng = randomSource(seed), names = playerNames(playerName);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   const state = {
     version: 1, seed: String(seed), round: 0, phase: 'setup', draftTurn: 0, deck,
-    cells: Object.fromEntries(data.map.cells.map(c => [c.coordinate, { ...c, owner: null, building: c.startingCityStrength ? { category: 'city', strength: c.startingCityStrength, initial: true } : null }])),
+    ...(expansion?{expansion:'in_the_sky',resourceKinds:Object.fromEntries([...data.buildings.resources,...data.expansion.resources].map(r=>[r.id,r.kind]))}:{}),
+    cells: Object.fromEntries([...data.map.cells,...(expansion?data.cloud.cells:[])].map(c => [c.coordinate, { ...structuredClone(c), owner: null, building: c.startingCityStrength ? { category: 'city', strength: c.startingCityStrength, initial: true } : structuredClone(c.startingBuilding||null) }])),
     blockedConnections: structuredClone(data.map.blockedConnections),
-    players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: names[id], bot: id !== 0, color: COLORS[id], score: 0, hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),
+    players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: names[id], bot: id !== 0, color: COLORS[id], score: 0, ...(expansion?{coins:0,coinEvents:[]}:{}), hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),
     log: [], history: [], lastTurn: null,
   };
   beginRound(state);
@@ -31,14 +36,14 @@ export function createGame(data, botCount, seed = Date.now(), playerName = '') {
 export function beginRound(state) {
   requireRule(state.round < 4, 'All four rounds have been dealt.');
   state.round++; state.draftTurn = 1; state.phase = 'draft';
-  const size = state.players.length === 3 ? 12 : 10;
+  const size = dealSize(state);
   for (const p of state.players) {
     p.hand = state.deck.splice(0, size);
-    p.reserve = state.players.length === 2 ? state.deck.splice(0, 10) : [];
+    p.reserve = state.players.length === 2 ? state.deck.splice(0, size) : [];
     p.ready = false;
   }
   if (state.players.length === 2) for (const p of state.players) p.hand.push(p.reserve.shift());
-  state.log.push(`Round ${state.round}: ${size} cards per hand${state.players.length === 2 ? ', plus 10 reserve cards. First reserve card added' : ''}.`);
+  state.log.push(`Round ${state.round}: ${size} cards per hand${state.players.length === 2 ? `, plus ${size} reserve cards. First reserve card added` : ''}.`);
 }
 export function publicView(state, playerId) {
   const view = structuredClone(state);
@@ -51,7 +56,7 @@ export function publicView(state, playerId) {
   return view;
 }
 
-export function pickCount(state) { return state.players.length === 2 ? 1 : 2; }
+export function pickCount(state) { return cardsPerPick(state); }
 export function draftRecipient(state, playerId) {
   return (playerId + (state.round % 2 ? 1 : -1) + state.players.length) % state.players.length;
 }
