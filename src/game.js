@@ -25,7 +25,7 @@ export function createGame(data, botCount, seed = Date.now(), playerName = '', o
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   const state = {
     version: 1, seed: String(seed), round: 0, phase: 'setup', draftTurn: 0, deck,
-    ...(expansion?{expansion:'in_the_sky',resourceKinds:Object.fromEntries([...data.buildings.resources,...data.expansion.resources].map(r=>[r.id,r.kind]))}:{}),
+    ...(expansion?{expansion:'in_the_sky',districtHistoryVersion:1,resourceKinds:Object.fromEntries([...data.buildings.resources,...data.expansion.resources].map(r=>[r.id,r.kind]))}:{}),
     cells: Object.fromEntries([...data.map.cells,...(expansion?data.cloud.cells:[])].map(c => [c.coordinate, { ...structuredClone(c), owner: null, building: c.startingCityStrength ? { category: 'city', strength: c.startingCityStrength, initial: true } : structuredClone(c.startingBuilding||null) }])),
     blockedConnections: structuredClone(data.map.blockedConnections),
     players: Array.from({ length: botCount + 1 }, (_, id) => ({ id, name: names[id], bot: id !== 0, color: COLORS[id], score: 0, ...(expansion?{coins:0,coinEvents:[]}:{}), hand: [], reserve: [], buildings: [], parchments: [], played: [], discarded: [], harvests: [], ready: false })),

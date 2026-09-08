@@ -1,5 +1,6 @@
 import {validPlayerName} from './player-names.js';
 import {hasExpansion} from './config.js';
+import {restoreDistrictHistory} from './district-history.js';
 const KEY='bunny-kingdom-save-v1';
 const phases=['draft','camps','construction','markets','harvest','parchments','finished'];
 export function validSave(game) {
@@ -17,7 +18,7 @@ export function saveGame(game,ui={},storage) {
   try {(storage||globalThis.localStorage).setItem(KEY,JSON.stringify({format:1,savedAt:new Date().toISOString(),game,ui}));return true;}catch{return false;}
 }
 export function loadGame(storage) {
-  try {const value=JSON.parse((storage||globalThis.localStorage).getItem(KEY));return value?.format===1&&validSave(value.game)?value:null;}catch{return null;}
+  try {const value=JSON.parse((storage||globalThis.localStorage).getItem(KEY));if(value?.format!==1||!validSave(value.game))return null;restoreDistrictHistory(value.game);return value;}catch{return null;}
 }
 export function exportGame(game,ui={}) {
   const seed=String(game.seed).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,100)||'saved';

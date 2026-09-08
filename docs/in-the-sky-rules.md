@@ -18,7 +18,7 @@ The [expansion catalog](../data/cards/in-the-sky.json) preserves all supplied pa
 | Carrotadel | Effective fief strength is the greater of 5 and ordinary city strength. Additional Carrotadels do not stack. Each still counts as a City for parchments. |
 | Rainbow | Claim its fixed cloud territory and reserve its ground token. Place on owned, unbuilt New World territory in a different fief. Move the ground endpoint during Construction; it cannot return to inventory. Relocation awards no coins. |
 | Chimney | Great Cloud only. During harvest choices, select a basic resource actually present in its fief, including a connected New World part. Each own fief containing New World territory gains access for that harvest. It neither creates production nor duplicates a resource already present. |
-| District | Fief containing at least two Rabbits. A new District awards one Coin. Expanding, merging, splitting, or relocating an existing District does not award another. Coins are retained in an event ledger. |
+| District | Fief containing at least two Rabbits. A new District awards one Coin only if none of its territories has ever belonged to a District. All members are permanently marked, including later additions and Rainbow destinations; ownership changes do not reset the mark. Relocation itself awards no Coin. Coins are retained in an event ledger. |
 | Tax Collector | Immediately adds two to Coin value. |
 | Trade | Endgame Coin value multiplied by produced Unique resource types (Luxury and Wondrous). Basics and Chimney access do not count. Trade is included before final rank bonuses. |
 | Parchments | All ten effects are implemented, including Nibblonacci's Treasure-count sequence, strict cloud row majorities, and Cloud Independence recalculated without Rainbow or Sky Tower links. Governors count current Districts. |
@@ -27,9 +27,10 @@ Trading Posts are selected before confirming Chimneys. Changing a Trading Post i
 
 Explorer counts four corners on each board: A1, A10, J1, J10 and C1-1, C1-5, C5-1, C5-7. C3-1 and C3-7 do not count. This user confirmation (2026-09-08) also applies to previews, copied Explorer effects, and older unfinished saves.
 
+District history follows the user’s 2026-09-08 clarification. Camps and newly placed Rainbow/Sky Tower links can form new Districts. Selected cards still resolve together before checking the completed pick; click order creates no temporary rewards. Older unfinished saves recover historical membership from recorded board actions, current groups, and Coin events without rewriting previously awarded Coins.
+
 ## Details awaiting confirmation
 
-- **District timing within a pick:** the current implementation compares the board before and after all selected cards and Provisions effects resolve together, following the base game's simultaneous play step. Selecting the same cards in a different click order therefore cannot manufacture a Coin. The expansion rulebook does not explicitly discuss cases where resolving individual territories sequentially would create an intermediate District. This is a documented interpretation awaiting confirmation, not a claimed publisher clarification.
 - The original game's existing copy-chain, stacked Treasure Hunter, and Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
 
 Primary source: [IELLO's expansion rulebook](https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf), particularly setup on page 2, dealing and board geometry on page 3, Carrotadels on page 4, buildings on page 5, Coins on page 6, and Trade on page 7. Farm restrictions, Treasure classifications, and parchment summaries also use the user's supplied information.

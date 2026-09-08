@@ -1,7 +1,7 @@
 import { requireRule } from './game.js';
 import { fiefs } from './fiefs.js';
 import {boardOf} from './topology.js';
-import {districtSnapshot,awardNewDistricts} from './districts.js';
+import {districtSnapshot,awardNewDistricts,rememberDistricts} from './districts.js';
 export function eligibleTerritories(state, playerId, card) {
   const source=card.category==='rainbow'?fiefs(state,playerId).find(f=>f.coordinates.includes(card.effect.cloud)):null;
   return Object.values(state.cells).filter(c => !c.building && c.owner === (card.category === 'camp' ? null : playerId) && (!card.placement?.allowedTerrains || card.placement.allowedTerrains.includes(c.terrain)) && (!card.placement?.allowedBoards || card.placement.allowedBoards.includes(boardOf(c))) && (card.category!=='rainbow'||source&&!source.coordinates.includes(c.coordinate))).map(c => c.coordinate);
@@ -53,7 +53,9 @@ export function moveRainbow(state,playerId,pairId,coordinate) {
   const old=movableRainbows(state,playerId).find(c=>c.building.pairId===pairId);
   requireRule(old&&rainbowDestinations(state,playerId,pairId).includes(coordinate),'Choose an owned New World territory with an empty slot in a different fief.');
   if(old.coordinate===coordinate)return;
+  rememberDistricts(state,playerId);
   state.cells[coordinate].building=old.building;old.building=null;
+  rememberDistricts(state,playerId);
   state.log.push(`${state.players[playerId].name} moved Rainbow ${pairId.split('_').at(-1)} from ${old.coordinate} to ${coordinate}.`);
   // Moving or splitting a District never creates a coin reward.
 }

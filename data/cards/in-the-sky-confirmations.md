@@ -24,4 +24,4 @@ These classifications must be used by Nibblonacci and existing Treasure-counting
 ## Still requiring review
 
 - The cloud board is transcribed and used in gameplay; review its [territories and adjacency](../../review/cloud/index.html). The user confirmed exactly four cloud corners on 2026-09-08: C1-1, C1-5, C5-1, C5-7; not C3-1 or C3-7.
-- District coins currently resolve after the completed simultaneous pick. These card confirmations do not settle whether sequential territory resolution should be allowed; see [the documented interpretation](../../docs/in-the-sky-rules.md).
+- District history was confirmed on 2026-09-08: a territory that has ever belonged to a District disqualifies future Districts containing it from a new Coin reward. This includes Camps, Rainbow connections, later additions, and changes of ownership. Selected cards continue to resolve as one pick before rewards are checked.
