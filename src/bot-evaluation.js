@@ -85,6 +85,10 @@ function frontierValue(view,stats,{unavailable,circulating}) {
 }
 
 export function idleBuildingValue(view,playerId,card,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)) {
+  // Rainbow connections are evaluated by the placement search. Unlike a fixed
+  // building, placing one preserves the ability to move it in later rounds.
+  // A reserve-only bonus made bots give up useful harvests to "save" that ability.
+  if(card.category==='rainbow')return 0;
   const picks=picksLeft(view),remaining=harvestsLeft(view);
   if(!picks||!remaining)return 0;
   const {unavailable}=knowledge;
@@ -100,7 +104,6 @@ export function idleBuildingValue(view,playerId,card,stats=playerStats(view,play
   if(card.category==='farm')potential=(card.farmType==='luxury'?strength:Math.min(strength,3))*(card.farmType==='luxury'?1:.6);
   if(card.farmType==='basic'&&groups.length&&groups.every(f=>f.resources.includes(card.effect.resource)))potential*=.25;
   if(card.category==='sky_tower')potential=groups.length>1?3:1.5;
-  if(card.category==='rainbow')potential=groups.length>1?5:2;
   if(card.category==='chimney')potential=groups.filter(f=>f.coordinates.some(id=>boardOf(view.cells[id])==='new_world')).reduce((n,f)=>n+f.strength*.4,0);
   if(card.category==='camp')potential=2;
   const waiting=view.players[playerId].buildings.filter(c=>c.category===card.category).length;
