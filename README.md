@@ -4,7 +4,7 @@ Browser implementation of Bunny Kingdom and the In the Sky expansion, with local
 
 ## Play locally
 
-From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Games autosave in this browser; after a refresh, select **Resume**. A seed lets you reproduce a deal. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. All 37 parchments have scoring handlers, including copy selection and treasure interactions. Select board territories to inspect buildings, resources, lava boundaries, and fiefs. Your secret parchments are available to inspect throughout play. Final scores show a per-card breakdown. Unverified tie/copy/stacking cases require an explicit, recorded ruling only if they occur.
+From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Games autosave in this browser; after a refresh, select **Resume**. A seed lets you reproduce a deal. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. All 37 parchments have scoring handlers, including copy selection and treasure interactions. Select board territories to inspect buildings, resources, lava boundaries, and fiefs. Your secret parchments are available to inspect throughout play. Final scores show a per-card breakdown. Only a tie for second at the Opportunist checkpoint still requires an explicit, recorded ruling.
 
 Player panels show total production (including farms and assigned Trading Posts), public building trays, and parchment stacks. Hover, focus, or tap a territory to highlight its connected fief and see its harvest value. Each parchment has an original pictogram; use the [picture guide](review/parchments/index.html) to learn all 37. Gold shields identify treasures and their values.
 
@@ -24,7 +24,7 @@ Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, ru
 
 Choose **Bunny Kingdom + In the Sky** when starting a game. Play against 1–4 bots using both boards and all 232 cards. The expansion includes Carrotadels, Rainbows, Chimneys, District Coins, Trade, and all ten new parchments. Player panels show Coins and current Trade; the final results separate Trade from harvests and parchments.
 
-The branch remains under rule review: cloud corners require an explicit Explorer ruling when relevant, and District coins currently resolve after the complete simultaneous pick. See [implemented rules, known questions, bot behavior, and validation](docs/in-the-sky-rules.md) and the [cloud map review](review/cloud/index.html).
+Explorer scores four corners per board. Districts remember every territory that has belonged to one, including after Rainbow movement or Camp capture. Copy chains use the copying player’s seat, Treasure Hunters stack additively, and all Opportunists share one final checkpoint. Only Opportunist qualification when tied for second remains under review. See [implemented rules, known questions, bot behavior, and validation](docs/in-the-sky-rules.md) and the [cloud map review](review/cloud/index.html).
 
 ## Local workspace
 
@@ -58,10 +58,10 @@ The building inventory is recorded as **21 cities, 12 farms, 6 camps, and 3 Sky 
 
 ## Parchments
 
-All **37 parchment entries** have been imported from the supplied text, completing the recorded **182-card inventory**. The import preserves the source wording and adds draft scoring specifications. Opportunist awards 10 Golden Carrots for second place after final scoring, as confirmed by the user. Tie handling for Opportunist and Matriarch, and some copy-card interactions, still need clarification.
+All **37 parchment entries** have been imported from the supplied text, completing the recorded **182-card inventory**. The import preserves the source wording and adds draft scoring specifications. Opportunist awards 10 Golden Carrots for second place after final scoring, as confirmed by the user. Only Opportunist qualification when tied for second still needs clarification.
 
 - [Readable parchment review and open questions](data/cards/base-parchments.review.md)
 - [Reusable JSON](data/cards/base-parchments.json) and [spreadsheet export](data/cards/base-parchments.csv)
 - [Original supplied text](data/cards/parchments.txt)
 
-The browser game supports a complete four-round session. Inventory coverage is complete; the documented parchment edge cases still require rulings. This is local play against heuristic bots, with no external AI service or account required.
+The browser game supports a complete four-round session. Inventory coverage is complete; the remaining Opportunist tie case requires a ruling when it occurs. This is local play against heuristic bots, with no external AI service or account required.

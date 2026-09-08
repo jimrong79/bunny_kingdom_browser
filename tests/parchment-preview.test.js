@@ -52,6 +52,13 @@ test('copy previews are unavailable before parchments are revealed',()=>{
   const s=setup(['liberal'],['royal_crown']);s.phase='draft';
   assert.deepEqual(copyScoreOptions(s,0,s.players[0].parchments[0]),[]);
 });
+test('changing a copy preserves other independently resolved chains from older saves',()=>{
+  const d={copies:{liberal_test:'socialist_test',socialist_test:'liberal_test'},rulings:{},copyResolutions:{liberal_test:'royal_ring_test',socialist_test:'royal_crown_test'}};
+  const next=copyChoiceDecisions(d,'liberal_test','right_glove_test');
+  assert.equal(next.copies.socialist_test,'liberal_test>royal_crown_test');
+  assert.equal(next.copies.liberal_test,'right_glove_test');assert.deepEqual(next.copyResolutions,{});
+  assert.equal(d.copies.socialist_test,'liberal_test');
+});
 test('known draft values match the scorer across parchment scoring types',()=>{
   const s=setup(['royal_ring','treasure_guardian','bureaucrat','left_glove'],[]);s.phase='draft';
   for(const id of ['A1','A2','A3','A4','A5','B1','J3'])s.cells[id].owner=0;

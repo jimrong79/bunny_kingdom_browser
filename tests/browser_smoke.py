@@ -124,7 +124,7 @@ def game(browser, bots, screenshots):
             page.screenshot(path=str(screenshots / f'{bots+1}-players-harvest.png'), full_page=True)
         page.locator('#next-round').click()
     for select in page.locator('[data-copy]:enabled').all():
-        options = select.locator('option').evaluate_all('(els)=>els.filter(el=>el.value&&!/Liberal|Socialist/.test(el.text)).map(el=>el.value)')
+        options = select.locator('option').evaluate_all('(els)=>els.filter(el=>el.value).map(el=>el.value)')
         if not options:
             options = [select.locator('option').nth(1).get_attribute('value')]
         select.select_option(options[0])

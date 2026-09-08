@@ -33,9 +33,11 @@ Treasure Hunter effects stack additively, as confirmed by the user: the treasure
 
 Copying a copy repeats its effect from the copying player’s seat; it does not inherit the neighbor’s selection. The UI and both bot difficulties enumerate finite paths ending at non-copy parchments, including routes across to the other neighbor. Repeated physical cards are excluded at every player count. A copy with no finite target scores zero. Chained choices and point previews are preserved in saves.
 
-## Details awaiting confirmation
+Opportunist uses one shared scoring checkpoint after Harvest totals, Trade, and all other parchment effects. Each qualifying original or copy earns 10 from that same snapshot. Bonuses never cause a new ranking check. The user confirmed this timing on 2026-09-08.
 
-- The original game's existing Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
+## Detail awaiting confirmation
+
+- **Opportunist tied second place:** whether a tied second-place player qualifies for the 10-point bonus is still unconfirmed. Only this case requests a scoring ruling; multiple effects held by one player share the same tie decision. Matriarch ties are resolved: a sole territory leader earns 12 and tied leaders earn zero, including copies.
 
 Primary source: [IELLO's expansion rulebook](https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf), particularly setup on page 2, dealing and board geometry on page 3, Carrotadels on page 4, buildings on page 5, Coins on page 6, and Trade on page 7. Farm restrictions, Treasure classifications, and parchment summaries also use the user's supplied information.
 

@@ -58,6 +58,13 @@ test('cloud row majority is strict and Governor counts current Districts rather 
  const stats=playerStats(s,0);assert.equal(stats.metrics.cloud_rows_led,1);assert.equal(stats.metrics.controlled_districts,1);
  assert.equal(basePoints(skyCard('governor'),stats,[]),3);assert.equal(basePoints(skyCard('general_mafayette'),stats,[]),5);
 });
+test('Opportunist checkpoint includes Trade and all ordinary parchment points',()=>{
+ const s=skyGame();s.phase='parchments';s.players[0].score=80;s.players[1].score=100;
+ s.players[0].coins=10;s.cells['C1-1'].owner=0;
+ s.players[0].parchments=['royal_crown','opportunist'].map(skyCard);
+ const result=evaluateFinal(s);assert.ok(result.complete);
+ assert.equal(result.players[0].trade,10);assert.equal(result.players[0].total,105);
+});
 test('Cloud Independence recomputes cloud fiefs after removing both types of links',()=>{
  const s=skyGame();
  own(s,'C1-1',{category:'sky_tower',pairId:'sky_1'},'wood');own(s,'C1-2',{category:'city',strength:1});

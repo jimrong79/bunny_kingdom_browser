@@ -30,22 +30,22 @@ All 37 parchments have original vector pictograms shared across hands, inventory
 
 Turn playback uses the public recap and newly placed board buildings. Rabbits hop to claims, building cards enter trays, and anonymous card backs enter parchment stacks. Construction animates placement, including both Sky Tower endpoints and Camp priority. Phone playback brings off-screen territories into view and uses the visible player badge when the player's panel is off screen. The engine settles and autosaves before animation starts. Playback changes presentation only; input is paused until it finishes or is skipped. **Skip**, **Esc**, the saved **Animations** toggle, and device reduced-motion preferences support faster or motion-free play. Refreshing resumes the settled state without replaying effects.
 
-## Rules still requiring a ruling
+## Confirmed scoring and the remaining ruling
 
-The user-supplied catalog defines every card, but four corner-case groups remain unverified. The engine does not silently choose their answers:
+User confirmations on 2026-09-08 define the special cases:
 
-- Matriarch when its holder ties for the most territories.
-- A copy card targeting another copy card. The user must identify the final copied card under their ruling; recursive copy loops are not automatically resolved.
-- Multiple Treasure Hunter effects applying to one player's treasures. The screen requests the total multiplier.
-- Tied rankings or multiple effective Opportunists. The screen requests the applicable awards after other scoring is known.
+- Matriarch requires a sole territory lead; ties score zero.
+- Copying a copy repeats its direction from the copying player's seat. Choices are independent of the neighbor's choices. The UI and bots enumerate finite paths to non-copy cards; repeated physical cards are excluded, and no available finite target means zero points.
+- Treasure Hunter multipliers are additive: one effect gives 2T, two give 3T, and three give 4T, including copies.
+- All Opportunist effects use one shared checkpoint after Trade and all other parchment scores. Bonuses are applied together, with no recheck after standings change.
 
-Only a case that occurs in the current game prompts for input. Rulings are stored in `scoringDecisions` and listed on the score screen. They can be revised before confirming the final score, and remain visible in the saved result. Changing an earlier ruling also reopens any dependent rank ruling. They are user decisions, not verified publisher rules. A single Opportunist with an untied ranking checks second place after the other final scores, then awards its 10 points once.
+Only qualification when tied for second at the Opportunist checkpoint remains unresolved. That case requests an explicit recorded award, which applies consistently to the player's Opportunist effects. Historical completed games retain their saved scoring and recorded rulings.
 
-Copy choices are completed before final scoring. The first version lets bots choose their copy targets before the human confirms theirs; copy-choice ordering remains part of the catalog's open questions. Bot choices are heuristic, not a claim of optimal simultaneous strategy.
+Bots choose their complete copy paths before the human confirms theirs. Their choices are heuristic; final scoring waits for every choice and uses the completed set.
 
 ## Bot behavior and information
 
-**Normal** is the default strategy. **Easy** preserves the original bot from the `bots-v1-baseline` checkpoint. Difficulty is saved in `game.botDifficulty`; saves without that field use Normal. Old saves without observed-hand history accumulate it from their next confirmed pick.
+**Normal** is the default strategy. **Easy** uses the original drafting/building strategy with expansion legality updates; both difficulties share complete copy-path evaluation. The original policy remains available at the `bots-v1-baseline` checkpoint. Difficulty is saved in `game.botDifficulty`; saves without that field use Normal. Old saves without observed-hand history accumulate it from their next confirmed pick.
 
 Normal evaluates legal harvest gains across the remaining rounds and estimates future expansion and parchment progress. Strength-3 cities respect the mountain restriction; luxury farms benefit from additional harvests, while unavailable late terrain sharply reduces their value. Drafting evaluates every unordered pair (up to 66), including combined territory connections and territory/building combinations. Two-player games compare play/discard assignments using the next player's public opportunities. Public board evaluation of rivals excludes their unknown parchment objectives.
 

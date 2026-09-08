@@ -11,7 +11,7 @@
       "The user supplied all 37 named entries as summaries. Original wording is preserved in sourceText; normalized scoringSpec fields are draft interpretations.",
       "One copy per entry is assumed from 37 distinct entries matching the rulebook's 37-card total; no separate copy counts were supplied.",
       "The six royal items and two gloves are classified as treasures; the other 29 are missions.",
-      "On 2026-09-05 the user confirmed Opportunist's timing as after final scoring and updated its source-file entry. Tie and copy interactions remain unresolved.",
+      "On 2026-09-05 the user confirmed Opportunist's timing as after final scoring and updated its source-file entry. Tied second-place qualification remains unresolved; copy interactions were confirmed on 2026-09-08.",
       "This import is not verification of every printed card or a tested scoring engine. Null rule fields are unresolved and must not receive silent defaults."
     ]
   },
@@ -63,6 +63,13 @@
       "date": "2026-09-08",
       "text": "if you want a parchemtn in your right but you only have copy-left and your left has copy-right. then you can this way copy your right.",
       "description": "Copy the effect, interpreting every direction from the copying player’s seat. Select a finite path ending at a non-copy parchment; repeated-card loops are excluded."
+    },
+    {
+      "id": "user-opportunist-checkpoint",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "only \"one\" checkpoint trigger. that's after the final scoring. we don't trigger and check to trigger by copy again.",
+      "description": "All Opportunist effects, including copies, use the same scores after Trade and other parchments, before any Opportunist bonuses; no retriggering."
     }
   ],
   "inventory": {
@@ -88,13 +95,13 @@
   },
   "openItems": [
     {
-      "id": "opportunist-ties-and-copies",
+      "id": "opportunist-ties",
       "cardIds": [
         "opportunist"
       ],
       "status": "open",
-      "question": "How are tied rankings and interactions between copied Opportunists handled after final scoring?",
-      "evidenceNeeded": "Publisher/designer clarification of ties and copied effects. The user confirmed the printed timing as after final scoring."
+      "question": "Does a player tied for second at the single final checkpoint receive 10 points per Opportunist effect?",
+      "evidenceNeeded": "User or publisher clarification of tied second place."
     }
   ],
   "cards": [
@@ -902,17 +909,20 @@
         "rank": 2,
         "points": 10,
         "checkpoint": "after_final_scoring",
-        "tiePolicy": null
+        "tiePolicy": null,
+        "evaluation": "single_shared_pre_bonus_snapshot",
+        "recheckAfterBonus": false
       },
       "sourceRefs": [
         "user-parchments",
-        "user-opportunist-timing"
+        "user-opportunist-timing",
+        "user-opportunist-checkpoint"
       ],
       "notes": [
-        "The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved."
+        "Evaluate once after Harvest totals, Trade, and all other parchments. Every original or copied effect uses the same pre-bonus scores; bonuses never trigger a new rank check. Only qualification when tied for second remains unresolved."
       ],
       "openItemRefs": [
-        "opportunist-ties-and-copies"
+        "opportunist-ties"
       ]
     }
   ]

@@ -21,7 +21,7 @@ The user confirmed that **Merchant's Signet** (written “Merchants Signet” in
 
 These classifications must be used by Nibblonacci and existing Treasure-counting and copying effects; variable scoring does not make these two cards Missions. The source text remains unmodified.
 
-## Still requiring review
+## Confirmed board and District rules
 
 - The cloud board is transcribed and used in gameplay; review its [territories and adjacency](../../review/cloud/index.html). The user confirmed exactly four cloud corners on 2026-09-08: C1-1, C1-5, C5-1, C5-7; not C3-1 or C3-7.
 - District history was confirmed on 2026-09-08: a territory that has ever belonged to a District disqualifies future Districts containing it from a new Coin reward. This includes Camps, Rainbow connections, later additions, and changes of ownership. Selected cards continue to resolve as one pick before rewards are checked.

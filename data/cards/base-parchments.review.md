@@ -8,7 +8,7 @@ One copy per entry and the treasure/mission classification are recorded assumpti
 
 ## Rules still needing clarification
 
-- **Opportunist:** How are tied rankings and interactions between copied Opportunists handled after final scoring?
+- **Opportunist:** Does a player tied for second at the single final checkpoint receive 10 points per Opportunist effect?
 
 ## Card review
 
@@ -76,6 +76,6 @@ In the supplied wording, carrot point rewards mean Golden Carrots (points); Carr
 - **Treasure Hunter:** Each Hunter adds the unmultiplied Treasure total: one Hunter gives 2T, two give 3T, three give 4T. Includes copied Hunters and copied Treasures (user confirmation, 2026-09-08).
 - **Liberal:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11). Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero.
 - **Socialist:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11). Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero.
-- **Opportunist:** The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved.
+- **Opportunist:** Evaluate once after Harvest totals, Trade, and all other parchments. Every original or copied effect uses the same pre-bonus scores; bonuses never trigger a new rank check. Only qualification when tied for second remains unresolved.
 
 General rules and noted special cases: [IELLO rulebook](https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf), pages 4-6 and 10-11. Remaining card text comes from the supplied file.

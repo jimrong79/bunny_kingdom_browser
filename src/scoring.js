@@ -108,11 +108,15 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
   });
   const rankRows=results.flatMap(p=>p.rows.filter(r=>r.type==='rank_bonus').map(row=>({player:p,row})));
   const beforeRank=results.map(p=>p.harvest+(p.trade||0)+p.parchmentPoints);
-  // All other parchment values must be settled before checking Opportunist's rank.
+  const rankAwards=new Map();
+  // One shared checkpoint, after Trade and all other parchment effects. Copies
+  // use this same snapshot; awarded bonuses never trigger another rank check.
   if(!issues.length) for(const {player,row} of rankRows) {
+    if(rankAwards.has(player.playerId)){row.points=rankAwards.get(player.playerId);continue;}
     const value=beforeRank[player.playerId],higher=beforeRank.filter(n=>n>value).length,tied=beforeRank.filter(n=>n===value).length>1;
-    if(rankRows.length>1||tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name}: ${row.name} has ${rankRows.length>1?'copied Opportunist interactions':'a tied rank'}. Scores before these bonuses: ${beforeRank.join(', ')}. Award under your ruling?`,[0,10]);
+    if(higher===1&&tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name} is tied for second at the final checkpoint. Award per Opportunist effect? Scores before these bonuses: ${beforeRank.join(', ')}.`,[0,10]);
     else row.points=higher===1?10:0;
+    rankAwards.set(player.playerId,row.points);
   }
   for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+(p.trade||0)+p.parchmentPoints;}
   return {complete:!issues.length&&results.every(p=>p.rows.every(r=>r.points!==null)),issues,players:results};

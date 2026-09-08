@@ -6,6 +6,9 @@ export function copyChoiceDecisions(decisions, cardId, targetId) {
   const next=structuredClone(decisions||{copies:{},rulings:{},copyResolutions:{}});
   next.copies||={};
   if(next.copies[cardId]!==targetId) {
+    // Old saves stored the end of a chain separately. Preserve other players'
+    // independent choices before replacing the changed choice and clearing aliases.
+    for(const [id,last] of Object.entries(next.copyResolutions||{}))if(next.copies[id]&&!next.copies[id].includes('>'))next.copies[id]+='>'+last;
     next.copies[cardId]=targetId;
     next.copyResolutions={};next.rulings={};
   }

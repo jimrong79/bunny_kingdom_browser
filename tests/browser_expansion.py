@@ -47,7 +47,7 @@ def game(browser, players):
         page.locator('#next-round').click()
     for card in page.locator('[data-copy]:enabled').evaluate_all('(els)=>els.map(e=>e.dataset.copy)'):
         select=page.locator(f'[data-copy="{card}"]')
-        options=select.locator('option').evaluate_all('(els)=>els.filter(e=>e.value&&!/Liberal|Socialist/.test(e.text)).map(e=>e.value)')
+        options=select.locator('option').evaluate_all('(els)=>els.filter(e=>e.value).map(e=>e.value)')
         if options:select.select_option(options[0])
     for _ in range(20):
         pending=page.locator('[data-ruling], [data-copy-resolution]')
