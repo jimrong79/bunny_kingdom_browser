@@ -29,9 +29,11 @@ Explorer counts four corners on each board: A1, A10, J1, J10 and C1-1, C1-5, C5-
 
 District history follows the user’s 2026-09-08 clarification. Camps and newly placed Rainbow/Sky Tower links can form new Districts. Selected cards still resolve together before checking the completed pick; click order creates no temporary rewards. Older unfinished saves recover historical membership from recorded board actions, current groups, and Coin events without rewriting previously awarded Coins.
 
+Treasure Hunter effects stack additively, as confirmed by the user: the treasure total is multiplied by one plus the number of Hunter effects, including copies. Two Hunters give 3T.
+
 ## Details awaiting confirmation
 
-- The original game's existing copy-chain, stacked Treasure Hunter, and Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
+- The original game's existing copy-chain and Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
 
 Primary source: [IELLO's expansion rulebook](https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf), particularly setup on page 2, dealing and board geometry on page 3, Carrotadels on page 4, buildings on page 5, Coins on page 6, and Trade on page 7. Farm restrictions, Treasure classifications, and parchment summaries also use the user's supplied information.
 

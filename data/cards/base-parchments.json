@@ -49,6 +49,13 @@
       "date": "2026-09-08",
       "text": "for matriarch, only if the player is the only player has the most.",
       "description": "User confirms Matriarch requires strictly more territories than every other player; ties score zero."
+    },
+    {
+      "id": "user-hunter-stacking",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "2x treasure hunter is 3T.",
+      "description": "Each Hunter effect adds one unmultiplied Treasure total, including copied Hunters."
     }
   ],
   "inventory": {
@@ -82,17 +89,6 @@
       "status": "open",
       "question": "Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.",
       "evidenceNeeded": "Publisher/designer clarification; the rulebook confirms whole-card copying and copied-treasure bonuses, but does not settle these interactions."
-    },
-    {
-      "id": "treasure-hunter-stacking",
-      "cardIds": [
-        "treasure_hunter",
-        "liberal",
-        "socialist"
-      ],
-      "status": "open",
-      "question": "How do an owned Treasure Hunter and a copied Treasure Hunter combine?",
-      "evidenceNeeded": "Publisher/designer clarification; do not infer repeated doubling or additive bonuses."
     },
     {
       "id": "opportunist-ties-and-copies",
@@ -820,23 +816,22 @@
       "copies": 1,
       "sourceLine": 34,
       "sourceText": "doubles the value of your Treasure Parchments",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "multiply_treasure_values",
         "factor": 2,
         "includesCopiedTreasures": true,
-        "multipleHunterStacking": null
+        "multipleHunterStacking": "additive"
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking"
       ],
       "notes": [
-        "Copied treasures qualify. This effect changes treasure values; it must not be counted as an unrelated fixed-point reward. Stacking with a copied Hunter remains open."
+        "Each Hunter adds the unmultiplied Treasure total: one Hunter gives 2T, two give 3T, three give 4T. Includes copied Hunters and copied Treasures (user confirmation, 2026-09-08)."
       ],
-      "openItemRefs": [
-        "treasure-hunter-stacking"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "liberal",
@@ -857,14 +852,14 @@
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking"
       ],
       "notes": [
         "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
       ],
       "openItemRefs": [
-        "copy-interactions",
-        "treasure-hunter-stacking"
+        "copy-interactions"
       ]
     },
     {
@@ -886,14 +881,14 @@
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking"
       ],
       "notes": [
         "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
       ],
       "openItemRefs": [
-        "copy-interactions",
-        "treasure-hunter-stacking"
+        "copy-interactions"
       ]
     },
     {

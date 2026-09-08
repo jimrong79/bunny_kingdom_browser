@@ -80,9 +80,7 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
   const results=state.players.map(p=>{
     const entries=effective[p.id], cards=entries.map(e=>e.card).filter(Boolean);
     const hunters=cards.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length;
-    const treasureValue=cards.filter(c=>c.parchmentType==='treasure').reduce((sum,c)=>sum+basePoints(c,stats[p.id],cards),0);
-    let multiplier=hunters?2:1;
-    if(hunters>1&&treasureValue>0) multiplier=ask(`hunter:${p.id}`,'multiplier',`${p.name} has ${hunters} Treasure Hunter effects. Choose the total treasure multiplier under your ruling.`,[hunters+1,2**hunters]);
+    const multiplier=1+hunters;
     const rows=entries.map(entry=>{
       const {original,card}=entry;
       if(!card)return {id:original.instanceId,name:original.name,points:entry.empty?0:null,note:entry.empty?'No parchment available to copy.':'Awaiting copy choice.'};

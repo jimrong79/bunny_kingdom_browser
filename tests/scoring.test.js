@@ -29,10 +29,11 @@ test('Matriarch requires a sole territory leader, including copies and legacy ca
  s.cells.A2.owner=1;d.rulings['matriarch:matriarch_test']=12;assert.deepEqual(points(),[0,0]);
  s.cells.A3.owner=1;assert.deepEqual(points(),[0,12]);
 });
-test('duplicate Hunters require explicit rulings',()=>{
+test('each copied Hunter adds one treasure total, with no compounding or ruling',()=>{
  const s=setup(),d=choices();
  s.players[0].parchments=['royal_crown','treasure_hunter','liberal'].map(card);s.players[1].parchments=[{...card('treasure_hunter'),instanceId:'other_hunter'}];d.copies.liberal_test='other_hunter';
- let r=evaluateFinal(s,d);assert.ok(r.issues.some(x=>x.kind==='multiplier'));d.rulings['hunter:0']=3;r=evaluateFinal(s,d);assert.ok(r.complete);assert.equal(r.players[0].parchmentPoints,15);
+ d.rulings['hunter:0']=4; // An obsolete ruling must not override the confirmed rule.
+ const r=evaluateFinal(s,d);assert.ok(r.complete);assert.equal(r.players[0].parchmentPoints,15);
 });
 test('copy-card loops are surfaced and cannot silently recurse',()=>{
  const s=setup();s.players[0].parchments=[card('liberal')];s.players[1].parchments=[card('socialist'),card('royal_ring')];

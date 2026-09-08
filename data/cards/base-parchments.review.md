@@ -9,7 +9,6 @@ One copy per entry and the treasure/mission classification are recorded assumpti
 ## Rules still needing clarification
 
 - **Liberal, Socialist:** Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.
-- **Treasure Hunter, Liberal, Socialist:** How do an owned Treasure Hunter and a copied Treasure Hunter combine?
 - **Opportunist:** How are tied rankings and interactions between copied Opportunists handled after final scoring?
 
 ## Card review
@@ -51,7 +50,7 @@ In the supplied wording, carrot point rewards mean Golden Carrots (points); Carr
 | 31 | Matriarch | mission | 12 carrots if you control the most territories | Draft from source |
 | 32 | Little Prince | mission | perform another harvest of all your Fiefs except your best Fief | Draft from source |
 | 33 | Treasure Guardian | mission | 3 carrots for each Treasure Parchment you own | Draft from source |
-| 34 | Treasure Hunter | mission | doubles the value of your Treasure Parchments | Needs clarification |
+| 34 | Treasure Hunter | mission | doubles the value of your Treasure Parchments | Draft from source |
 | 35 | Liberal | mission | copy one Parchment belonging to the player on your right | Needs clarification |
 | 36 | Socialist | mission | copy one Parchment belonging to the player on your left | Needs clarification |
 | 37 | Opportunist | mission | 10 carrots if you're in second place after final scoring | Needs clarification |
@@ -75,7 +74,7 @@ In the supplied wording, carrot point rewards mean Golden Carrots (points); Carr
 - **Matriarch:** Requires strictly more territories than every other player; ties score zero (user confirmation, 2026-09-08).
 - **Little Prince:** If multiple fiefs tie for highest harvest, exclude exactly one of them (rulebook page 11).
 - **Treasure Guardian:** A copied treasure qualifies for this bonus (rulebook page 11).
-- **Treasure Hunter:** Copied treasures qualify. This effect changes treasure values; it must not be counted as an unrelated fixed-point reward. Stacking with a copied Hunter remains open.
+- **Treasure Hunter:** Each Hunter adds the unmultiplied Treasure total: one Hunter gives 2T, two give 3T, three give 4T. Includes copied Hunters and copied Treasures (user confirmation, 2026-09-08).
 - **Liberal:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).
 - **Socialist:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).
 - **Opportunist:** The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved.

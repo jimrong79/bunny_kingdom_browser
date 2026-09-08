@@ -28,18 +28,16 @@ export function copyScoreOptions(state, playerId, card, decisions=state.scoringD
 // Keep unresolved copies in the list so Bureaucrat still counts every parchment.
 function knownDraftPoints(view, playerId, cards, stats) {
   const hunters=cards.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length;
-  const treasureValue=cards.filter(c=>c.parchmentType==='treasure').reduce((sum,c)=>sum+basePoints(c,stats,cards),0);
-  const multiplierPending=hunters>1&&treasureValue>0;
   const territories=view.players.map(p=>Object.values(view.cells).filter(c=>c.owner===p.id).length);
   const most=Math.max(...territories);
   const points=new Map(cards.map(card=>{
     let value=basePoints(card,stats,cards);
     if(card.scoringSpec.type==='territory_lead_bonus')value=stats.cells.length===most&&
       territories.filter(n=>n===most).length===1?card.scoringSpec.points:0;
-    if(card.parchmentType==='treasure')value=multiplierPending?null:value*(hunters?2:1);
+    if(card.parchmentType==='treasure')value*=1+hunters;
     return [card.instanceId,value];
   }));
-  return {points,multiplierPending,total:[...points.values()].reduce((sum,n)=>sum+(n??0),0)};
+  return {points,total:[...points.values()].reduce((sum,n)=>sum+(n??0),0)};
 }
 
 export function draftParchmentPreview(state, playerId, card) {
@@ -51,8 +49,6 @@ export function draftParchmentPreview(state, playerId, card) {
   const before=knownDraftPoints(view,playerId,kept,stats);
   const after=knownDraftPoints(view,playerId,[...kept,card],stats);
   const points=after.points.get(card.instanceId);
-  if(after.multiplierPending)return {points:null,reason:'A ruling is needed for multiple Treasure Hunter effects.'};
-  if(points===null)return {points:null,reason:'Cloud corner classification needs a ruling.'};
   const notes=[];
   if(kept.some(isCopy))notes.push('Unchosen copy effects are excluded.');
   if(kept.some(c=>c.scoringSpec.type==='rank_bonus'))notes.push('Final-rank bonuses are excluded.');
