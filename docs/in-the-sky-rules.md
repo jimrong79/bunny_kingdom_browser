@@ -31,9 +31,11 @@ District history follows the user’s 2026-09-08 clarification. Camps and newly 
 
 Treasure Hunter effects stack additively, as confirmed by the user: the treasure total is multiplied by one plus the number of Hunter effects, including copies. Two Hunters give 3T.
 
+Copying a copy repeats its effect from the copying player’s seat; it does not inherit the neighbor’s selection. The UI and both bot difficulties enumerate finite paths ending at non-copy parchments, including routes across to the other neighbor. Repeated physical cards are excluded at every player count. A copy with no finite target scores zero. Chained choices and point previews are preserved in saves.
+
 ## Details awaiting confirmation
 
-- The original game's existing copy-chain and Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
+- The original game's existing Opportunist interaction questions still use recorded final-scoring rulings when applicable. Matriarch ties are resolved: the user confirmed on 2026-09-08 that only a sole territory leader earns its 12 points; tied leaders earn zero, including copied Matriarch effects.
 
 Primary source: [IELLO's expansion rulebook](https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf), particularly setup on page 2, dealing and board geometry on page 3, Carrotadels on page 4, buildings on page 5, Coins on page 6, and Trade on page 7. Farm restrictions, Treasure classifications, and parchment summaries also use the user's supplied information.
 

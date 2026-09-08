@@ -1,7 +1,7 @@
 // All decisions use the player's permitted view. No seed, hidden deck, or rival hand is consulted.
 import {playCard} from './game.js';
 import {fiefs} from './fiefs.js';
-import {playerStats,copyOptions,isCopy} from './scoring.js';
+import {playerStats,copyPaths,isCopy,evaluateFinal} from './scoring.js';
 import {forkPosition,positionValue,parchmentValue} from './bot-evaluation.js';
 import {planBuildings} from './bot-planning.js';
 import {campExposure,passedCampPenalty} from './bot-camp-defense.js';
@@ -146,19 +146,19 @@ export function chooseMarkets(view,playerId) {
     +(view.round===4?parchmentValue(trial,playerId,trial.players[playerId].parchments,playerStats(trial,playerId),false):0));
 }
 
-export function chooseCopies(view,playerId,decisions) {
+export function chooseCopies(view,playerId,decisions={copies:{},rulings:{},copyResolutions:{}}) {
   const player=view.players[playerId],copies=player.parchments.filter(isCopy),stats=playerStats(view,playerId);
   let best={},value=-Infinity;
   const visit=(index,effective,choices)=>{
     if(index===copies.length) {
-      const score=parchmentValue(view,playerId,effective,stats,false);
+      const result=evaluateFinal(view,{...decisions,copies:{...decisions.copies,...choices},copyResolutions:{}}).players[playerId];
+      const score=result.rows.every(r=>r.points!==null)?result.total-view.players[playerId].score-(result.trade||0):parchmentValue(view,playerId,effective,stats,false);
       if(score>value){value=score;best=choices;}
       return;
     }
-    const copy=copies[index],available=copyOptions(view,playerId,copy).cards;
-    const targets=available.filter(c=>!isCopy(c));
-    if(!targets.length){visit(index+1,effective.filter(c=>c.instanceId!==copy.instanceId),available.length?{...choices,[copy.instanceId]:available[0].instanceId}:choices);return;}
-    for(const target of targets)visit(index+1,effective.map(c=>c.instanceId===copy.instanceId?{...target,instanceId:copy.instanceId}:c),{...choices,[copy.instanceId]:target.instanceId});
+    const copy=copies[index],paths=copyPaths(view,playerId,copy);
+    if(!paths.length){visit(index+1,effective.map(c=>c.instanceId===copy.instanceId?{...c,scoringSpec:{type:'fixed_points',points:0}}:c),choices);return;}
+    for(const path of paths)visit(index+1,effective.map(c=>c.instanceId===copy.instanceId?{...path.at(-1),instanceId:copy.instanceId}:c),{...choices,[copy.instanceId]:path.map(c=>c.instanceId).join('>')});
   };
   visit(0,player.parchments,{});return best;
 }

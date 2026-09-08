@@ -1,5 +1,5 @@
 import { publicView } from './game.js';
-import { basePoints, copyOptions, evaluateFinal, isCopy, playerStats } from './scoring.js';
+import { basePoints, copyPaths, evaluateFinal, isCopy, playerStats } from './scoring.js';
 
 // Preview exactly the choices that will be used when the dropdown changes.
 export function copyChoiceDecisions(decisions, cardId, targetId) {
@@ -15,10 +15,11 @@ export function copyChoiceDecisions(decisions, cardId, targetId) {
 export function copyScoreOptions(state, playerId, card, decisions=state.scoringDecisions) {
   if(state.phase!=='parchments')return [];
   const view=publicView(state,playerId);
-  return copyOptions(view,playerId,card).cards.map(target=>{
-    const result=evaluateFinal(view,copyChoiceDecisions(decisions,card.instanceId,target.instanceId));
+  return copyPaths(view,playerId,card).map(path=>{
+    const target=path.at(-1),value=path.map(c=>c.instanceId).join('>');
+    const result=evaluateFinal(view,copyChoiceDecisions(decisions,card.instanceId,value));
     const own=result.players[playerId],row=own.rows.find(r=>r.id===card.instanceId);
-    return {card:target,points:row?.points??null,total:own.total,
+    return {card:target,path,value,points:row?.points??null,total:own.total,
       complete:own.rows.every(r=>r.points!==null)};
   }).sort((a,b)=>Number(b.complete)-Number(a.complete)||
     (a.complete?b.total-a.total:0)||a.card.name.localeCompare(b.card.name)||a.card.instanceId.localeCompare(b.card.instanceId));

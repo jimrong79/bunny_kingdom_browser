@@ -35,10 +35,12 @@ test('each copied Hunter adds one treasure total, with no compounding or ruling'
  d.rulings['hunter:0']=4; // An obsolete ruling must not override the confirmed rule.
  const r=evaluateFinal(s,d);assert.ok(r.complete);assert.equal(r.players[0].parchmentPoints,15);
 });
-test('copy-card loops are surfaced and cannot silently recurse',()=>{
+test('an incomplete copy chain requires a complete legal path rather than an arbitrary ruling',()=>{
  const s=setup();s.players[0].parchments=[card('liberal')];s.players[1].parchments=[card('socialist'),card('royal_ring')];
  const d=choices();d.copies.liberal_test='socialist_test';d.copies.socialist_test='liberal_test';
- assert.equal(evaluateFinal(s,d).issues.filter(x=>x.kind==='copy_resolution').length,2);
+ const result=evaluateFinal(s,d);
+ assert.ok(!result.complete);assert.ok(result.issues.some(x=>x.kind==='copy'&&x.key==='liberal_test'));
+ assert.equal(result.issues.filter(x=>x.kind==='copy_resolution').length,0);
 });
 test('all basic scoring definitions calculate known spatial/resource counts',()=>{
  const s=setup();for(const id of ['A1','A2','A3','A4','B1','J3'])s.cells[id].owner=0;

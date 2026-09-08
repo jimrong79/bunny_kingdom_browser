@@ -56,6 +56,13 @@
       "date": "2026-09-08",
       "text": "2x treasure hunter is 3T.",
       "description": "Each Hunter effect adds one unmultiplied Treasure total, including copied Hunters."
+    },
+    {
+      "id": "user-copy-chains",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "if you want a parchemtn in your right but you only have copy-left and your left has copy-right. then you can this way copy your right.",
+      "description": "Copy the effect, interpreting every direction from the copying player’s seat. Select a finite path ending at a non-copy parchment; repeated-card loops are excluded."
     }
   ],
   "inventory": {
@@ -80,16 +87,6 @@
     "nullFields": "Unresolved rule: a future scoring engine must require a verified resolution before relying on this field."
   },
   "openItems": [
-    {
-      "id": "copy-interactions",
-      "cardIds": [
-        "liberal",
-        "socialist"
-      ],
-      "status": "open",
-      "question": "Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.",
-      "evidenceNeeded": "Publisher/designer clarification; the rulebook confirms whole-card copying and copied-treasure bonuses, but does not settle these interactions."
-    },
     {
       "id": "opportunist-ties-and-copies",
       "cardIds": [
@@ -841,26 +838,26 @@
       "copies": 1,
       "sourceLine": 35,
       "sourceText": "copy one Parchment belonging to the player on your right",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "copy_parchment",
         "targetNeighbor": "right",
         "copyEntireCard": true,
         "copiedTreasuresQualifyForBonuses": true,
-        "copyCardTargetPolicy": null,
-        "choiceOrder": null
+        "copyCardTargetPolicy": "copy_effect_from_own_seat",
+        "choiceOrder": "independent_finite_paths_before_scoring"
       },
       "sourceRefs": [
         "user-parchments",
         "official-rulebook",
-        "user-hunter-stacking"
+        "user-hunter-stacking",
+        "user-copy-chains"
       ],
       "notes": [
-        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).",
+        "Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero."
       ],
-      "openItemRefs": [
-        "copy-interactions"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "socialist",
@@ -870,26 +867,26 @@
       "copies": 1,
       "sourceLine": 36,
       "sourceText": "copy one Parchment belonging to the player on your left",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "copy_parchment",
         "targetNeighbor": "left",
         "copyEntireCard": true,
         "copiedTreasuresQualifyForBonuses": true,
-        "copyCardTargetPolicy": null,
-        "choiceOrder": null
+        "copyCardTargetPolicy": "copy_effect_from_own_seat",
+        "choiceOrder": "independent_finite_paths_before_scoring"
       },
       "sourceRefs": [
         "user-parchments",
         "official-rulebook",
-        "user-hunter-stacking"
+        "user-hunter-stacking",
+        "user-copy-chains"
       ],
       "notes": [
-        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).",
+        "Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero."
       ],
-      "openItemRefs": [
-        "copy-interactions"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "opportunist",

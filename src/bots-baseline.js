@@ -97,25 +97,5 @@ export function chooseMarkets(view, playerId) {
   visit(0,[]);return best;
 }
 
-import { basePoints, playerStats, copyOptions, isCopy } from './scoring.js';
-export function chooseCopies(view, playerId, decisions) {
-  const player=view.players[playerId],stats=playerStats(view,playerId),result={};
-  for(const copy of player.parchments.filter(isCopy)) {
-    const options=copyOptions(view,playerId,copy).cards.filter(c=>!isCopy(c));
-    let best=null,bestValue=-Infinity;
-    for(const target of options) {
-      const all=view.players.flatMap(p=>Array.isArray(p.parchments)?p.parchments:[]);
-      const effective=player.parchments.map(c=>c.instanceId===copy.instanceId?target:all.find(t=>t.instanceId===(result[c.instanceId]||decisions.copies[c.instanceId]))||c);
-      let value=basePoints(target,stats,effective) ?? 5;
-      if(target.scoringSpec.type==='multiply_treasure_values') {
-        const already=effective.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length>1;
-        value=already?-1:effective.filter(c=>c.parchmentType==='treasure').reduce((sum,c)=>sum+basePoints(c,stats,effective),0);
-      }
-      if(target.parchmentType==='treasure') value+=effective.filter(c=>c.id==='treasure_guardian').length*3;
-      if(value>bestValue){bestValue=value;best=target;}
-    }
-    if(best)result[copy.instanceId]=best.instanceId;
-    else if(copyOptions(view,playerId,copy).cards.length) result[copy.instanceId]=copyOptions(view,playerId,copy).cards[0].instanceId;
-  }
-  return result;
-}
+import { basePoints, playerStats } from './scoring.js';
+export {chooseCopies} from './bots.js';

@@ -45,7 +45,7 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
       const other=view.players[neighbor].parchments,count=Array.isArray(other)?other.length:other.count;
       points=count?Math.min(12,4+count*.7):growth?4:0;
     }
-    // More than one Hunter still needs an explicit ruling in the real final scoring.
+    // Each Hunter adds one unmultiplied Treasure total, including copied effects.
     if(card.parchmentType==='treasure')points*=hunters?hunters+1:1;
     value+=points||0;
   }

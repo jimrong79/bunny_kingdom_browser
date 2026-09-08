@@ -31,13 +31,15 @@ test('copying Treasure Hunter can rank first even with zero points on its own ro
   const [best]=copyScoreOptions(s,0,s.players[0].parchments[2]);
   assert.equal(best.card.id,'treasure_hunter');assert.equal(best.points,0);assert.equal(best.total,42);
 });
-test('stacked Hunter copy options show exact additive scores while unresolved chains remain pending',()=>{
+test('stacked Hunter and chained copy options show exact additive scores',()=>{
   const s=setup(['royal_crown','treasure_hunter','liberal'],['socialist','treasure_hunter','royal_ring']);
   const options=copyScoreOptions(s,0,s.players[0].parchments[2]);
   assert.equal(options[0].card.id,'treasure_hunter');assert.equal(options[0].complete,true);
   assert.equal(options[0].total,35);
   assert.equal(options.find(o=>o.card.id==='royal_ring').complete,true);
-  assert.equal(options.find(o=>o.card.id==='socialist').points,null);
+  const chained=options.find(o=>o.value==='socialist_test>treasure_hunter_test');
+  assert.ok(chained);assert.equal(chained.points,0);assert.equal(chained.total,35);
+  assert.ok(options.every(o=>o.complete));
 });
 test('changed copy choices clear dependent rulings exactly as the preview expects',()=>{
   const d={copies:{liberal_test:'treasure_hunter_test'},rulings:{'hunter:0':3},copyResolutions:{socialist_test:'royal_ring_test'}};

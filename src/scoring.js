@@ -9,6 +9,24 @@ export function copyOptions(state, playerId, card) {
   const neighbor=(playerId+direction+state.players.length)%state.players.length;
   return {playerId:neighbor,cards:state.players[neighbor].parchments};
 }
+export function copyPaths(state,playerId,card) {
+  const paths=[];
+  const visit=(effect,path,seen)=>{
+    for(const target of copyOptions(state,playerId,effect).cards) {
+      if(seen.has(target.instanceId))continue;
+      const next=[...path,target];
+      if(isCopy(target))visit(target,next,new Set([...seen,target.instanceId]));
+      else paths.push(next);
+    }
+  };
+  // Every copied left/right instruction is interpreted from this player's seat.
+  visit(card,[],new Set([card.instanceId]));
+  return paths;
+}
+export function copyChoiceValue(decisions,cardId) {
+  const value=decisions?.copies?.[cardId]||'',legacy=decisions?.copyResolutions?.[cardId];
+  return value&&!value.includes('>')&&legacy?value+'>'+legacy:value;
+}
 export function playerStats(state, playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId), groups=fiefs(state,playerId);
   const production=cells.flatMap(resourcesAt), cityCount=cells.filter(c=>c.building?.category==='city').length;
@@ -57,7 +75,7 @@ export function basePoints(card, stats, effective) {
   }
 }
 export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolutions:{}}) {
-  const issues=[],allCards=state.players.flatMap(p=>p.parchments),stats=state.players.map(p=>playerStats(state,p.id));
+  const issues=[],stats=state.players.map(p=>playerStats(state,p.id));
   const ask=(key,kind,label,options)=>{
     const value=decisions.rulings?.[key];
     if(!options.includes(value)){issues.push({key,kind,label,options});return null;}
@@ -65,20 +83,16 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
   };
   const effective=state.players.map(p=>p.parchments.map(original=>{
     if(!isCopy(original))return {original,card:original};
-    const options=copyOptions(state,p.id,original);
-    if(!options.cards.length)return {original,card:null,empty:true};
-    const selected=options.cards.find(c=>c.instanceId===decisions.copies?.[original.instanceId]);
-    if(!selected){issues.push({key:original.instanceId,kind:'copy',playerId:p.id,label:`${p.name}: choose ${original.name}'s target.`});return {original,card:null};}
-    if(isCopy(selected)) {
-      const resolution=allCards.find(c=>c.instanceId===decisions.copyResolutions?.[original.instanceId]&&!isCopy(c));
-      if(!resolution){issues.push({key:original.instanceId,kind:'copy_resolution',label:`${p.name}: ${original.name} copies ${selected.name}. This interaction needs a ruling: select the final card it becomes.`,options:allCards.filter(c=>!isCopy(c)).map(c=>c.instanceId)});return {original,card:null};}
-      return {original,card:resolution,copiedFrom:selected.name,manual:true};
-    }
-    return {original,card:selected,copiedFrom:selected.name};
+    const paths=copyPaths(state,p.id,original);
+    if(!paths.length)return {original,card:null,empty:true};
+    const value=copyChoiceValue(decisions,original.instanceId);
+    const selected=paths.find(path=>path.map(c=>c.instanceId).join('>')===value);
+    if(!selected){issues.push({key:original.instanceId,kind:'copy',playerId:p.id,label:`${p.name}: choose a parchment to copy with ${original.name}.`});return {original,card:null};}
+    return {original,card:selected.at(-1),copiedFrom:selected.map(c=>c.name).join(' → ')};
   }));
   const territoryMax=Math.max(...stats.map(s=>s.cells.length)), leaders=stats.filter(s=>s.cells.length===territoryMax).length;
   const results=state.players.map(p=>{
-    const entries=effective[p.id], cards=entries.map(e=>e.card).filter(Boolean);
+    const entries=effective[p.id], cards=entries.map(e=>e.card||e.original);
     const hunters=cards.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length;
     const multiplier=1+hunters;
     const rows=entries.map(entry=>{
@@ -88,7 +102,7 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
       let points=basePoints(card,stats[p.id],cards);
       if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length===territoryMax&&leaders===1?s.points:0;
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
-      return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};
+      return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier}× total).`:entry.copiedFrom?`Copies ${entry.copiedFrom}.`:''};
     });
     return {playerId:p.id,harvest:p.score,...(hasExpansion(state)?{trade:stats[p.id].metrics.trade_score,coins:stats[p.id].metrics.coins,uniqueResources:stats[p.id].uniqueResources}:{}),rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
   });
