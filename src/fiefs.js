@@ -31,7 +31,7 @@ export function fiefs(state, playerId, {ignoreLinks=false,boardId=null,harvest=f
     const strength = Math.max(ordinaryStrength,cells.some(c=>c.building?.cityType==='carrotadel')?5:0);
     result.push({ coordinates: cells.map(c => c.coordinate), strength, resources, production, wealth: resources.length, points: strength * resources.length });
   }
-  if(harvest) {
+  if(harvest&&owned.some(c=>c.building?.category==='chimney')) {
     const shared=[...new Set(owned.filter(c=>c.building?.category==='chimney').flatMap(c=>{
       const group=result.find(f=>f.coordinates.includes(c.coordinate)),choice=c.building.choice;
       return ['wood','fish','carrots'].includes(choice)&&group.resources.includes(choice)?[choice]:[];

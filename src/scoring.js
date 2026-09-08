@@ -1,6 +1,7 @@
 import { requireRule } from './game.js';
 import { fiefs, resourcesAt } from './fiefs.js';
 import {boardOf} from './topology.js';
+import {hasExpansion} from './config.js';
 export const resourceKind = (state,id) => state.resourceKinds?.[id] || (['wood','fish','carrots'].includes(id)?'basic':'luxury');
 export const isCopy = c => c.scoringSpec?.type === 'copy_parchment';
 export function copyOptions(state, playerId, card) {
@@ -93,17 +94,17 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
       return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};
     });
-    return {playerId:p.id,harvest:p.score,trade:stats[p.id].metrics.trade_score,coins:stats[p.id].metrics.coins,uniqueResources:stats[p.id].uniqueResources,rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
+    return {playerId:p.id,harvest:p.score,...(hasExpansion(state)?{trade:stats[p.id].metrics.trade_score,coins:stats[p.id].metrics.coins,uniqueResources:stats[p.id].uniqueResources}:{}),rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
   });
   const rankRows=results.flatMap(p=>p.rows.filter(r=>r.type==='rank_bonus').map(row=>({player:p,row})));
-  const beforeRank=results.map(p=>p.harvest+p.trade+p.parchmentPoints);
+  const beforeRank=results.map(p=>p.harvest+(p.trade||0)+p.parchmentPoints);
   // All other parchment values must be settled before checking Opportunist's rank.
   if(!issues.length) for(const {player,row} of rankRows) {
     const value=beforeRank[player.playerId],higher=beforeRank.filter(n=>n>value).length,tied=beforeRank.filter(n=>n===value).length>1;
     if(rankRows.length>1||tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name}: ${row.name} has ${rankRows.length>1?'copied Opportunist interactions':'a tied rank'}. Scores before these bonuses: ${beforeRank.join(', ')}. Award under your ruling?`,[0,10]);
     else row.points=higher===1?10:0;
   }
-  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+p.trade+p.parchmentPoints;}
+  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+(p.trade||0)+p.parchmentPoints;}
   return {complete:!issues.length&&results.every(p=>p.rows.every(r=>r.points!==null)),issues,players:results};
 }
 export function finalizeScoring(state, decisions) {
