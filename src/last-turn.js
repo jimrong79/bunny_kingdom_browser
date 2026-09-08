@@ -8,6 +8,7 @@ function actionText(action,state) {
     case 'parchment': return 'Kept a secret parchment';
     case 'provisions': return 'Played Provisions · 2 extra cards';
     case 'discard': return `Discarded ${action.count} card${action.count===1?'':'s'} face down`;
+    case 'coins': return `Collected ${action.count} Coin${action.count===1?'':'s'} · ${action.reason||'Tax Collector'}`;
     default: return '';
   }
 }

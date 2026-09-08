@@ -1,21 +1,52 @@
 import { requireRule } from './game.js';
 import { fiefs, resourcesAt } from './fiefs.js';
+import {boardOf} from './topology.js';
+import {hasExpansion} from './config.js';
+export const resourceKind = (state,id) => state.resourceKinds?.[id] || (['wood','fish','carrots'].includes(id)?'basic':'luxury');
 export const isCopy = c => c.scoringSpec?.type === 'copy_parchment';
 export function copyOptions(state, playerId, card) {
   const direction=card.scoringSpec.targetNeighbor==='left'?1:-1;
   const neighbor=(playerId+direction+state.players.length)%state.players.length;
   return {playerId:neighbor,cards:state.players[neighbor].parchments};
 }
+export function copyPaths(state,playerId,card) {
+  const paths=[];
+  const visit=(effect,path,seen)=>{
+    for(const target of copyOptions(state,playerId,effect).cards) {
+      if(seen.has(target.instanceId))continue;
+      const next=[...path,target];
+      if(isCopy(target))visit(target,next,new Set([...seen,target.instanceId]));
+      else paths.push(next);
+    }
+  };
+  // Every copied left/right instruction is interpreted from this player's seat.
+  visit(card,[],new Set([card.instanceId]));
+  return paths;
+}
+export function copyChoiceValue(decisions,cardId) {
+  const value=decisions?.copies?.[cardId]||'',legacy=decisions?.copyResolutions?.[cardId];
+  return value&&!value.includes('>')&&legacy?value+'>'+legacy:value;
+}
 export function playerStats(state, playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId), groups=fiefs(state,playerId);
   const production=cells.flatMap(resourcesAt), cityCount=cells.filter(c=>c.building?.category==='city').length;
-  const rows=Object.values(state.cells).map(c=>c.row.charCodeAt(0)), columns=Object.values(state.cells).map(c=>c.column);
+  const ground=Object.values(state.cells).filter(c=>boardOf(c)==='new_world');
+  const rows=ground.map(c=>c.row.charCodeAt(0)), columns=ground.map(c=>c.column);
   const minRow=Math.min(...rows), maxRow=Math.max(...rows), minCol=Math.min(...columns), maxCol=Math.max(...columns);
   const rowEdge=c=>[minRow,maxRow].includes(c.row.charCodeAt(0)), colEdge=c=>[minCol,maxCol].includes(c.column);
-  return {cells,groups,production,metrics:{
+  const cloud=cells.filter(c=>boardOf(c)==='great_cloud');
+  // The four confirmed cloud corners also apply to older saves with null metadata.
+  const knownCorners=cells.filter(c=>boardOf(c)==='great_cloud'?['C1-1','C1-5','C5-1','C5-7'].includes(c.coordinate):rowEdge(c)&&colEdge(c)).length;
+  const unknownCorners=[];
+  const coins=state.players[playerId].coins||0, uniqueResources=[...new Set(production.filter(r=>resourceKind(state,r)!=='basic'))];
+  const cloudRows=[...new Set(cloud.map(c=>c.row))];
+  const cloudRowsLed=cloudRows.filter(row=>state.players.every(p=>p.id===playerId||cloud.filter(c=>c.row===row).length>Object.values(state.cells).filter(c=>boardOf(c)==='great_cloud'&&c.owner===p.id&&c.row===row).length)).length;
+  return {cells,groups,production,knownCorners,unknownCorners,uniqueResources,resourceKinds:state.resourceKinds,get cloudPoints(){return cloud.length?fiefs(state,playerId,{boardId:'great_cloud',ignoreLinks:true}).reduce((sum,f)=>sum+f.points,0):0;},metrics:{
+    coins,trade_score:coins*uniqueResources.length,controlled_districts:groups.filter(f=>f.coordinates.length>=2).length,
+    controlled_cloud_rows:cloudRows.length,controlled_cloud_territories:cloud.length,cloud_rows_led:cloudRowsLed,
     controlled_cities:cityCount,
-    controlled_border_territories:cells.filter(c=>rowEdge(c)||colEdge(c)).length,
-    controlled_corner_territories:cells.filter(c=>rowEdge(c)&&colEdge(c)).length,
+    controlled_border_territories:cells.filter(c=>boardOf(c)==='great_cloud'?c.isEdge:rowEdge(c)||colEdge(c)).length,
+    controlled_corner_territories:knownCorners,
     controlled_mountain_territories:cells.filter(c=>c.terrain==='mountain').length,
     controlled_fiefs:groups.length,
     cities_in_fiefs_with_no_resource_production:groups.filter(f=>!f.production.length).reduce((sum,f)=>sum+f.coordinates.filter(id=>state.cells[id].building?.category==='city').length,0),
@@ -29,10 +60,12 @@ export function basePoints(card, stats, effective) {
   switch(s.type) {
     case 'fixed_points': return s.points;
     case 'paired_treasure': return effective.some(c=>c.id===s.partnerCardId)?s.pointsWithPartner:s.pointsAlone;
-    case 'points_per_count': return metric[s.metric]*s.pointsPerItem;
+    case 'points_per_count': return metric[s.metric]===null?null:metric[s.metric]*s.pointsPerItem;
     case 'points_per_resource': return units*s.pointsPerUnit;
     case 'resource_threshold': return units>=s.minimum?s.points:0;
-    case 'points_per_resource_class': return stats.production.filter(r=>!['wood','fish','carrots'].includes(r)).length*s.pointsPerUnit;
+    case 'points_per_resource_class': return stats.production.filter(r=>resourceKind(stats,r)===(s.resourceClass||'luxury')).length*s.pointsPerUnit;
+    case 'treasure_sequence': return s.points[Math.min(metric.owned_treasures,s.points.length-1)];
+    case 'cloud_independence': return stats.cloudPoints;
     case 'points_per_qualifying_fief': return stats.groups.filter(f=>f.coordinates.length>=s.minimumTerritories).length*s.pointsPerFief;
     case 'count_threshold': return metric[s.metric]>=s.minimum?s.points:0;
     case 'extra_harvest_except_best': return stats.groups.reduce((sum,f)=>sum+f.points,0)-Math.max(0,...stats.groups.map(f=>f.points));
@@ -42,7 +75,7 @@ export function basePoints(card, stats, effective) {
   }
 }
 export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolutions:{}}) {
-  const issues=[],allCards=state.players.flatMap(p=>p.parchments),stats=state.players.map(p=>playerStats(state,p.id));
+  const issues=[],stats=state.players.map(p=>playerStats(state,p.id));
   const ask=(key,kind,label,options)=>{
     const value=decisions.rulings?.[key];
     if(!options.includes(value)){issues.push({key,kind,label,options});return null;}
@@ -50,44 +83,42 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
   };
   const effective=state.players.map(p=>p.parchments.map(original=>{
     if(!isCopy(original))return {original,card:original};
-    const options=copyOptions(state,p.id,original);
-    if(!options.cards.length)return {original,card:null,empty:true};
-    const selected=options.cards.find(c=>c.instanceId===decisions.copies?.[original.instanceId]);
-    if(!selected){issues.push({key:original.instanceId,kind:'copy',playerId:p.id,label:`${p.name}: choose ${original.name}'s target.`});return {original,card:null};}
-    if(isCopy(selected)) {
-      const resolution=allCards.find(c=>c.instanceId===decisions.copyResolutions?.[original.instanceId]&&!isCopy(c));
-      if(!resolution){issues.push({key:original.instanceId,kind:'copy_resolution',label:`${p.name}: ${original.name} copies ${selected.name}. This interaction needs a ruling: select the final card it becomes.`,options:allCards.filter(c=>!isCopy(c)).map(c=>c.instanceId)});return {original,card:null};}
-      return {original,card:resolution,copiedFrom:selected.name,manual:true};
-    }
-    return {original,card:selected,copiedFrom:selected.name};
+    const paths=copyPaths(state,p.id,original);
+    if(!paths.length)return {original,card:null,empty:true};
+    const value=copyChoiceValue(decisions,original.instanceId);
+    const selected=paths.find(path=>path.map(c=>c.instanceId).join('>')===value);
+    if(!selected){issues.push({key:original.instanceId,kind:'copy',playerId:p.id,label:`${p.name}: choose a parchment to copy with ${original.name}.`});return {original,card:null};}
+    return {original,card:selected.at(-1),copiedFrom:selected.map(c=>c.name).join(' → ')};
   }));
   const territoryMax=Math.max(...stats.map(s=>s.cells.length)), leaders=stats.filter(s=>s.cells.length===territoryMax).length;
   const results=state.players.map(p=>{
-    const entries=effective[p.id], cards=entries.map(e=>e.card).filter(Boolean);
+    const entries=effective[p.id], cards=entries.map(e=>e.card||e.original);
     const hunters=cards.filter(c=>c.scoringSpec.type==='multiply_treasure_values').length;
-    const treasureValue=cards.filter(c=>c.parchmentType==='treasure').reduce((sum,c)=>sum+basePoints(c,stats[p.id],cards),0);
-    let multiplier=hunters?2:1;
-    if(hunters>1&&treasureValue>0) multiplier=ask(`hunter:${p.id}`,'multiplier',`${p.name} has ${hunters} Treasure Hunter effects. Choose the total treasure multiplier under your ruling.`,[hunters+1,2**hunters]);
+    const multiplier=1+hunters;
     const rows=entries.map(entry=>{
       const {original,card}=entry;
       if(!card)return {id:original.instanceId,name:original.name,points:entry.empty?0:null,note:entry.empty?'No parchment available to copy.':'Awaiting copy choice.'};
       const s=card.scoringSpec;
       let points=basePoints(card,stats[p.id],cards);
-      if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length<territoryMax?0:leaders===1?s.points:ask(`matriarch:${original.instanceId}`,'points',`${p.name} ties for most territories. Award for ${original.name} under your ruling?`,[0,s.points]);
+      if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length===territoryMax&&leaders===1?s.points:0;
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
-      return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};
+      return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier}× total).`:entry.copiedFrom?`Copies ${entry.copiedFrom}.`:''};
     });
-    return {playerId:p.id,harvest:p.score,rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
+    return {playerId:p.id,harvest:p.score,...(hasExpansion(state)?{trade:stats[p.id].metrics.trade_score,coins:stats[p.id].metrics.coins,uniqueResources:stats[p.id].uniqueResources}:{}),rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
   });
   const rankRows=results.flatMap(p=>p.rows.filter(r=>r.type==='rank_bonus').map(row=>({player:p,row})));
-  const beforeRank=results.map(p=>p.harvest+p.parchmentPoints);
-  // All other parchment values must be settled before checking Opportunist's rank.
+  const beforeRank=results.map(p=>p.harvest+(p.trade||0)+p.parchmentPoints);
+  const rankAwards=new Map();
+  // One shared checkpoint, after Trade and all other parchment effects. Copies
+  // use this same snapshot; awarded bonuses never trigger another rank check.
   if(!issues.length) for(const {player,row} of rankRows) {
+    if(rankAwards.has(player.playerId)){row.points=rankAwards.get(player.playerId);continue;}
     const value=beforeRank[player.playerId],higher=beforeRank.filter(n=>n>value).length,tied=beforeRank.filter(n=>n===value).length>1;
-    if(rankRows.length>1||tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name}: ${row.name} has ${rankRows.length>1?'copied Opportunist interactions':'a tied rank'}. Scores before these bonuses: ${beforeRank.join(', ')}. Award under your ruling?`,[0,10]);
+    if(higher===1&&tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name} is tied for second at the final checkpoint. Award per Opportunist effect? Scores before these bonuses: ${beforeRank.join(', ')}.`,[0,10]);
     else row.points=higher===1?10:0;
+    rankAwards.set(player.playerId,row.points);
   }
-  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+p.parchmentPoints;}
+  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+(p.trade||0)+p.parchmentPoints;}
   return {complete:!issues.length&&results.every(p=>p.rows.every(r=>r.points!==null)),issues,players:results};
 }
 export function finalizeScoring(state, decisions) {

@@ -20,7 +20,15 @@ The original file remains unmodified. Each JSON entry preserves its line number 
 
 `scoringSpec` is a draft description, not executable scoring code. `scoringStatus`, `openItemRefs`, and the top-level `openItems` record unresolved details. A `null` rule field is unknown, never an instruction to choose a default. General rules and special-case notes cite the official rulebook separately from the supplied card summaries.
 
-The user confirmed Opportunist's wording as 10 Golden Carrots for second place after final scoring. The remaining questions concern Opportunist ties/copy interactions, Matriarch ties, copy-card targets and ordering, and multiple Treasure Hunter effects. The source's Golden Carrot point rewards remain distinct from basic Carrot resource production.
+The user confirmed Opportunist's wording as 10 Golden Carrots for second place after final scoring. The user also confirmed on 2026-09-08 that Matriarch requires an outright territory lead; ties score zero. Copy chains are confirmed: directions use the copying player’s seat, independent of the neighbor’s choice, and repeated-card loops are excluded. Opportunist originals and copies use one final checkpoint, without retriggering. The only remaining question is qualification when tied for second. Treasure Hunter stacking is additive: two effects give 3T (confirmed 2026-09-08). The source's Golden Carrot point rewards remain distinct from basic Carrot resource production.
+
+## In the Sky reference data
+
+- [User-supplied expansion parchment summaries](parchments-in-the-sky.txt)
+- [Confirmed Luxury farm restrictions and Treasure classifications](in-the-sky-confirmations.md)
+- [Expansion card catalog](in-the-sky.json)
+
+The expansion has its own normalized catalog and playable mode. See [expansion rules and remaining review](../../docs/in-the-sky-rules.md). Base-game catalogs and inventory checks remain scoped to the original game.
 
 ## Data conventions
 

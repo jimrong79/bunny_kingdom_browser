@@ -8,10 +8,7 @@ One copy per entry and the treasure/mission classification are recorded assumpti
 
 ## Rules still needing clarification
 
-- **Matriarch:** Does a tie for the most territories qualify? The supplied summary and checked rulebook do not specify this.
-- **Liberal, Socialist:** Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.
-- **Treasure Hunter, Liberal, Socialist:** How do an owned Treasure Hunter and a copied Treasure Hunter combine?
-- **Opportunist:** How are tied rankings and interactions between copied Opportunists handled after final scoring?
+- **Opportunist:** Does a player tied for second at the single final checkpoint receive 10 points per Opportunist effect?
 
 ## Card review
 
@@ -49,12 +46,12 @@ In the supplied wording, carrot point rewards mean Golden Carrots (points); Carr
 | 28 | PanPan the Barbarian | mission | 2 carrots per territory you control that has neither a City nor a resource | Draft from source |
 | 29 | Colonist | mission | 3 carrots for each Camp card you played | Draft from source |
 | 30 | King of Thieves | mission | 12 carrots if you have at least 9 Cities | Draft from source |
-| 31 | Matriarch | mission | 12 carrots if you control the most territories | Needs clarification |
+| 31 | Matriarch | mission | 12 carrots if you control the most territories | Draft from source |
 | 32 | Little Prince | mission | perform another harvest of all your Fiefs except your best Fief | Draft from source |
 | 33 | Treasure Guardian | mission | 3 carrots for each Treasure Parchment you own | Draft from source |
-| 34 | Treasure Hunter | mission | doubles the value of your Treasure Parchments | Needs clarification |
-| 35 | Liberal | mission | copy one Parchment belonging to the player on your right | Needs clarification |
-| 36 | Socialist | mission | copy one Parchment belonging to the player on your left | Needs clarification |
+| 34 | Treasure Hunter | mission | doubles the value of your Treasure Parchments | Draft from source |
+| 35 | Liberal | mission | copy one Parchment belonging to the player on your right | Draft from source |
+| 36 | Socialist | mission | copy one Parchment belonging to the player on your left | Draft from source |
 | 37 | Opportunist | mission | 10 carrots if you're in second place after final scoring | Needs clarification |
 
 ## Interpretation notes
@@ -73,12 +70,12 @@ In the supplied wording, carrot point rewards mean Golden Carrots (points); Carr
 - **PanPan the Barbarian:** Check each territory separately. A city or resource elsewhere in the fief does not disqualify it. A Camp or Sky Tower is not a city (rulebook page 11).
 - **Colonist:** The supplied text counts Camp cards played, not Camp tokens currently on the board. Keep card-play history separate from surviving camps; this is a transcription of the supplied summary.
 - **King of Thieves:** Count cities, not towers/strength (rulebook page 10).
-- **Matriarch:** The tie policy is deliberately unset pending a verified clarification.
+- **Matriarch:** Requires strictly more territories than every other player; ties score zero (user confirmation, 2026-09-08).
 - **Little Prince:** If multiple fiefs tie for highest harvest, exclude exactly one of them (rulebook page 11).
 - **Treasure Guardian:** A copied treasure qualifies for this bonus (rulebook page 11).
-- **Treasure Hunter:** Copied treasures qualify. This effect changes treasure values; it must not be counted as an unrelated fixed-point reward. Stacking with a copied Hunter remains open.
-- **Liberal:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).
-- **Socialist:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).
-- **Opportunist:** The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved.
+- **Treasure Hunter:** Each Hunter adds the unmultiplied Treasure total: one Hunter gives 2T, two give 3T, three give 4T. Includes copied Hunters and copied Treasures (user confirmation, 2026-09-08).
+- **Liberal:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11). Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero.
+- **Socialist:** Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11). Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero.
+- **Opportunist:** Evaluate once after Harvest totals, Trade, and all other parchments. Every original or copied effect uses the same pre-bonus scores; bonuses never trigger a new rank check. Only qualification when tied for second remains unresolved.
 
 General rules and noted special cases: [IELLO rulebook](https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf), pages 4-6 and 10-11. Remaining card text comes from the supplied file.

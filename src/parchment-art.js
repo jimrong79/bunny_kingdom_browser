@@ -24,9 +24,12 @@ export function parchmentArt(card,{resourceArt,pieceArt,rabbitArt}) {
       royal_crown:`<g transform="translate(-5 15) scale(1.18)">${crown}</g><ellipse cx="42" cy="64" rx="28" ry="6" fill="#bf945735"/>`,
       royal_carrot:`${resource('carrots',6,10,69)}<g transform="translate(27 -4) scale(.6)">${crown}</g>`,
       left_glove:'<path d="M25 66V44L12 28Q10 19 17 23L25 32V12Q26 5 31 12V27V7Q36 0 39 8V26V10Q44 3 47 12V28V18Q53 11 55 20V47L50 66Z" fill="#fff0ce" stroke="#a98b51" stroke-width="2"/><path d="M25 56H52V68H25Z" fill="#cfb267"/>',
+      merchants_signet:'<ellipse cx="40" cy="47" rx="20" ry="21" fill="none" stroke="#bf933d" stroke-width="9"/><circle cx="40" cy="23" r="16" fill="#eed27a" stroke="#96702d" stroke-width="3"/><text x="40" y="29" text-anchor="middle" font-size="18" fill="#866833">¢</text>',
+      cape_of_dawn:'<path d="M24 15L9 65L35 59L60 67L68 18L46 25Z" fill="#a69ac9" stroke="#6d6996" stroke-width="3"/><path d="M25 17L46 28L67 19" fill="none" stroke="#f8e9bc" stroke-width="6"/><circle cx="39" cy="46" r="10" fill="#f2d385"/>',
     };
     treasures.right_glove=`<g transform="translate(78 0) scale(-1 1)">${treasures.left_glove}</g>`;
-    picture=`<g transform="translate(0 3)">${treasures[id]||scroll}</g>${shield(s.points??s.pointsAlone??'?')}`;
+    picture=`<g transform="translate(0 3)">${treasures[id]||scroll}</g>${shield(s.points??s.pointsAlone??(id==='merchants_signet'?'1×':'2×'))}`;
+    if(id==='merchants_signet')cue='1 / Coin';if(id==='cape_of_dawn')cue='2 / cloud row';
     if(s.type==='paired_treasure')picture+=text(id==='left_glove'?'L':'R',13,17,14)+`<rect x="7" y="75" width="65" height="16" rx="8" fill="#fff3cb"/>`+text(`PAIR → ${s.pointsWithPartner}`,40,87,10);
   } else if(s.type==='points_per_resource'||s.type==='resource_threshold') {
     tone=({wood:'#dce9cb',fish:'#d4e9e9',carrots:'#f1dfbf'})[s.resource];
@@ -41,6 +44,14 @@ export function parchmentArt(card,{resourceArt,pieceArt,rabbitArt}) {
     }
   } else {
     const drawings={
+      nibblonacci:[`${scroll}${text('2 3 5',85,26,12)}${text('8 13',85,44,12)}${text('21 34',85,62,12)}`,'Treasure sequence'],
+      assistant_governor:[`${flag(18,22)}${flag(70,22)}${text('2',60,28,28)}`,'2 / District'],
+      governor:[`<g transform="translate(18 0)">${crown}</g>${flag(15,42)}${flag(73,42)}`,'3 / District'],
+      cloud_independence:[`${resource('wondrous_books',12,8,60)}${text('↻',89,57,42)}`,'Cloud harvest again'],
+      merchant_queen:[`<g transform="translate(18 0)">${crown}</g>${shield('50',41,38)}`,'Trade 50+ → 20'],
+      hareborne_explorer:[`${bunny(34,14,57,'#9b7cad')}<path d="M11 64Q11 48 29 54Q44 35 60 54Q97 44 108 66Z" fill="#c4dce9"/>`,'1 / cloud territory'],
+      lewis_carrot:[`${resource('wondrous_star',8,15,52)}${resource('wondrous_dragon',61,20,52)}`,'2 / Wondrous'],
+      general_mafayette:[`${bunny(27,14,62,'#8f88b7')}${flag(78,14)}<path d="M35 12H80L60 1Z" fill="#536980"/>`,'Lead a cloud row → 5'],
       bureaucrat:[`<g transform="translate(8 9) rotate(-12 38 35)">${scroll}</g><g transform="translate(26 2)">${scroll}</g><path d="M63 61Q61 25 95 12Q96 35 70 54L62 67" fill="#71978b" stroke="#466f64" stroke-width="2"/>`,'1 / parchment'],
       burgomaster:[`${city(17,10,66)}<circle cx="86" cy="29" r="8" fill="none" stroke="#b88d3c" stroke-width="5"/><path d="M86 38V65H76M86 56H79" stroke="#b88d3c" stroke-width="5"/>`,'1 / city'],
       diplomat:[grid('edge'),'1 / edge'],

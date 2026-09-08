@@ -1,16 +1,19 @@
 import {playerStats,basePoints} from './scoring.js';
 import {eligibleTerritories} from './construction.js';
 import {knownTerritories} from './bot-memory.js';
+import {hasExpansion,picksPerRound} from './config.js';
+import {neighborsOf,boardOf} from './topology.js';
+import {chimneyPlan} from './bot-chimneys.js';
 
 // Search estimates are deliberately separate from the scoring engine and its unresolved rulings.
 export const harvestsLeft=view=>['parchments','finished'].includes(view.phase)?0:view.phase==='harvest'?4-view.round:5-view.round;
 export function picksLeft(view) {
-  const perRound=view.players.length===2?10:view.players.length===3?6:5;
+  const perRound=picksPerRound(view);
   return (4-view.round)*perRound+(view.phase==='draft'?Math.max(0,perRound-view.draftTurn):0);
 }
 export function forkPosition(view,playerId) {
   return {...view,cells:Object.fromEntries(Object.entries(view.cells).map(([id,c])=>[id,{...c,building:c.building?{...c.building}:null}])),
-    players:view.players.map(p=>p.id===playerId?{...p,buildings:[...p.buildings],parchments:Array.isArray(p.parchments)?[...p.parchments]:[],played:[...p.played],ready:false}:p),log:[]};
+    players:view.players.map(p=>p.id===playerId?{...p,...(p.coinEvents?{coinEvents:[...p.coinEvents]}:{}),buildings:[...p.buildings],parchments:Array.isArray(p.parchments)?[...p.parchments]:[],played:[...p.played],ready:false}:p),log:[]};
 }
 
 export function parchmentValue(view,playerId,cards,stats=playerStats(view,playerId),forecast=true) {
@@ -30,7 +33,7 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
     if(s.type==='territory_lead_bonus') {
       const rival=Math.max(...view.players.filter(p=>p.id!==playerId).map(p=>Object.values(view.cells).filter(c=>c.owner===p.id).length));
       points=s.points/(1+Math.exp((rival-stats.cells.length)/Math.max(1,growth*1.8)));
-      if(!growth)points=stats.cells.length>rival?s.points:stats.cells.length===rival?s.points/2:0;
+      if(!growth)points=stats.cells.length>rival?s.points:0;
     }
     if(s.type==='rank_bonus') {
       const projected=view.players.map(p=>p.score+playerStats(view,p.id).groups.reduce((n,f)=>n+f.points*harvestsLeft(view),0));
@@ -42,7 +45,7 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
       const other=view.players[neighbor].parchments,count=Array.isArray(other)?other.length:other.count;
       points=count?Math.min(12,4+count*.7):growth?4:0;
     }
-    // More than one Hunter still needs an explicit ruling in the real final scoring.
+    // Each Hunter adds one unmultiplied Treasure total, including copied effects.
     if(card.parchmentType==='treasure')points*=hunters?hunters+1:1;
     value+=points||0;
   }
@@ -52,7 +55,8 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
 export function positionValue(view,playerId,{forecast=true,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)}={}) {
   const remaining=harvestsLeft(view);
   const future=forecast?Math.max(0,remaining-1):0;
-  let value=stats.groups.reduce((n,f)=>n+f.points*remaining,0);
+  let value=(hasExpansion(view)?chimneyPlan(view,playerId,stats.groups).value:stats.groups.reduce((n,f)=>n+f.points,0))*remaining;
+  if(hasExpansion(view))value+=stats.metrics.trade_score+future*(stats.uniqueResources.length*.6+stats.metrics.coins*.7);
   for(const f of stats.groups) {
     // Early strength and resource variety can find their missing counterpart through expansion.
     value+=future*(f.strength*Math.max(0,3-f.wealth)*.35+f.wealth*Math.min(3,Math.sqrt(f.coordinates.length))*.35);
@@ -69,7 +73,7 @@ function frontierValue(view,stats,{unavailable,circulating}) {
   const gains=[];
   for(const c of Object.values(view.cells)) {
     if(c.owner!==null||unavailable.has(c.coordinate))continue;
-    const adjacent=[c.row+(c.column-1),c.row+(c.column+1),String.fromCharCode(c.row.charCodeAt(0)-1)+c.column,String.fromCharCode(c.row.charCodeAt(0)+1)+c.column];
+    const adjacent=neighborsOf(view,c);
     const neighbors=[...new Set(adjacent.filter(id=>indexes.has(id)&&!blocked.has(c.coordinate+':'+id)).map(id=>indexes.get(id)))].map(i=>groups[i]);
     if(!neighbors.length)continue;
     const resources=new Set(neighbors.flatMap(f=>f.resources));if(c.baseResource)resources.add(c.baseResource);
@@ -81,11 +85,15 @@ function frontierValue(view,stats,{unavailable,circulating}) {
 }
 
 export function idleBuildingValue(view,playerId,card,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)) {
+  // Rainbow connections are evaluated by the placement search. Unlike a fixed
+  // building, placing one preserves the ability to move it in later rounds.
+  // A reserve-only bonus made bots give up useful harvests to "save" that ability.
+  if(card.category==='rainbow')return 0;
   const picks=picksLeft(view),remaining=harvestsLeft(view);
   if(!picks||!remaining)return 0;
   const {unavailable}=knowledge;
   const open=Object.values(view.cells).filter(c=>!c.building&&c.owner===null&&!unavailable.has(c.coordinate));
-  const suitable=open.filter(c=>!card.placement?.allowedTerrains||card.placement.allowedTerrains.includes(c.terrain));
+  const suitable=open.filter(c=>(!card.placement?.allowedTerrains||card.placement.allowedTerrains.includes(c.terrain))&&(!card.placement?.allowedBoards||card.placement.allowedBoards.includes(boardOf(c))));
   const legal=eligibleTerritories(view,playerId,card).length;
   const fraction=suitable.length/Math.max(1,open.length);
   const chance=legal?1:1-Math.exp(-picks*fraction*.65);
@@ -96,6 +104,7 @@ export function idleBuildingValue(view,playerId,card,stats=playerStats(view,play
   if(card.category==='farm')potential=(card.farmType==='luxury'?strength:Math.min(strength,3))*(card.farmType==='luxury'?1:.6);
   if(card.farmType==='basic'&&groups.length&&groups.every(f=>f.resources.includes(card.effect.resource)))potential*=.25;
   if(card.category==='sky_tower')potential=groups.length>1?3:1.5;
+  if(card.category==='chimney')potential=groups.filter(f=>f.coordinates.some(id=>boardOf(view.cells[id])==='new_world')).reduce((n,f)=>n+f.strength*.4,0);
   if(card.category==='camp')potential=2;
   const waiting=view.players[playerId].buildings.filter(c=>c.category===card.category).length;
   return potential*Math.max(.3,remaining-.7)*chance*.45/Math.sqrt(Math.max(1,waiting));

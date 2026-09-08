@@ -31,12 +31,15 @@ test('copying Treasure Hunter can rank first even with zero points on its own ro
   const [best]=copyScoreOptions(s,0,s.players[0].parchments[2]);
   assert.equal(best.card.id,'treasure_hunter');assert.equal(best.points,0);assert.equal(best.total,42);
 });
-test('unresolved copy chains and treasure rulings are shown as pending rather than exact totals',()=>{
+test('stacked Hunter and chained copy options show exact additive scores',()=>{
   const s=setup(['royal_crown','treasure_hunter','liberal'],['socialist','treasure_hunter','royal_ring']);
   const options=copyScoreOptions(s,0,s.players[0].parchments[2]);
-  assert.equal(options[0].card.id,'royal_ring');assert.equal(options[0].complete,true);
-  assert.ok(options.slice(1).every(o=>!o.complete));
-  assert.equal(options.find(o=>o.card.id==='socialist').points,null);
+  assert.equal(options[0].card.id,'treasure_hunter');assert.equal(options[0].complete,true);
+  assert.equal(options[0].total,35);
+  assert.equal(options.find(o=>o.card.id==='royal_ring').complete,true);
+  const chained=options.find(o=>o.value==='socialist_test>treasure_hunter_test');
+  assert.ok(chained);assert.equal(chained.points,0);assert.equal(chained.total,35);
+  assert.ok(options.every(o=>o.complete));
 });
 test('changed copy choices clear dependent rulings exactly as the preview expects',()=>{
   const d={copies:{liberal_test:'treasure_hunter_test'},rulings:{'hunter:0':3},copyResolutions:{socialist_test:'royal_ring_test'}};
@@ -48,6 +51,13 @@ test('changed copy choices clear dependent rulings exactly as the preview expect
 test('copy previews are unavailable before parchments are revealed',()=>{
   const s=setup(['liberal'],['royal_crown']);s.phase='draft';
   assert.deepEqual(copyScoreOptions(s,0,s.players[0].parchments[0]),[]);
+});
+test('changing a copy preserves other independently resolved chains from older saves',()=>{
+  const d={copies:{liberal_test:'socialist_test',socialist_test:'liberal_test'},rulings:{},copyResolutions:{liberal_test:'royal_ring_test',socialist_test:'royal_crown_test'}};
+  const next=copyChoiceDecisions(d,'liberal_test','right_glove_test');
+  assert.equal(next.copies.socialist_test,'liberal_test>royal_crown_test');
+  assert.equal(next.copies.liberal_test,'right_glove_test');assert.deepEqual(next.copyResolutions,{});
+  assert.equal(d.copies.socialist_test,'liberal_test');
 });
 test('known draft values match the scorer across parchment scoring types',()=>{
   const s=setup(['royal_ring','treasure_guardian','bureaucrat','left_glove'],[]);s.phase='draft';
@@ -84,9 +94,9 @@ test('draft previews never depend on rival hidden cards and do not mutate the sa
   assert.equal(draftParchmentPreview(s,0,card('liberal')).points,null);
   assert.equal(draftParchmentPreview(s,0,card('opportunist')).points,null);
 });
-test('draft Matriarch previews use public territory counts and leave tied awards pending',()=>{
+test('draft Matriarch previews award zero for ties and twelve only for an outright lead',()=>{
   const s=setup([],[]);s.phase='draft';const c=card('matriarch');
-  assert.equal(draftParchmentPreview(s,0,c).points,null);
+  assert.equal(draftParchmentPreview(s,0,c).points,0);
   s.cells.A1.owner=0;assert.equal(draftParchmentPreview(s,0,c).points,12);
   s.cells.A2.owner=1;s.cells.A3.owner=1;assert.equal(draftParchmentPreview(s,0,c).points,0);
 });

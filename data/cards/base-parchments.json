@@ -11,7 +11,7 @@
       "The user supplied all 37 named entries as summaries. Original wording is preserved in sourceText; normalized scoringSpec fields are draft interpretations.",
       "One copy per entry is assumed from 37 distinct entries matching the rulebook's 37-card total; no separate copy counts were supplied.",
       "The six royal items and two gloves are classified as treasures; the other 29 are missions.",
-      "On 2026-09-05 the user confirmed Opportunist's timing as after final scoring and updated its source-file entry. Tie and copy interactions remain unresolved.",
+      "On 2026-09-05 the user confirmed Opportunist's timing as after final scoring and updated its source-file entry. Tied second-place qualification remains unresolved; copy interactions were confirmed on 2026-09-08.",
       "This import is not verification of every printed card or a tested scoring engine. Null rule fields are unresolved and must not receive silent defaults."
     ]
   },
@@ -42,6 +42,34 @@
       "date": "2026-09-05",
       "text": "10 carrots if you're in second place after final scoring",
       "description": "User confirmation of Opportunist's printed wording; also reflected in line 37 of the supplied file."
+    },
+    {
+      "id": "user-matriarch-ties",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "for matriarch, only if the player is the only player has the most.",
+      "description": "User confirms Matriarch requires strictly more territories than every other player; ties score zero."
+    },
+    {
+      "id": "user-hunter-stacking",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "2x treasure hunter is 3T.",
+      "description": "Each Hunter effect adds one unmultiplied Treasure total, including copied Hunters."
+    },
+    {
+      "id": "user-copy-chains",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "if you want a parchemtn in your right but you only have copy-left and your left has copy-right. then you can this way copy your right.",
+      "description": "Copy the effect, interpreting every direction from the copying player’s seat. Select a finite path ending at a non-copy parchment; repeated-card loops are excluded."
+    },
+    {
+      "id": "user-opportunist-checkpoint",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "only \"one\" checkpoint trigger. that's after the final scoring. we don't trigger and check to trigger by copy again.",
+      "description": "All Opportunist effects, including copies, use the same scores after Trade and other parchments, before any Opportunist bonuses; no retriggering."
     }
   ],
   "inventory": {
@@ -67,43 +95,13 @@
   },
   "openItems": [
     {
-      "id": "matriarch-ties",
-      "cardIds": [
-        "matriarch"
-      ],
-      "status": "open",
-      "question": "Does a tie for the most territories qualify? The supplied summary and checked rulebook do not specify this.",
-      "evidenceNeeded": "Printed clarification or a readable publisher/designer ruling."
-    },
-    {
-      "id": "copy-interactions",
-      "cardIds": [
-        "liberal",
-        "socialist"
-      ],
-      "status": "open",
-      "question": "Confirm target restrictions and choice order when a copy card can target another copy card, including a possible loop.",
-      "evidenceNeeded": "Publisher/designer clarification; the rulebook confirms whole-card copying and copied-treasure bonuses, but does not settle these interactions."
-    },
-    {
-      "id": "treasure-hunter-stacking",
-      "cardIds": [
-        "treasure_hunter",
-        "liberal",
-        "socialist"
-      ],
-      "status": "open",
-      "question": "How do an owned Treasure Hunter and a copied Treasure Hunter combine?",
-      "evidenceNeeded": "Publisher/designer clarification; do not infer repeated doubling or additive bonuses."
-    },
-    {
-      "id": "opportunist-ties-and-copies",
+      "id": "opportunist-ties",
       "cardIds": [
         "opportunist"
       ],
       "status": "open",
-      "question": "How are tied rankings and interactions between copied Opportunists handled after final scoring?",
-      "evidenceNeeded": "Publisher/designer clarification of ties and copied effects. The user confirmed the printed timing as after final scoring."
+      "question": "Does a player tied for second at the single final checkpoint receive 10 points per Opportunist effect?",
+      "evidenceNeeded": "User or publisher clarification of tied second place."
     }
   ],
   "cards": [
@@ -752,21 +750,20 @@
       "copies": 1,
       "sourceLine": 31,
       "sourceText": "12 carrots if you control the most territories",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "territory_lead_bonus",
         "points": 12,
-        "tiePolicy": null
+        "tiePolicy": "no_bonus"
       },
       "sourceRefs": [
-        "user-parchments"
+        "user-parchments",
+        "user-matriarch-ties"
       ],
       "notes": [
-        "The tie policy is deliberately unset pending a verified clarification."
+        "Requires strictly more territories than every other player; ties score zero (user confirmation, 2026-09-08)."
       ],
-      "openItemRefs": [
-        "matriarch-ties"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "little_prince",
@@ -823,23 +820,22 @@
       "copies": 1,
       "sourceLine": 34,
       "sourceText": "doubles the value of your Treasure Parchments",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "multiply_treasure_values",
         "factor": 2,
         "includesCopiedTreasures": true,
-        "multipleHunterStacking": null
+        "multipleHunterStacking": "additive"
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking"
       ],
       "notes": [
-        "Copied treasures qualify. This effect changes treasure values; it must not be counted as an unrelated fixed-point reward. Stacking with a copied Hunter remains open."
+        "Each Hunter adds the unmultiplied Treasure total: one Hunter gives 2T, two give 3T, three give 4T. Includes copied Hunters and copied Treasures (user confirmation, 2026-09-08)."
       ],
-      "openItemRefs": [
-        "treasure-hunter-stacking"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "liberal",
@@ -849,26 +845,26 @@
       "copies": 1,
       "sourceLine": 35,
       "sourceText": "copy one Parchment belonging to the player on your right",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "copy_parchment",
         "targetNeighbor": "right",
         "copyEntireCard": true,
         "copiedTreasuresQualifyForBonuses": true,
-        "copyCardTargetPolicy": null,
-        "choiceOrder": null
+        "copyCardTargetPolicy": "copy_effect_from_own_seat",
+        "choiceOrder": "independent_finite_paths_before_scoring"
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking",
+        "user-copy-chains"
       ],
       "notes": [
-        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).",
+        "Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero."
       ],
-      "openItemRefs": [
-        "copy-interactions",
-        "treasure-hunter-stacking"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "socialist",
@@ -878,26 +874,26 @@
       "copies": 1,
       "sourceLine": 36,
       "sourceText": "copy one Parchment belonging to the player on your left",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "copy_parchment",
         "targetNeighbor": "left",
         "copyEntireCard": true,
         "copiedTreasuresQualifyForBonuses": true,
-        "copyCardTargetPolicy": null,
-        "choiceOrder": null
+        "copyCardTargetPolicy": "copy_effect_from_own_seat",
+        "choiceOrder": "independent_finite_paths_before_scoring"
       },
       "sourceRefs": [
         "user-parchments",
-        "official-rulebook"
+        "official-rulebook",
+        "user-hunter-stacking",
+        "user-copy-chains"
       ],
       "notes": [
-        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11)."
+        "Copy the whole card. A copied treasure qualifies for Treasure Guardian and Treasure Hunter bonuses (rulebook page 11).",
+        "Copied left/right effects use your own seat and your own choices. Paths must end at a non-copy parchment without revisiting a physical card. If no finite path exists, this copy earns zero."
       ],
-      "openItemRefs": [
-        "copy-interactions",
-        "treasure-hunter-stacking"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "opportunist",
@@ -913,17 +909,20 @@
         "rank": 2,
         "points": 10,
         "checkpoint": "after_final_scoring",
-        "tiePolicy": null
+        "tiePolicy": null,
+        "evaluation": "single_shared_pre_bonus_snapshot",
+        "recheckAfterBonus": false
       },
       "sourceRefs": [
         "user-parchments",
-        "user-opportunist-timing"
+        "user-opportunist-timing",
+        "user-opportunist-checkpoint"
       ],
       "notes": [
-        "The user confirmed 10 Golden Carrots for second place after final scoring. The tie policy and interactions between copied Opportunists remain unresolved."
+        "Evaluate once after Harvest totals, Trade, and all other parchments. Every original or copied effect uses the same pre-bonus scores; bonuses never trigger a new rank check. Only qualification when tied for second remains unresolved."
       ],
       "openItemRefs": [
-        "opportunist-ties-and-copies"
+        "opportunist-ties"
       ]
     }
   ]

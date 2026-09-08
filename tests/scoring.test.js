@@ -19,16 +19,28 @@ test('Opportunist resolves after other scoring and can move its holder into firs
  const s=setup();s.players[0].score=35;s.players[0].parchments=[card('opportunist')];
  finalizeScoring(s,choices());assert.equal(s.players[0].score,45);assert.deepEqual(s.winners,[0]);assert.throws(()=>finalizeScoring(s,choices()));
 });
-test('unknown tied conditions and duplicate Hunters require explicit rulings',()=>{
- const s=setup();s.players[0].parchments=[card('matriarch')];const d=choices();let r=evaluateFinal(s,d);
- assert.ok(!r.complete);assert.equal(r.issues[0].key,'matriarch:matriarch_test');d.rulings['matriarch:matriarch_test']=0;assert.ok(evaluateFinal(s,d).complete);
- s.players[0].parchments=['royal_crown','treasure_hunter','liberal'].map(card);s.players[1].parchments=[{...card('treasure_hunter'),instanceId:'other_hunter'}];d.copies.liberal_test='other_hunter';
- r=evaluateFinal(s,d);assert.ok(r.issues.some(x=>x.kind==='multiplier'));d.rulings['hunter:0']=3;r=evaluateFinal(s,d);assert.ok(r.complete);assert.equal(r.players[0].parchmentPoints,15);
+test('Matriarch requires a sole territory leader, including copies and legacy card data',()=>{
+ const s=setup(),d=choices();s.players[0].parchments=[card('matriarch')];
+ s.players[0].parchments[0].scoringSpec.tiePolicy=null;
+ s.players[1].parchments=[card('socialist')];d.copies.socialist_test='matriarch_test';
+ const points=()=>{const r=evaluateFinal(s,d);assert.ok(r.complete);return r.players.map(p=>p.parchmentPoints);};
+ assert.deepEqual(points(),[0,0]);
+ s.cells.A1.owner=0;assert.deepEqual(points(),[12,0]);
+ s.cells.A2.owner=1;d.rulings['matriarch:matriarch_test']=12;assert.deepEqual(points(),[0,0]);
+ s.cells.A3.owner=1;assert.deepEqual(points(),[0,12]);
 });
-test('copy-card loops are surfaced and cannot silently recurse',()=>{
+test('each copied Hunter adds one treasure total, with no compounding or ruling',()=>{
+ const s=setup(),d=choices();
+ s.players[0].parchments=['royal_crown','treasure_hunter','liberal'].map(card);s.players[1].parchments=[{...card('treasure_hunter'),instanceId:'other_hunter'}];d.copies.liberal_test='other_hunter';
+ d.rulings['hunter:0']=4; // An obsolete ruling must not override the confirmed rule.
+ const r=evaluateFinal(s,d);assert.ok(r.complete);assert.equal(r.players[0].parchmentPoints,15);
+});
+test('an incomplete copy chain requires a complete legal path rather than an arbitrary ruling',()=>{
  const s=setup();s.players[0].parchments=[card('liberal')];s.players[1].parchments=[card('socialist'),card('royal_ring')];
  const d=choices();d.copies.liberal_test='socialist_test';d.copies.socialist_test='liberal_test';
- assert.equal(evaluateFinal(s,d).issues.filter(x=>x.kind==='copy_resolution').length,2);
+ const result=evaluateFinal(s,d);
+ assert.ok(!result.complete);assert.ok(result.issues.some(x=>x.kind==='copy'&&x.key==='liberal_test'));
+ assert.equal(result.issues.filter(x=>x.kind==='copy_resolution').length,0);
 });
 test('all basic scoring definitions calculate known spatial/resource counts',()=>{
  const s=setup();for(const id of ['A1','A2','A3','A4','B1','J3'])s.cells[id].owner=0;

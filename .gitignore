@@ -1,6 +1,7 @@
 # Local board reference uploads; retain instructions in the repository.
 /reference/map/*
 !/reference/map/README.md
+/data/maps/cloud.jpeg
 
 # Local match exports for review; these contain the full saved game.
 /reference/games/*

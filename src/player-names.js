@@ -1,5 +1,5 @@
 export const PLAYER_NAME_LIMIT = 24;
-const royalNames = ['Sir Rabbiton', 'Lady Cottontail', 'Duke Hopsworth'];
+const royalNames = ['Sir Rabbiton', 'Lady Cottontail', 'Duke Hopsworth', 'Count Cloudtail'];
 
 export function playerNames(name = '') {
   const human = typeof name === 'string' ? name.replace(/\s+/gu,' ').trim().slice(0,PLAYER_NAME_LIMIT).trim() : '';

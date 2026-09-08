@@ -1,3 +1,7 @@
+import {hasExpansion,cardsPerPick,selectionsPerPick} from './config.js';
+import {boardOf} from './topology.js';
+import {movableRainbows,rainbowDestinations,moveRainbow} from './construction.js';
+import {chimneys,chimneyOptions,chooseChimney} from './harvest.js';
 import { COLORS, createGame, publicView, resolveDraft, draftRecipient } from './game.js';
 import * as normalBots from './bots.js';
 import * as easyBots from './bots-baseline.js';
@@ -25,23 +29,24 @@ let data, state, selected = [], buildingId = null, targets = [], error = "", ins
 let animationsEnabled=true,playing=false;
 let reviewingFinalBoard=false;
 const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
-const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===2;
+const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===cardsPerPick(state);
 let boardZoom=matchMedia('(max-width:600px)').matches;
 export const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 try {
-  const responses = await Promise.all(['data/maps/original-board.json', 'data/cards/base-buildings-and-provisions.json', 'data/cards/base-parchments.json'].map(async path => { const r = await fetch(path); if (!r.ok) throw Error(`Could not load ${path}`); return r.json(); }));
-  data = { map: responses[0], buildings: responses[1], parchments: responses[2] };
+  const responses = await Promise.all(['data/maps/original-board.json', 'data/cards/base-buildings-and-provisions.json', 'data/cards/base-parchments.json','data/maps/great-cloud.json','data/cards/in-the-sky.json'].map(async path => { const r = await fetch(path); if (!r.ok) throw Error(`Could not load ${path}`); return r.json(); }));
+  data = { map: responses[0], buildings: responses[1], parchments: responses[2], cloud:responses[3], expansion:responses[4] };
   setup();
 } catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
 function setup() {
   soundEffects.stop();
   reviewingFinalBoard=false;
-  app.classList.remove('at-table','at-results');
+  app.classList.remove('at-table','at-results','expansion-table');
   const saved=loadGame();
-  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Your name <span class="muted">optional · leave blank to play as You</span><input name="playerName" autocomplete="nickname" maxlength="${PLAYER_NAME_LIMIT}" placeholder="Your royal name" value="${escape(saved?.game.players[0].name==='You'?'':saved?.game.players[0].name||'')}"></label><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted">Original 100-territory board · Full 182-card deck</p></section>`;
+  app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Your name <span class="muted">optional · leave blank to play as You</span><input name="playerName" autocomplete="nickname" maxlength="${PLAYER_NAME_LIMIT}" placeholder="Your royal name" value="${escape(saved?.game.players[0].name==='You'?'':saved?.game.players[0].name||'')}"></label><label>Game<select name="expansion"><option value="base">Original Bunny Kingdom</option><option value="in_the_sky">Bunny Kingdom + In the Sky</option></select></label><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option><option value="4" disabled>4 bots · 5-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted" id="setup-scope">Original 100-territory board · Full 182-card deck</p></section>`;
   document.querySelector('#setup').insertAdjacentHTML('beforebegin',soundToggleHTML());bindSoundToggles();
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName')); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
+  document.querySelector('[name=expansion]').onchange=e=>{const sky=e.target.value==='in_the_sky',bots=document.querySelector('[name=bots]');bots.querySelector('[value="4"]').disabled=!sky;if(!sky&&bots.value==='4')bots.value='3';document.querySelector('#setup-scope').textContent=sky?'Two boards · 131 territories · Full 232-card deck':'Original 100-territory board · Full 182-card deck';};
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
 }
 function resume(saved) {
@@ -50,22 +55,29 @@ function resume(saved) {
   for(const player of state.players)player.color=COLORS[player.id];
   animationsEnabled=ui.animationsEnabled??true;
   boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
-  selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,2);
-  buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)?ui.buildingId:null;
+  selected=(ui.selected||[]).filter(id=>state.players[0].hand.some(c=>c.instanceId===id)).slice(0,selectionsPerPick(state));
+  buildingId=state.players[0].buildings.some(c=>c.instanceId===ui.buildingId)||movableRainbows(state,0).some(c=>'move:'+c.building.pairId===ui.buildingId)?ui.buildingId:null;
   targets=(ui.targets||[]).filter(id=>state.cells[id]);inspected=state.cells[ui.inspected]?ui.inspected:null;error='';render();
 }
 function board() {
   const blocked = new Set(state.blockedConnections.flatMap(e => [e.from + ':' + e.to, e.to + ':' + e.from]));
   const valid=placementOptions();
-  return `<div class="board ${boardZoom?'board-large':''}" aria-label="New World board">${Object.values(state.cells).map(c => {
+  const pane=(boardId,label)=>`<div class="board ${boardId==='great_cloud'?'cloud-board':''} ${boardZoom?'board-large':''}" aria-label="${label}">${Object.values(state.cells).filter(c=>boardOf(c)===boardId).map(c => {
     const right = c.row + (c.column + 1), down = String.fromCharCode(c.row.charCodeAt(0) + 1) + c.column;
-    return `<button class="cell ${c.terrain} ${c.owner===null?'':'owned'} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some((id,i)=>!(state.players.length===2&&i===1)&&state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" data-owner="${c.owner??''}" aria-label="${c.coordinate}, ${c.terrain}, ${escape(c.owner===null?'unclaimed':state.players[c.owner].name)}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}">${terrainArt(c.terrain)}${c.owner===null?'':'<span class="owner-overlay"></span>'}<small class="coordinate">${c.coordinate}</small>${c.baseResource?`<span class="natural-resource" title="Natural ${resourceNames[c.baseResource]}">${resourceArt(c.baseResource)}</span>`:''}${c.owner===null?'':`<span class="bunny" aria-label="${escape(state.players[c.owner].name)}">${rabbitArt()}</span>`}${c.building?`<span class="piece" data-kind="${c.building.category}" title="${escape(buildingText(c.building))}">${pieceArt(c.building)}${c.building.category==='farm'?'':`<span class="piece-level">${c.building.category==='city'?c.building.strength:c.building.category==='camp'?c.building.priority:'↗'+c.building.pairId.split('_').at(-1)}</span>`}</span>`:''}</button>`;
+    return `<button class="cell ${c.terrain} ${c.owner===null?'':'owned'} ${valid.includes(c.coordinate) ? 'eligible' : ''} ${targets.includes(c.coordinate) ? 'target' : ''} ${selected.some((id,i)=>!(state.players.length===2&&i===1)&&state.players[0].hand.find(card=>card.instanceId===id)?.coordinate===c.coordinate)?'draft-target':''} ${blocked.has(c.coordinate + ':' + right) ? 'lava-right' : ''} ${blocked.has(c.coordinate + ':' + down) ? 'lava-bottom' : ''}" style="${c.boardId==='great_cloud'?`grid-column:${c.x*2+1}/span 2;grid-row:${c.y+1};`:''}--owner:${c.owner === null ? 'transparent' : state.players[c.owner].color}" data-cell="${c.coordinate}" data-owner="${c.owner??''}" aria-label="${c.coordinate}, ${c.terrain}, ${escape(c.owner===null?'unclaimed':state.players[c.owner].name)}, ${escape(buildingText(c.building))}" title="${c.coordinate}: ${c.terrain}${c.building ? ', ' + c.building.category + (c.building.strength ? ' strength ' + c.building.strength : '') : ''}">${terrainArt(c.terrain)}${c.owner===null?'':'<span class="owner-overlay"></span>'}<small class="coordinate">${c.coordinate}</small>${c.baseResource?`<span class="natural-resource" title="Natural ${resourceNames[c.baseResource]}">${resourceArt(c.baseResource)}</span>`:''}${c.owner===null?'':`<span class="bunny" aria-label="${escape(state.players[c.owner].name)}">${rabbitArt()}</span>`}${c.building?`<span class="piece" data-kind="${c.building.category}" title="${escape(buildingText(c.building))}">${pieceArt(c.building)}${['farm','chimney'].includes(c.building.category)?'':`<span class="piece-level">${c.building.category==='city'?(c.building.cityType==='carrotadel'?'5*':c.building.strength):c.building.category==='camp'?c.building.priority:(c.building.category==='rainbow'?'R':'↗')+c.building.pairId.split('_').at(-1)}</span>`}</span>`:''}</button>`;
   }).join('')}</div>`;
+  return hasExpansion(state)?`<div class="boards"><section class="board-region new-world-region"><h3>New World <small>100 territories</small></h3>${pane('new_world','New World board')}</section><section class="board-region cloud-region"><h3>☁ Great Cloud <small>31 territories</small></h3>${pane('great_cloud','Great Cloud board')}</section><svg class="connection-overlay" aria-hidden="true"></svg></div>`:pane('new_world','New World board');
+}
+
+function selectedBuilding(){
+  if(buildingId?.startsWith('move:'))return {instanceId:buildingId,category:'rainbow',name:'Move Rainbow '+buildingId.split('_').at(-1)};
+  return state.players[0].buildings.find(c=>c.instanceId===buildingId);
 }
 
 function placementOptions() {
-  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  const card=selectedBuilding();
   if(!card)return [];
+  if(buildingId?.startsWith('move:'))return rainbowDestinations(state,0,buildingId.slice(5));
   const eligible=eligibleTerritories(state,0,card);
   if(card.category!=='sky_tower')return eligible;
   const groups=fiefs(state,0).filter(f=>f.coordinates.some(id=>eligible.includes(id)));
@@ -75,7 +87,7 @@ function placementOptions() {
 }
 
 function placementGuide() {
-  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  const card=selectedBuilding();
   if(!card)return '<p class="muted">Choose a building below to see its available territories.</p>';
   const count=card.category==='sky_tower'?2:1;
   let guidance=targets.length===count?'Ready to place. Confirm below.':count===2&&targets.length?'Choose the second endpoint in another highlighted fief.':'Choose a highlighted territory on the board.';
@@ -84,12 +96,12 @@ function placementGuide() {
 }
 
 function boardToolbar() {
-  const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+  const card=selectedBuilding();
   const count=card?.category==='sky_tower'?2:1;
-  return `<div class="board-toolbar"><h2>The New World</h2><button class="quiet" id="board-zoom" aria-pressed="${boardZoom}">${boardZoom?'Fit board':'Enlarge board'}</button></div>${card?`<div class="board-placement"><span>${escape(card.name)} · ${targets.length}/${count} selected</span><button id="board-confirm" class="primary" ${targets.length===count?'':'disabled'}>Confirm placement</button></div>`:''}<p class="board-scroll-hint muted">${boardZoom?'Scroll sideways to explore the enlarged board.':'Select any territory for details. Enlarge the board for a closer look.'}</p>`;
+  return `<div class="board-toolbar"><h2>${hasExpansion(state)?'Your two worlds':'The New World'}</h2><button class="quiet" id="board-zoom" aria-pressed="${boardZoom}">${boardZoom?'Fit board':'Enlarge board'}</button></div>${card?`<div class="board-placement"><span>${escape(card.name)} · ${targets.length}/${count} selected</span><button id="board-confirm" class="primary" ${targets.length===count?'':'disabled'}>Confirm placement</button></div>`:''}<p class="board-scroll-hint muted">${boardZoom?'Scroll sideways to explore the enlarged board.':'Select any territory for details. Enlarge the board for a closer look.'}</p>`;
 }
 function pieceKey() {
-  return `<details class="piece-key"><summary>Pieces & resources</summary><div class="piece-key-row"><span>${rabbitArt()} Owner</span><span>${pieceArt({category:'city',strength:2})} City · strength shown</span><span>${pieceArt({category:'camp'})} Camp · priority shown</span><span>${pieceArt({category:'sky_tower'})} Sky Tower · pair shown</span></div><div class="resource-key">${Object.entries(resourceNames).map(([id,name])=>`<span>${resourceArt(id)} ${name}</span>`).join('')}</div><p>A gold rim marks a luxury farm. The small shield shows the territory's natural resource.</p><p><a href="review/parchments/" target="_blank" rel="noopener">Parchment picture guide ↗</a></p></details>`;
+  return `<details class="piece-key"><summary>Pieces & resources</summary><div class="piece-key-row"><span>${rabbitArt()} Owner</span><span>${pieceArt({category:'city',strength:2})} City · strength shown</span><span>${pieceArt({category:'camp'})} Camp · priority shown</span><span>${pieceArt({category:'sky_tower'})} Sky Tower · pair shown</span></div><div class="resource-key">${Object.entries(resourceNames).filter(([id])=>hasExpansion(state)||data.buildings.resources.some(r=>r.id===id)).map(([id,name])=>`<span>${resourceArt(id)} ${name}</span>`).join('')}</div><p>A gold rim marks a luxury farm. The small shield shows the territory's natural resource.</p><p><a href="review/parchments/" target="_blank" rel="noopener">Parchment picture guide ↗</a></p></details>`;
 }
 function cardHTML(c,index=0) {
   const i=selected.indexOf(c.instanceId),label=i>=0?(state.players.length===2&&i===1?'Discard':'Play'):'';
@@ -98,13 +110,13 @@ function cardHTML(c,index=0) {
   return `<button class="card ${c.category} ${c.parchmentType||''} ${c.farmType==='luxury'?'luxury-card':''} ${i>=0?'selected':''} ${label==='Discard'?'discard-selected':''}" style="--fan-angle:${offset*.65}deg;--fan-drop:${Math.abs(offset)*1.5}px;--card-order:${index}" data-card="${c.instanceId}" aria-pressed="${i>=0}" aria-label="${escape(c.name+': '+cardText(c,state)+(label?' — '+label:''))}"><span class="tag">${escape(type)}</span><span class="card-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p>${label?`<span class="choice-ribbon">${label==='Discard'?'×':'✓'} ${label}</span>`:''}</button>`;
 }
 function handPanel() {
-  const instruction=forcedFinalPick()?'Both remaining cards will be played · No cards to pass':`${state.players.length===2?'Choose 1 to play and 1 to discard':'Choose 2 cards to play'} · ${passDestination()}`;
+  const instruction=forcedFinalPick()?'All remaining cards will be played · No cards to pass':`${state.players.length===2?'Choose 1 to play and 1 to discard':`Choose ${cardsPerPick(state)} cards to play`} · ${passDestination()}`;
   return `<section class="hand-dock" id="hand-panel" aria-label="Your hand"><div class="card-preview hand-preview" id="card-preview">${cardPreview(null)}</div><div class="hand-heading"><div><span class="eyebrow">YOUR HAND</span><b>${state.players[0].hand.length} cards</b></div><p>${instruction}</p><a href="#turn-panel">Review & confirm ↑</a></div><div class="hand" style="--hand-count:${state.players[0].hand.length}">${sortedHand(state.players[0].hand).map(cardHTML).join('')}</div></section>`;
 }
 function playerPanels() { return renderPlayerPanels(state); }
 
 function passDestination() {
-  if(state.players[0].hand.length===2)return 'Final pick · No cards to pass';
+  if(state.players[0].hand.length===selectionsPerPick(state))return 'Final pick · No cards to pass';
   const next=state.players[draftRecipient(state,0)];
   return `<span class="pass-destination" data-pass-player="${next.id}">Pass ${state.round%2?'left':'right'} to <span class="pass-player" style="--player:${next.color}"><i aria-hidden="true"></i><b>${escape(next.name)}</b></span></span>`;
 }
@@ -120,13 +132,13 @@ function parchmentEstimate(card) {
   return `<div class="parchment-estimate"><strong>If scored now: ${signed(preview.gain)} parchment ${preview.gain===1?'point':'points'}</strong>${preview.otherPoints?`<p>${preview.points} on this card · ${signed(preview.otherPoints)} from your other parchments.</p>`:''}<small>Current board and kept parchments; future moves can change this.${preview.notes.length?' '+escape(preview.notes.join(' ')):''}</small></div>`;
 }
 function draftPanel() {
-  const twoPlayers=state.players.length===2,forced=forcedFinalPick();
-  const slots=[0,1].map(i=>{
+  const twoPlayers=state.players.length===2,forced=forcedFinalPick(),count=selectionsPerPick(state);
+  const slots=Array.from({length:count},(_,i)=>{
     const card=state.players[0].hand.find(c=>c.instanceId===selected[i]);
     const label=twoPlayers?(i===0?'Play':'Discard'):'Play '+(i+1);
     return `<div class="draft-slot ${twoPlayers&&i===1?'discard-slot':''}"><b>${label}</b><span>${card?escape(card.name):'Choose a card'}</span></div>`;
   }).join('');
-  return `<p class="draft-route">${passDestination()}</p><div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div>${forced?'':`<div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===2?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div>`}<button id="confirm-draft" class="primary" ${selected.length===2?'':'disabled'}>${forced?'Continue →':selected.length===2?(state.players[0].hand.length===2?'Confirm final cards →':'Confirm cards & pass →'):`Select ${2-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${forced?'Your last two cards are ready. Continue to finish exploration.':'Click a selected card to remove it.'}</p>`;
+  return `<p class="draft-route">${passDestination()}</p><div class="draft-controls" id="draft-controls" tabindex="-1"><div class="draft-slots" aria-live="polite" aria-atomic="true">${slots}</div>${forced?'':`<div class="selection-tools">${twoPlayers?`<button id="swap-draft" class="quiet" ${selected.length===count?'':'disabled'}>Swap play / discard</button>`:''}<button id="clear-draft" class="quiet" ${selected.length?'':'disabled'}>Clear selection</button></div>`}<button id="confirm-draft" class="primary" ${selected.length===count?'':'disabled'}>${forced?'Continue →':selected.length===count?(state.players[0].hand.length===count?'Confirm final cards →':'Confirm cards & pass →'):`Select ${count-selected.length} more card${selected.length?'':'s'}`}</button></div><p class="muted">${forced?'Your remaining cards are ready. Continue to finish exploration.':'Click a selected card to remove it.'}</p>`;
 }
 function focusedControl() {
   const element=document.activeElement;
@@ -148,12 +160,14 @@ function render() {
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
   const recap=document.querySelector('.last-turn-panel');
   const recapScroll=recap?.dataset.turn===(state.lastTurn?state.lastTurn.round+'-'+state.lastTurn.pick:'none')?recap.scrollTop:0;
-  app.classList.remove('at-results');app.classList.add('at-table');
+  app.classList.remove('at-results');app.classList.add('at-table');app.classList.toggle('expansion-table',hasExpansion(state));
+  document.querySelector('.edition').textContent=hasExpansion(state)?'THE NEW WORLD + IN THE SKY':'THE NEW WORLD · BASE GAME';
   app.innerHTML = `
     <div class="game-heading"><div class="round-token">${state.round}<small>/ 4</small></div><div class="turn-heading"><p class="eyebrow">${({draft:'EXPLORATION',camps:'CAMP PRIORITY',construction:'CONSTRUCTION',markets:'TRADING POSTS',harvest:'HARVEST',parchments:'FINAL SCORING',finished:'GAME COMPLETE'})[state.phase]}</p><h1>${({draft:'Choose your next move',camps:'Claim a foothold',construction:'Build your kingdom',markets:'Gather your resources',harvest:'A season of plenty',parchments:'The royal reckoning',finished:'A kingdom to remember'})[state.phase]}</h1></div><div class="heading-actions"><button id="toggle-animation" class="quiet" aria-pressed="${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches}" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'disabled title="Your device requests reduced motion"':''}>Animations: ${animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'on':'off'}</button><button id="new-game" class="quiet">New game</button></div></div>
+    ${hasExpansion(state)?`<section class="expansion-player-strip">${playerPanels()}</section>`:''}
     <div class="game-layout table-layout" data-phase="${state.phase}">
       <section class="map-panel panel" id="map-panel" tabindex="-1"><div class="board-workspace">${lastTurnPanel(state)}<div class="board-area">${boardToolbar()}<div class="board-scroll" tabindex="0" role="region" aria-label="Board; scroll to explore in the enlarged view">${board()}</div><p class="legend" id="fief-readout"></p></div></div></section>
-      <aside class="table-sidebar panel">${playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn}${state.players[0].hand.length===2?' · FINAL PICK':''}</p><h2>${state.players.length===2?'Play one, discard one':'Play two cards'}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
+      <aside class="table-sidebar panel">${hasExpansion(state)?'':playerPanels()}<section id="turn-panel" tabindex="-1">${state.phase==='draft'?`<p class="eyebrow">PICK ${state.draftTurn}${state.players[0].hand.length===selectionsPerPick(state)?' · FINAL PICK':''}</p><h2>${state.players.length===2?'Play one, discard one':`Play ${cardsPerPick(state)} cards`}</h2>`:''}<div id="error" role="alert">${error?`<p class="error">${escape(error)}</p>`:''}</div><div id="actions">${state.phase==='draft'?draftPanel():constructionPanel()}</div></section>${inspectionPanel()}${privateCardsPanel()}${pieceKey()}<details class="log"><summary>Table activity</summary>${state.log.slice(-30).reverse().map(x=>`<p>${escape(x)}</p>`).join('')}</details></aside>${state.phase==='draft'?handPanel():''}
     </div>
     <nav class="game-nav" aria-label="Game sections"><a href="#map-panel">▦ Board</a>${state.phase==='draft'?'<a href="#hand-panel">Your hand</a>':''}<a href="#turn-panel">${({draft:'Confirm',camps:'Place Camp',construction:'Buildings',markets:'Resources',harvest:'Harvest',parchments:'Parchments',finished:'Results'})[state.phase]} →</a></nav>
     <p class="save-status muted">${saved?'Autosaved in this browser':'Browser storage is unavailable; keep this tab open to retain your game'} · ${state.botDifficulty==='easy'?'Easy':'Normal'} bots · Seed ${escape(state.seed)}</p>`;
@@ -179,7 +193,7 @@ function render() {
     if(forcedFinalPick())return;
     const id = button.dataset.card;
     if (selected.includes(id)) {selected = selected.filter(x => x !== id);soundEffects.play('deselect');}
-    else if (selected.length < 2) {selected.push(id);soundEffects.play('select');}
+    else if (selected.length < selectionsPerPick(state)) {selected.push(id);soundEffects.play('select');}
     render();
   });
   document.querySelectorAll('[data-card]').forEach(button=>{
@@ -233,20 +247,24 @@ function constructionPanel() {
     const current=state.campQueue[0];
     return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2>${placementGuide()}<p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
   }
-  if(state.phase==='markets') return `<h2>Choose your Trading Posts</h2><p class="help">Each Trading Post produces one basic resource this round. Round 4 choices also apply to parchment scoring.</p>${tradingPosts(state,0).map(c=>`<label>${c.coordinate}<select data-market="${c.coordinate}"><option value="" disabled ${!c.building.choice?'selected':''}>Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${r}</option>`).join('')}</select></label>`).join('') || '<p>You have no Trading Posts to assign.</p>'}<div class="actions"><button id="confirm-markets" class="primary" ${tradingPosts(state,0).some(c=>!c.building.choice)?'disabled':''}>Confirm & harvest</button></div>`;
+  if(state.phase==='markets') {
+    const posts=tradingPosts(state,0),vents=chimneys(state,0);
+    const pending=posts.some(c=>!c.building.choice)||vents.some(c=>{const options=chimneyOptions(state,0,c.coordinate);return options.length&&!options.includes(c.building.choice);});
+    return `<h2>Choose harvest resources</h2><p class="help">Trading Posts produce a basic resource. Chimneys share one resource already present in their fief with your New World fiefs for this harvest.</p>${posts.map(c=>`<label>Trading Post · ${c.coordinate}<select data-market="${c.coordinate}"><option value="" disabled ${!c.building.choice?'selected':''}>Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`).join('')}${vents.map(c=>{const options=chimneyOptions(state,0,c.coordinate);return `<label>Chimney · ${c.coordinate}<select data-chimney="${c.coordinate}" ${options.length?'':'disabled'}><option value="" disabled ${!options.includes(c.building.choice)?'selected':''}>${options.length?'Choose a resource':'No basic resource in this fief'}</option>${options.map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`;}).join('')}${!posts.length&&!vents.length?'<p>No resources to assign.</p>':''}<div class="actions"><button id="confirm-markets" class="primary" ${pending?'disabled':''}>Confirm & harvest</button></div>`;
+  }
   if(state.phase==='harvest') return `<h2>Round ${state.round} harvest</h2><table class="table"><thead><tr><th>Player</th><th>Harvest</th><th>Total</th></tr></thead><tbody>${state.lastHarvest.map(h=>`<tr><td>${escape(state.players[h.playerId].name)}</td><td>+${h.points}</td><td>${state.players[h.playerId].score}</td></tr>`).join('')}</tbody></table>${state.lastHarvest.map(h=>`<details class="fief-list"><summary>${escape(state.players[h.playerId].name)}: fief breakdown</summary>${h.fiefs.map(f=>`<p>${f.coordinates.join(', ')}: ${f.strength} strength × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`).join('')}<div class="actions"><button id="next-round" class="primary">${state.round===4?'Reveal parchments':'Begin round '+(state.round+1)} →</button></div>`;
   if(['parchments','finished'].includes(state.phase)) return scoringPanel(state);
   const available = state.players[0].buildings;
-  const card=available.find(c=>c.instanceId===buildingId);
+  const card=selectedBuilding();
   const complete=card&&targets.length===(card.category==='sky_tower'?2:1);
-  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length||buildingId?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}${movableRainbows(state,0).map(c=>`<button class="quiet rainbow-move" data-move-rainbow="${c.building.pairId}">Move Rainbow ${c.building.pairId.split('_').at(-1)} · currently ${c.coordinate}</button>`).join('')}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
 async function attempt(action) {
   if(playing)return;
   soundEffects.unlock();
   const before=capturePresentation(state),phase=state.phase;
   try {error='';action();} catch(e) {error=e.message;render();soundEffects.play('error');return;}
-  const events=animationEvents(before,state,data.buildings.cards);
+  const events=animationEvents(before,state,[...data.buildings.cards,...data.expansion.cards]);
   const transition=phase!==state.phase?({harvest:'harvest',parchments:'reveal',finished:state.winners?.includes(0)?'finish':'lose',draft:'round'})[state.phase]:null;
   playing=animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&events.length>0;
   render();
@@ -269,6 +287,7 @@ function driveBots() {
   if (state.phase === 'construction') for (const p of state.players.filter(p=>p.bot&&!p.ready)) {
     let action;
     while ((action=botPolicy().chooseBuilding(publicView(state,p.id),p.id))) placeBuilding(state,p.id,action.cardId,action.coordinates);
+    for(const move of botPolicy().chooseRainbowMoves(publicView(state,p.id),p.id))moveRainbow(state,p.id,move.pairId,move.coordinate);
     finishConstruction(state,p.id);
   }
   if(state.phase==='parchments') {
@@ -277,13 +296,15 @@ function driveBots() {
   }
   if(state.phase==='markets') for(const p of state.players.filter(p=>p.bot&&!p.ready)) {
     for(const c of botPolicy().chooseMarkets(publicView(state,p.id),p.id)) chooseResource(state,p.id,c.coordinate,c.resource);
+    for(const c of botPolicy().chooseChimneys(publicView(state,p.id),p.id))chooseChimney(state,p.id,c.coordinate,c.resource);
     finishMarkets(state,p.id);
   }
 }
 function bindConstruction() {
+  document.querySelectorAll('[data-move-rainbow]').forEach(b=>b.onclick=()=>{buildingId='move:'+b.dataset.moveRainbow;targets=[];render();});
   document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];soundEffects.play('select');const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp'){requestCamp(state,0,buildingId);driveBots();}}));
   document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
-    const card=state.players[0].buildings.find(c=>c.instanceId===buildingId);
+    const card=selectedBuilding();
     inspected=b.dataset.cell;
     if(!card || !placementOptions().includes(b.dataset.cell)) {render();return;}
     const id=b.dataset.cell, count=card.category==='sky_tower'?2:1;
@@ -293,19 +314,18 @@ function bindConstruction() {
     render();
   });
   const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
-  bind('place-building',()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}});
+  bind('place-building',()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{if(buildingId?.startsWith('move:'))moveRainbow(state,0,buildingId.slice(5),targets[0]);else placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}});
   document.querySelectorAll('[data-market]').forEach(select=>select.onchange=()=>attempt(()=>chooseResource(state,0,select.dataset.market,select.value)));
+  document.querySelectorAll('[data-chimney]').forEach(select=>select.onchange=()=>attempt(()=>chooseChimney(state,0,select.dataset.chimney,select.value)));
   bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
   bind('next-round',()=>{advanceRound(state);selected=[];buildingId=null;targets=[];driveBots();});
   document.querySelectorAll('[data-copy]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions=copyChoiceDecisions(state.scoringDecisions,s.dataset.copy,s.value);}));
   document.querySelectorAll('[data-ruling]').forEach(s=>s.onchange=()=>attempt(()=>{if(s.value!=='')state.scoringDecisions.rulings[s.dataset.ruling]=Number(s.value);}));
-  document.querySelectorAll('[data-copy-resolution]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions.copyResolutions[s.dataset.copyResolution]=s.value;state.scoringDecisions.rulings={};}));
   document.querySelectorAll('[data-reset-ruling]').forEach(b=>b.onclick=()=>attempt(()=>{
     delete state.scoringDecisions.rulings[b.dataset.resetRuling];
     // A changed earlier award can change the later rank ruling.
     for(const key of Object.keys(state.scoringDecisions.rulings))if(key.startsWith('opportunist:'))delete state.scoringDecisions.rulings[key];
   }));
-  document.querySelectorAll('[data-reset-copy-resolution]').forEach(b=>b.onclick=()=>attempt(()=>{delete state.scoringDecisions.copyResolutions[b.dataset.resetCopyResolution];state.scoringDecisions.rulings={};}));
   bind('finish-scoring',()=>finalizeScoring(state,state.scoringDecisions));
   const again=document.querySelector('#play-again');if(again)again.onclick=setup;
   bind('save-camp',()=>{respondCamp(state,0);driveBots();});

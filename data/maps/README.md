@@ -1,5 +1,7 @@
 # Original board data
 
+The expansion has a separate [Great Cloud JSON](great-cloud.json) and [interactive map review](../../review/cloud/index.html). Its staggered adjacency and starting pieces are transcribed; corner classification still awaits clarification. The uploaded `cloud.jpeg` remains local.
+
 The supplied `reference/map/IMG_3156.jpeg` is clear enough to transcribe. All 100 spaces, the 18 printed starting cities, and eight lava-blocked shared edges have been extracted. No additional photo is currently needed.
 
 **Status: user verified.** The user reviewed the extraction and confirmed that the data looks correct. The confirmation is recorded in the JSON's `verification` metadata. Automated checks also establish structural consistency.

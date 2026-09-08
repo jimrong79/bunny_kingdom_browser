@@ -11,13 +11,15 @@ export function animationEvents(before,after,catalog) {
     if(action.type==='territory')events.push({type:'claim',playerId,coordinate:action.coordinate,campOwner:action.campOwner});
     if(action.type==='building')events.push({type:'reserve',playerId,card:catalog.find(c=>c.name===action.name)});
     if(['parchment','provisions','discard'].includes(action.type))events.push({type:action.type,playerId});
+    if(action.type==='coins')events.push({type:'coins',playerId,count:action.count});
   }
   const placed=new Set();
   const cells=Object.values(after.cells).sort((a,b)=>(a.building?.category==='camp'?a.building.priority:10+a.owner)-(b.building?.category==='camp'?b.building.priority:10+b.owner));
   for(const cell of cells) {
     if(!cell.building?.instanceId||before.cells[cell.coordinate]?.building?.instanceId===cell.building.instanceId)continue;
-    events.push({type:'place',playerId:cell.owner,coordinate:cell.coordinate,building:{...cell.building},
-      name:catalog.find(c=>c.id===cell.building.cardId)?.name||'Building',removeFromTray:!placed.has(cell.building.instanceId)});
+    const movedFrom=cell.building.category==='rainbow'?Object.values(before.cells).find(c=>c.building?.instanceId===cell.building.instanceId)?.coordinate:null;
+    events.push({type:'place',playerId:cell.owner,coordinate:cell.coordinate,building:{...cell.building},movedFrom,
+      name:catalog.find(c=>c.id===cell.building.cardId)?.name||(cell.building.category==='rainbow'?'Rainbow':'Building'),removeFromTray:!movedFrom&&!placed.has(cell.building.instanceId)});
     placed.add(cell.building.instanceId);
   }
   return events;
@@ -25,7 +27,7 @@ export function animationEvents(before,after,catalog) {
 
 export function capturePresentation(state) {
   return {cells:structuredClone(state.cells),lastTurn:state.lastTurn,
-    players:state.players.map(p=>({id:p.id,buildings:p.buildings.length,parchments:p.parchments.length})),
+    players:state.players.map(p=>({id:p.id,buildings:p.buildings.length,parchments:p.parchments.length,coins:p.coins||0})),
     markup:new Map([...document.querySelectorAll('[data-cell]')].map(el=>[el.dataset.cell,el.innerHTML]))};
 }
 
@@ -62,7 +64,7 @@ export async function playAnimation(before,state,events) {
     const pendingPlaces=new Set(events.filter(e=>e.type==='place').map(e=>e.coordinate));
     const finalMarkup=new Map();
     const cellElement=id=>document.querySelector(`[data-cell="${id}"]`);
-    for(const coordinate of new Set(events.map(e=>e.coordinate).filter(Boolean))) {
+    for(const coordinate of new Set(events.flatMap(e=>[e.coordinate,e.movedFrom]).filter(Boolean))) {
       const el=cellElement(coordinate);finalMarkup.set(coordinate,el.innerHTML);
       el.innerHTML=before.markup.get(coordinate);el.classList.toggle('owned',before.cells[coordinate].owner!==null);
       el.style.setProperty('--owner',state.players[before.cells[coordinate].owner]?.color||'transparent');
@@ -78,6 +80,7 @@ export async function playAnimation(before,state,events) {
         panel.querySelector('[data-player-stats]').textContent=`${production.territories} territories · ${fiefs(virtual,player.id).length} fiefs`;
         panel.querySelector('[data-city-count]').textContent=production.cities;
         panel.querySelector('[data-city-strength]').textContent=production.cityStrength;
+        const coins=panel.querySelector('[data-coins]');if(coins)coins.textContent=counts[player.id].coins;
         for(const pile of ['buildings','parchments'])panel.querySelector(`[data-pile="${pile}"] [data-pile-count]`).textContent=counts[player.id][pile];
       }
     };
@@ -104,15 +107,17 @@ export async function playAnimation(before,state,events) {
       const player=state.players[event.playerId],pile=event.type==='parchment'?'parchments':'buildings';
       overlay.dataset.event=event.type;overlay.dataset.player=player.id;overlay.style.setProperty('--player',player.color);
       origin.style.color=player.color;origin.innerHTML=rabbitArt();
-      const label=({claim:`claims ${event.coordinate}${event.campOwner!==null&&event.campOwner!==undefined?' · replaces a Camp':''}`,reserve:`adds ${event.card?.name||'a building'} to the tray`,parchment:'keeps a face-down parchment',provisions:'opens Provisions · 2 extra cards',discard:'discards a face-down card',place:`places ${event.name} at ${event.coordinate}`})[event.type];
+      const label=({claim:`claims ${event.coordinate}${event.campOwner!==null&&event.campOwner!==undefined?' · replaces a Camp':''}`,reserve:`adds ${event.card?.name||'a building'} to the tray`,parchment:'keeps a face-down parchment',provisions:'opens Provisions · 2 extra cards',discard:'discards a face-down card',coins:`collects ${event.count} Coin${event.count===1?'':'s'}`,place:`${event.movedFrom?'moves':'places'} ${event.name} at ${event.coordinate}`})[event.type];
       overlay.querySelector('[role=status]').textContent=player.name+' '+label;
       overlay.querySelector('.animation-progress').textContent=`${event.type==='place'?`Construction · Round ${state.round}`:`Round ${state.lastTurn.round} · Pick ${state.lastTurn.pick}`} · ${index+1} / ${events.length}`;
       let art=event.type==='claim'?rabbitArt():event.type==='reserve'&&event.card?cardArt(event.card):event.type==='place'?pieceArt(event.building):event.type==='provisions'?cardArt({category:'provisions'}):cardBackArt();
+      if(event.type==='coins')art=pieceArt({category:'tax_collector'});
       if(event.type==='place'&&event.building.category==='camp')art+=`<span class="flying-camp-rabbit">${rabbitArt()}</span>`;
       destination.innerHTML=event.coordinate?`<b>${event.coordinate}</b>`:event.type==='parchment'?cardBackArt():event.type==='reserve'?pieceArt({category:'city',strength:2}):art;
       const cell=event.coordinate?cellElement(event.coordinate):null;
       if(cell&&!visibleCenter(cell))cell.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
       let to=cell||document.querySelector(`[data-pile="${pile}"][data-pile-player="${player.id}"]`);
+      if(event.type==='coins')to=document.querySelector(`[data-player="${player.id}"] [data-coins]`)||destination;
       if(['provisions','discard'].includes(event.type))to=destination;
       const from=event.type==='place'?document.querySelector(`[data-pile="buildings"][data-pile-player="${player.id}"]`):document.querySelector(`[data-player-origin="${player.id}"]`);
       await fly(art,visibleCenter(from)||visibleCenter(origin),visibleCenter(to)||visibleCenter(destination),player.color,event.type);
@@ -120,10 +125,12 @@ export async function playAnimation(before,state,events) {
       soundEffects.play(event.type);
       if(event.type==='reserve')counts[player.id].buildings++;
       if(event.type==='parchment')counts[player.id].parchments++;
+      if(event.type==='coins')counts[player.id].coins+=event.count;
       if(event.type==='claim'||event.type==='place') {
         const c=virtual.cells[event.coordinate];c.owner=player.id;
         if(event.type==='claim'&&c.building?.category==='camp')c.building=null;
         if(event.type==='place') {
+          if(event.movedFrom){virtual.cells[event.movedFrom].building=null;cellElement(event.movedFrom).innerHTML=finalMarkup.get(event.movedFrom);}
           c.building=state.cells[event.coordinate].building;pendingPlaces.delete(event.coordinate);
           if(event.removeFromTray)counts[player.id].buildings--;
         }

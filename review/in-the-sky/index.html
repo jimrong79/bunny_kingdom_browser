@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>In the Sky · Table layout preview</title>
+<link rel="stylesheet" href="../../src/style.css"><link rel="stylesheet" href="preview.css">
+</head>
+<body>
+<header class="preview-header"><a href="../../">BUNNY KINGDOM <span>in the Sky</span></a><span class="study">Layout preview · sample position</span><nav aria-label="Layout options"><button data-layout="beside" aria-pressed="true">Cloud upper-right</button><button data-layout="above" aria-pressed="false">Cloud above</button><label>Players <select id="player-count"><option>3</option><option selected>4</option><option>5</option></select></label></nav></header>
+<main id="preview" data-layout="beside">
+<div class="roster" aria-label="Example players"></div>
+<div class="table-space">
+<aside class="activity"><p class="eyebrow">ROUND 3 · EXPLORATION</p><h2>Last turn</h2><div id="activity"></div><div class="layout-notes"><b>Two worlds, one table</b><p>Hover a territory or card. Click a territory to pin its details.</p><button id="links" aria-pressed="false">Show example connection</button><p id="measurements"></p></div></aside>
+<section class="boards" aria-label="Both game boards">
+<section class="ground-world"><div class="world-heading"><h1>The New World</h1><span class="world-badge">LAND · A–J</span></div><div id="ground" class="board" aria-label="New World"></div></section>
+<section class="cloud-world"><div class="world-heading"><h1>The Great Cloud</h1><span class="world-badge sky-badge">SKY · ☁</span></div><div id="cloud" aria-label="Great Cloud layout study"></div><p class="cloud-caption">Cloud territory labels & contents are illustrative.</p></section>
+<svg id="connections" aria-hidden="true"><path/><circle/><circle/></svg>
+</section>
+<aside class="inspector"><p class="eyebrow">TERRITORY & FIEF</p><div id="detail" aria-live="polite"></div><section class="supplies"><h2>Your reserves</h2><div class="reserve-pieces"></div><p>Buildings ready to place</p><div class="parchment-pile"></div><p>7 private parchments</p></section><div class="turn-choice"><b id="pick-instruction"></b><p>Card selection and scoring are examples in this preview.</p><a href="../../">Return to playable base game →</a></div></aside>
+</div>
+<section class="hand-zone" aria-label="Example hand"><div class="hand-heading"><b>Your hand <span id="hand-count"></span></b><span>Territories → buildings & actions → parchments</span><span class="pass">Passing to Sir Rabbiton →</span></div><div id="hand"></div></section>
+<footer>This is a layout study, not expansion gameplay. <a href="../../docs/in-the-sky-plan.md">Implementation plan</a> · Try both layouts, then resize the window.</footer>
+</main>
+<script type="module" src="preview.js"></script>
+</body>
+</html>
