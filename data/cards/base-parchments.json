@@ -42,6 +42,13 @@
       "date": "2026-09-05",
       "text": "10 carrots if you're in second place after final scoring",
       "description": "User confirmation of Opportunist's printed wording; also reflected in line 37 of the supplied file."
+    },
+    {
+      "id": "user-matriarch-ties",
+      "kind": "user_message",
+      "date": "2026-09-08",
+      "text": "for matriarch, only if the player is the only player has the most.",
+      "description": "User confirms Matriarch requires strictly more territories than every other player; ties score zero."
     }
   ],
   "inventory": {
@@ -66,15 +73,6 @@
     "nullFields": "Unresolved rule: a future scoring engine must require a verified resolution before relying on this field."
   },
   "openItems": [
-    {
-      "id": "matriarch-ties",
-      "cardIds": [
-        "matriarch"
-      ],
-      "status": "open",
-      "question": "Does a tie for the most territories qualify? The supplied summary and checked rulebook do not specify this.",
-      "evidenceNeeded": "Printed clarification or a readable publisher/designer ruling."
-    },
     {
       "id": "copy-interactions",
       "cardIds": [
@@ -752,21 +750,20 @@
       "copies": 1,
       "sourceLine": 31,
       "sourceText": "12 carrots if you control the most territories",
-      "scoringStatus": "needs_clarification",
+      "scoringStatus": "draft_from_source",
       "scoringSpec": {
         "type": "territory_lead_bonus",
         "points": 12,
-        "tiePolicy": null
+        "tiePolicy": "no_bonus"
       },
       "sourceRefs": [
-        "user-parchments"
+        "user-parchments",
+        "user-matriarch-ties"
       ],
       "notes": [
-        "The tie policy is deliberately unset pending a verified clarification."
+        "Requires strictly more territories than every other player; ties score zero (user confirmation, 2026-09-08)."
       ],
-      "openItemRefs": [
-        "matriarch-ties"
-      ]
+      "openItemRefs": []
     },
     {
       "id": "little_prince",

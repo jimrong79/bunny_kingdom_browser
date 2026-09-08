@@ -33,7 +33,7 @@ export function parchmentValue(view,playerId,cards,stats=playerStats(view,player
     if(s.type==='territory_lead_bonus') {
       const rival=Math.max(...view.players.filter(p=>p.id!==playerId).map(p=>Object.values(view.cells).filter(c=>c.owner===p.id).length));
       points=s.points/(1+Math.exp((rival-stats.cells.length)/Math.max(1,growth*1.8)));
-      if(!growth)points=stats.cells.length>rival?s.points:stats.cells.length===rival?s.points/2:0;
+      if(!growth)points=stats.cells.length>rival?s.points:0;
     }
     if(s.type==='rank_bonus') {
       const projected=view.players.map(p=>p.score+playerStats(view,p.id).groups.reduce((n,f)=>n+f.points*harvestsLeft(view),0));

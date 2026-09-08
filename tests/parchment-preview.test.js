@@ -84,9 +84,9 @@ test('draft previews never depend on rival hidden cards and do not mutate the sa
   assert.equal(draftParchmentPreview(s,0,card('liberal')).points,null);
   assert.equal(draftParchmentPreview(s,0,card('opportunist')).points,null);
 });
-test('draft Matriarch previews use public territory counts and leave tied awards pending',()=>{
+test('draft Matriarch previews award zero for ties and twelve only for an outright lead',()=>{
   const s=setup([],[]);s.phase='draft';const c=card('matriarch');
-  assert.equal(draftParchmentPreview(s,0,c).points,null);
+  assert.equal(draftParchmentPreview(s,0,c).points,0);
   s.cells.A1.owner=0;assert.equal(draftParchmentPreview(s,0,c).points,12);
   s.cells.A2.owner=1;s.cells.A3.owner=1;assert.equal(draftParchmentPreview(s,0,c).points,0);
 });

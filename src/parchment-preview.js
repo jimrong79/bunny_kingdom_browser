@@ -34,8 +34,8 @@ function knownDraftPoints(view, playerId, cards, stats) {
   const most=Math.max(...territories);
   const points=new Map(cards.map(card=>{
     let value=basePoints(card,stats,cards);
-    if(card.scoringSpec.type==='territory_lead_bonus')value=stats.cells.length<most?0:
-      territories.filter(n=>n===most).length===1?card.scoringSpec.points:null;
+    if(card.scoringSpec.type==='territory_lead_bonus')value=stats.cells.length===most&&
+      territories.filter(n=>n===most).length===1?card.scoringSpec.points:0;
     if(card.parchmentType==='treasure')value=multiplierPending?null:value*(hunters?2:1);
     return [card.instanceId,value];
   }));
@@ -52,7 +52,7 @@ export function draftParchmentPreview(state, playerId, card) {
   const after=knownDraftPoints(view,playerId,[...kept,card],stats);
   const points=after.points.get(card.instanceId);
   if(after.multiplierPending)return {points:null,reason:'A ruling is needed for multiple Treasure Hunter effects.'};
-  if(points===null)return {points:null,reason:card.scoringSpec.metric==='controlled_corner_territories'?'Cloud corner classification needs a ruling.':'You are tied for most territories; this award needs a tie ruling.'};
+  if(points===null)return {points:null,reason:'Cloud corner classification needs a ruling.'};
   const notes=[];
   if(kept.some(isCopy))notes.push('Unchosen copy effects are excluded.');
   if(kept.some(c=>c.scoringSpec.type==='rank_bonus'))notes.push('Final-rank bonuses are excluded.');

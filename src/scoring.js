@@ -90,7 +90,7 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
       if(s.metric==='controlled_corner_territories'&&stats[p.id].unknownCorners.length) {
         const own=stats[p.id];points=ask(`cloud-corners:${original.instanceId}`,'points',`${p.name}: Explorer's cloud corners need a ruling for ${own.unknownCorners.map(c=>c.coordinate).join(', ')}. Choose its total award, including ${own.knownCorners} confirmed corners.`,Array.from({length:own.unknownCorners.length+1},(_,i)=>(own.knownCorners+i)*s.pointsPerItem));
       }
-      if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length<territoryMax?0:leaders===1?s.points:ask(`matriarch:${original.instanceId}`,'points',`${p.name} ties for most territories. Award for ${original.name} under your ruling?`,[0,s.points]);
+      if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length===territoryMax&&leaders===1?s.points:0;
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
       return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};
     });
