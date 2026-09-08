@@ -2,6 +2,8 @@
 
 Run `python3 -m http.server 8000 --bind 127.0.0.1` from the repository root and open `http://localhost:8000`. The application is static HTML, CSS, JavaScript modules, and the existing JSON catalogs. There is no build step or external AI service.
 
+For the playable expansion, see [In the Sky rules, controls, bots, and validation](in-the-sky-rules.md). The flow below describes the original mode.
+
 ## Play flow
 
 1. Start a seeded or random game against 1–3 bots. The original board, 18 neutral cities, eight lava edges, and all 182 cards are used.

@@ -28,7 +28,7 @@ The user confirmed Opportunist's wording as 10 Golden Carrots for second place a
 - [Confirmed Luxury farm restrictions and Treasure classifications](in-the-sky-confirmations.md)
 - [Expansion card catalog](in-the-sky.json)
 
-These expansion sources are awaiting a separate normalized catalog and gameplay implementation. The base-game catalogs and inventory checks remain scoped to the original game.
+The expansion has its own normalized catalog and playable mode. See [expansion rules and remaining review](../../docs/in-the-sky-rules.md). Base-game catalogs and inventory checks remain scoped to the original game.
 
 ## Data conventions
 

@@ -1,6 +1,6 @@
 # Bunny Kingdom Browser
 
-Browser implementation of the original Bunny Kingdom base game, starting with verification of the board, cards, and rules.
+Browser implementation of Bunny Kingdom and the In the Sky expansion, with local AI opponents.
 
 ## Play locally
 
@@ -19,6 +19,12 @@ Confirming the final score opens a results screen with each player's colored rab
 Use **Download game** on the results screen to export the full match as JSON for review. Put exports in [`reference/games/`](reference/games/), which stays local. The seed reproduces the deal; the export also captures the actual moves and final position.
 
 Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, rule limitations, and browser checks](docs/implementation.md).
+
+## In the Sky
+
+Choose **Bunny Kingdom + In the Sky** when starting a game. Play against 1–4 bots using both boards and all 232 cards. The expansion includes Carrotadels, Rainbows, Chimneys, District Coins, Trade, and all ten new parchments. Player panels show Coins and current Trade; the final results separate Trade from harvests and parchments.
+
+The branch remains under rule review: cloud corners require an explicit Explorer ruling when relevant, and District coins currently resolve after the complete simultaneous pick. See [implemented rules, known questions, bot behavior, and validation](docs/in-the-sky-rules.md) and the [cloud map review](review/cloud/index.html).
 
 ## Local workspace
 

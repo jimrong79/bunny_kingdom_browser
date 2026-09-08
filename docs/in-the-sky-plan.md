@@ -2,6 +2,10 @@
 
 Branch: `feat/in-the-sky`, starting from `4625daf` / `bots-v3-camp-defense`. Keep the PR in draft while the expansion is incomplete. The first commit adds only this plan and an isolated [layout preview](../review/in-the-sky/index.html). The base-game entry point, rules, and saved games are untouched.
 
+## Current implementation
+
+The main entry point now offers the playable expansion. Map/card data, setup, two-board interaction, expansion mechanics, endgame scoring, bots, and save/resume have been implemented in separate commits. See [rules and validation](in-the-sky-rules.md) for the remaining cloud-corner and District-timing review. The isolated layout preview below remains the original illustrative prototype.
+
 ## Try the layout
 
 With the usual server running, open **http://localhost:8000/review/in-the-sky/**. Use the buttons to compare the cloud above the New World with the cloud at its upper-right. Switch between three, four, and five players to compare hand sizes and player panels. Hover or tap blue territories to highlight a sample fief across both boards, or hover a territory card to locate its board square.

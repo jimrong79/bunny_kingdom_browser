@@ -23,5 +23,5 @@ These classifications must be used by Nibblonacci and existing Treasure-counting
 
 ## Still requiring review
 
-- Normalize and review the uploaded cloud board's territories, adjacency, edges, corners, and starting pieces before using them in gameplay.
-- Resolve the order-sensitive District coin case when several drafted territories are played together; these confirmations do not settle that rule.
+- The cloud board is transcribed and used in gameplay; review its [territories and adjacency](../../review/cloud/index.html). Corner classification is still unresolved.
+- District coins currently resolve after the completed simultaneous pick. These card confirmations do not settle whether sequential territory resolution should be allowed; see [the documented interpretation](../../docs/in-the-sky-rules.md).
