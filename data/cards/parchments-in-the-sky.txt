@@ -1,0 +1,12 @@
+Merchants Signet - 1 carrot for each coin in your possession
+Nibblonacci - Receive carrot based on your number of treasures (see the next two lines)
+1/2/3/4/5/6/7+
+2/3/5/8/13/21/34
+Cape of Dawn - 2 carrots for each row on the great cloud board in which you control at least one territory
+Assistant Governor - 2 carrots for each District you control
+Cloud Independence - Collect the carrots from your Fiefs on the Great Cloud again (ignoring any Rainbows and Sky Towers)
+Merchant Queen - 20 carrots if you have a trade score of 50 or higher
+Governor - 3 carrots for each district you control
+Hareborne Explorer -1 carrot for each Territory on the Great Cloud under your control
+Lewis Carrot - 2 carrots for each Wondrous Resource that you produce
+General Mafayette - 5 carrots for each row on the great cloud board in which you control more Territories than any other player

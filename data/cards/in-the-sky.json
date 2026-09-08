@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "id": "in_the_sky",
+  "verification": {
+    "status": "user_confirmed_text_and_components",
+    "confirmationDate": "2026-09-08",
+    "sources": [
+      "data/cards/parchments-in-the-sky.txt",
+      "data/cards/in-the-sky-confirmations.md",
+      "https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf"
+    ],
+    "parchmentSourceSha256": "bed24c0dabea2e2f6555a7783a87119a30a062699b5a2422dd11e702212576b7",
+    "notes": [
+      "Both new Luxury farms have descriptive names.",
+      "Merchant's Signet and Cape of Dawn are confirmed Treasures.",
+      "Hareborne Explorer awards positive one point per cloud territory.",
+      "Nibblonacci scores zero when no Treasure is held."
+    ]
+  },
+  "resources": [
+    {
+      "id": "wondrous_books",
+      "name": "Flying books",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_carpet",
+      "name": "Magic carpet",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_star",
+      "name": "Falling star",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_lightning",
+      "name": "Lightning",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_mushrooms",
+      "name": "Giant mushrooms",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_dragon",
+      "name": "Dragon",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_snow",
+      "name": "Snow rabbit",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_phoenix",
+      "name": "Phoenix",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_fruit",
+      "name": "Golden fruit",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_cheese",
+      "name": "Cheese moon",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_beanstalk",
+      "name": "Beanstalk",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "wondrous_feathers",
+      "name": "Golden feathers",
+      "kind": "wondrous",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "luxury_cloud",
+      "name": "Cloud wool",
+      "kind": "luxury",
+      "nameStatus": "descriptive"
+    },
+    {
+      "id": "luxury_plains",
+      "name": "Bird",
+      "kind": "luxury",
+      "nameStatus": "descriptive"
+    }
+  ],
+  "deckCounts": {
+    "territory": 29,
+    "rainbow": 2,
+    "building": 7,
+    "parchment": 10,
+    "tax_collector": 2,
+    "total": 50
+  },
+  "cards": [
+    {
+      "id": "carrotadel",
+      "name": "Carrotadel",
+      "copies": 3,
+      "category": "city",
+      "cityType": "carrotadel",
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "allowedTerrains": null,
+        "allowedBoards": null
+      },
+      "effect": {
+        "type": "strength_floor",
+        "strength": 5
+      }
+    },
+    {
+      "id": "chimney",
+      "name": "Chimney",
+      "copies": 2,
+      "category": "chimney",
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "allowedTerrains": null,
+        "allowedBoards": [
+          "great_cloud"
+        ]
+      },
+      "effect": {
+        "type": "share_basic_resource_during_harvest"
+      }
+    },
+    {
+      "id": "farm_luxury_cloud",
+      "name": "Cloud wool farm",
+      "copies": 1,
+      "category": "farm",
+      "farmType": "luxury",
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "allowedTerrains": null,
+        "allowedBoards": [
+          "great_cloud"
+        ]
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "luxury_cloud"
+      }
+    },
+    {
+      "id": "farm_luxury_plains",
+      "name": "Bird farm",
+      "copies": 1,
+      "category": "farm",
+      "farmType": "luxury",
+      "resolutionPhase": "exploration",
+      "placement": {
+        "phase": "construction",
+        "allowedTerrains": [
+          "plains"
+        ],
+        "allowedBoards": null
+      },
+      "effect": {
+        "type": "produce_resource",
+        "resource": "luxury_plains"
+      }
+    },
+    {
+      "id": "tax_collector",
+      "name": "Tax Collector",
+      "copies": 2,
+      "category": "tax_collector",
+      "resolutionPhase": "exploration",
+      "effect": {
+        "type": "gain_coins",
+        "coins": 2
+      }
+    }
+  ],
+  "parchments": [
+    {
+      "id": "merchants_signet",
+      "name": "Merchants Signet",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "sourceLine": 1,
+      "sourceText": "Merchants Signet - 1 carrot for each coin in your possession",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "coins",
+        "pointsPerItem": 1
+      }
+    },
+    {
+      "id": "nibblonacci",
+      "name": "Nibblonacci",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 2,
+      "sourceText": "Nibblonacci - Receive carrot based on your number of treasures (see the next two lines)",
+      "scoringSpec": {
+        "type": "treasure_sequence",
+        "points": [
+          0,
+          2,
+          3,
+          5,
+          8,
+          13,
+          21,
+          34
+        ]
+      }
+    },
+    {
+      "id": "cape_of_dawn",
+      "name": "Cape of Dawn",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "treasure",
+      "sourceLine": 5,
+      "sourceText": "Cape of Dawn - 2 carrots for each row on the great cloud board in which you control at least one territory",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_cloud_rows",
+        "pointsPerItem": 2
+      }
+    },
+    {
+      "id": "assistant_governor",
+      "name": "Assistant Governor",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 6,
+      "sourceText": "Assistant Governor - 2 carrots for each District you control",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_districts",
+        "pointsPerItem": 2
+      }
+    },
+    {
+      "id": "cloud_independence",
+      "name": "Cloud Independence",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 7,
+      "sourceText": "Cloud Independence - Collect the carrots from your Fiefs on the Great Cloud again (ignoring any Rainbows and Sky Towers)",
+      "scoringSpec": {
+        "type": "cloud_independence"
+      }
+    },
+    {
+      "id": "merchant_queen",
+      "name": "Merchant Queen",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 8,
+      "sourceText": "Merchant Queen - 20 carrots if you have a trade score of 50 or higher",
+      "scoringSpec": {
+        "type": "count_threshold",
+        "metric": "trade_score",
+        "minimum": 50,
+        "points": 20
+      }
+    },
+    {
+      "id": "governor",
+      "name": "Governor",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 9,
+      "sourceText": "Governor - 3 carrots for each district you control",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_districts",
+        "pointsPerItem": 3
+      }
+    },
+    {
+      "id": "hareborne_explorer",
+      "name": "Hareborne Explorer",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 10,
+      "sourceText": "Hareborne Explorer -1 carrot for each Territory on the Great Cloud under your control",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "controlled_cloud_territories",
+        "pointsPerItem": 1
+      }
+    },
+    {
+      "id": "lewis_carrot",
+      "name": "Lewis Carrot",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 11,
+      "sourceText": "Lewis Carrot - 2 carrots for each Wondrous Resource that you produce",
+      "scoringSpec": {
+        "type": "points_per_resource_class",
+        "resourceClass": "wondrous",
+        "pointsPerUnit": 2
+      }
+    },
+    {
+      "id": "general_mafayette",
+      "name": "General Mafayette",
+      "copies": 1,
+      "category": "parchment",
+      "parchmentType": "mission",
+      "sourceLine": 12,
+      "sourceText": "General Mafayette - 5 carrots for each row on the great cloud board in which you control more Territories than any other player",
+      "scoringSpec": {
+        "type": "points_per_count",
+        "metric": "cloud_rows_led",
+        "pointsPerItem": 5
+      }
+    }
+  ]
+}

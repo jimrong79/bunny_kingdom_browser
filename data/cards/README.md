@@ -22,6 +22,14 @@ The original file remains unmodified. Each JSON entry preserves its line number 
 
 The user confirmed Opportunist's wording as 10 Golden Carrots for second place after final scoring. The remaining questions concern Opportunist ties/copy interactions, Matriarch ties, copy-card targets and ordering, and multiple Treasure Hunter effects. The source's Golden Carrot point rewards remain distinct from basic Carrot resource production.
 
+## In the Sky reference data
+
+- [User-supplied expansion parchment summaries](parchments-in-the-sky.txt)
+- [Confirmed Luxury farm restrictions and Treasure classifications](in-the-sky-confirmations.md)
+- [Expansion card catalog](in-the-sky.json)
+
+These expansion sources are awaiting a separate normalized catalog and gameplay implementation. The base-game catalogs and inventory checks remain scoped to the original game.
+
 ## Data conventions
 
 - `id` is a stable identifier; `name` is a display label.

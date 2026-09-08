@@ -29,11 +29,13 @@ The [publisher's English rulebook](https://iellogames.com/wp-content/uploads/201
 
 The PDF is a source, not a complete verified card database. Do not infer all new parchment text, placement restrictions, or exact map contents from the overview illustrations.
 
-## Data to collect
+## Received data and remaining review
 
-1. A clear, straight-on cloud-board photo in `reference/map/in-the-sky.jpg`. Include its row symbols, territory borders, printed resources, fixed pieces and corner/edge markings. The existing reference-folder ignore rule keeps uploads local.
-2. Exact text for the ten expansion parchments in `data/cards/in-the-sky-parchments.txt`, one named card per entry, including exceptions.
-3. Names, copy counts, effects and printed placement restrictions for the seven building cards, both Rainbow cards and both action cards, preferably as text. Photos are useful where a symbol or restriction is unclear. Territory cards need photos only if they contain information beyond the map reference.
+1. The user supplied a clear cloud-board photo at `data/maps/cloud.jpeg`. Its real territory contents and geometry still need a normalized extraction and review; the layout preview remains illustrative.
+2. The ten parchment summaries are in `data/cards/parchments-in-the-sky.txt`. On 2026-09-08, the user confirmed Merchant's Signet and Cape of Dawn as the two Treasures; the remaining eight are Missions.
+3. The user confirmed three Carrotadels, two Chimneys, two Luxury farms and two Tax Collectors. The unnamed Luxury farms are cloud-only (wool-like artwork) and Plain-only (bird-like artwork). Plain means the existing `plains` terrain, not a carrot-producing Field. Descriptive labels and classification details are recorded in [the card confirmations](../data/cards/in-the-sky-confirmations.md).
+
+Preserve the uploaded source files. Resource labels are descriptive, not printed names. Review any remaining card restrictions and order-sensitive District coin cases before implementing them.
 
 Normalize into separate expansion JSON and human-readable map/card review tables, with source references and unresolved items. Verify the 50-card inventory before creating the combined deck. Explicitly review cloud adjacency and which cells count as edges or corners; the current letter/number arithmetic is specific to the base map.
 

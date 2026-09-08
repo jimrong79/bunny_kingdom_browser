@@ -1,0 +1,715 @@
+{
+  "schemaVersion": 1,
+  "id": "great_cloud",
+  "name": "The Great Cloud",
+  "verification": {
+    "status": "transcribed_pending_review",
+    "sources": [
+      "data/maps/cloud.jpeg",
+      "https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf"
+    ],
+    "photoSha256": "3d02c04b281889671bc51c07cdd4feaa79a570e96cc881cd56fe0dbe0cbe1e93",
+    "notes": [
+      "Staggered rows: 5,6,7,6,7 cells. Shared partial sides connect; corner contact does not.",
+      "Starting city strengths cross-checked against publisher setup diagram, page 2.",
+      "Resource names describe artwork, not printed titles.",
+      "Corner classification awaits clarification; null is not false."
+    ]
+  },
+  "cells": [
+    {
+      "coordinate": "C1-1",
+      "boardId": "great_cloud",
+      "row": "1",
+      "column": 1,
+      "x": 1,
+      "y": 0,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_books",
+        "initial": true
+      },
+      "neighbors": [
+        "C1-2",
+        "C2-1",
+        "C2-2"
+      ]
+    },
+    {
+      "coordinate": "C1-2",
+      "boardId": "great_cloud",
+      "row": "1",
+      "column": 2,
+      "x": 2,
+      "y": 0,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C1-1",
+        "C1-3",
+        "C2-2",
+        "C2-3"
+      ]
+    },
+    {
+      "coordinate": "C1-3",
+      "boardId": "great_cloud",
+      "row": "1",
+      "column": 3,
+      "x": 3,
+      "y": 0,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C1-2",
+        "C1-4",
+        "C2-3",
+        "C2-4"
+      ]
+    },
+    {
+      "coordinate": "C1-4",
+      "boardId": "great_cloud",
+      "row": "1",
+      "column": 4,
+      "x": 4,
+      "y": 0,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_carpet",
+        "initial": true
+      },
+      "neighbors": [
+        "C1-3",
+        "C1-5",
+        "C2-4",
+        "C2-5"
+      ]
+    },
+    {
+      "coordinate": "C1-5",
+      "boardId": "great_cloud",
+      "row": "1",
+      "column": 5,
+      "x": 5,
+      "y": 0,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_star",
+        "initial": true
+      },
+      "neighbors": [
+        "C1-4",
+        "C2-5",
+        "C2-6"
+      ]
+    },
+    {
+      "coordinate": "C2-1",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 1,
+      "x": 0.5,
+      "y": 1,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_lightning",
+        "initial": true
+      },
+      "neighbors": [
+        "C1-1",
+        "C2-2",
+        "C3-1",
+        "C3-2"
+      ]
+    },
+    {
+      "coordinate": "C2-2",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 2,
+      "x": 1.5,
+      "y": 1,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C1-1",
+        "C1-2",
+        "C2-1",
+        "C2-3",
+        "C3-2",
+        "C3-3"
+      ]
+    },
+    {
+      "coordinate": "C2-3",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 3,
+      "x": 2.5,
+      "y": 1,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 3,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C1-2",
+        "C1-3",
+        "C2-2",
+        "C2-4",
+        "C3-3",
+        "C3-4"
+      ]
+    },
+    {
+      "coordinate": "C2-4",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 4,
+      "x": 3.5,
+      "y": 1,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C1-3",
+        "C1-4",
+        "C2-3",
+        "C2-5",
+        "C3-4",
+        "C3-5"
+      ]
+    },
+    {
+      "coordinate": "C2-5",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 5,
+      "x": 4.5,
+      "y": 1,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_mushrooms",
+        "initial": true
+      },
+      "neighbors": [
+        "C1-4",
+        "C1-5",
+        "C2-4",
+        "C2-6",
+        "C3-5",
+        "C3-6"
+      ]
+    },
+    {
+      "coordinate": "C2-6",
+      "boardId": "great_cloud",
+      "row": "2",
+      "column": 6,
+      "x": 5.5,
+      "y": 1,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 2,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C1-5",
+        "C2-5",
+        "C3-6",
+        "C3-7"
+      ]
+    },
+    {
+      "coordinate": "C3-1",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 1,
+      "x": 0,
+      "y": 2,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_dragon",
+        "initial": true
+      },
+      "neighbors": [
+        "C2-1",
+        "C3-2",
+        "C4-1"
+      ]
+    },
+    {
+      "coordinate": "C3-2",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 2,
+      "x": 1,
+      "y": 2,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_snow",
+        "initial": true
+      },
+      "neighbors": [
+        "C2-1",
+        "C2-2",
+        "C3-1",
+        "C3-3",
+        "C4-1",
+        "C4-2"
+      ]
+    },
+    {
+      "coordinate": "C3-3",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 3,
+      "x": 2,
+      "y": 2,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C2-2",
+        "C2-3",
+        "C3-2",
+        "C3-4",
+        "C4-2",
+        "C4-3"
+      ]
+    },
+    {
+      "coordinate": "C3-4",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 4,
+      "x": 3,
+      "y": 2,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C2-3",
+        "C2-4",
+        "C3-3",
+        "C3-5",
+        "C4-3",
+        "C4-4"
+      ]
+    },
+    {
+      "coordinate": "C3-5",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 5,
+      "x": 4,
+      "y": 2,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C2-4",
+        "C2-5",
+        "C3-4",
+        "C3-6",
+        "C4-4",
+        "C4-5"
+      ]
+    },
+    {
+      "coordinate": "C3-6",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 6,
+      "x": 5,
+      "y": 2,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_phoenix",
+        "initial": true
+      },
+      "neighbors": [
+        "C2-5",
+        "C2-6",
+        "C3-5",
+        "C3-7",
+        "C4-5",
+        "C4-6"
+      ]
+    },
+    {
+      "coordinate": "C3-7",
+      "boardId": "great_cloud",
+      "row": "3",
+      "column": 7,
+      "x": 6,
+      "y": 2,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C2-6",
+        "C3-6",
+        "C4-6"
+      ]
+    },
+    {
+      "coordinate": "C4-1",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 1,
+      "x": 0.5,
+      "y": 3,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_fruit",
+        "initial": true
+      },
+      "neighbors": [
+        "C3-1",
+        "C3-2",
+        "C4-2",
+        "C5-1",
+        "C5-2"
+      ]
+    },
+    {
+      "coordinate": "C4-2",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 2,
+      "x": 1.5,
+      "y": 3,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C3-2",
+        "C3-3",
+        "C4-1",
+        "C4-3",
+        "C5-2",
+        "C5-3"
+      ]
+    },
+    {
+      "coordinate": "C4-3",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 3,
+      "x": 2.5,
+      "y": 3,
+      "terrain": "sea",
+      "baseResource": "fish",
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C3-3",
+        "C3-4",
+        "C4-2",
+        "C4-4",
+        "C5-3",
+        "C5-4"
+      ]
+    },
+    {
+      "coordinate": "C4-4",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 4,
+      "x": 3.5,
+      "y": 3,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": false,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_cheese",
+        "initial": true
+      },
+      "neighbors": [
+        "C3-4",
+        "C3-5",
+        "C4-3",
+        "C4-5",
+        "C5-4",
+        "C5-5"
+      ]
+    },
+    {
+      "coordinate": "C4-5",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 5,
+      "x": 4.5,
+      "y": 3,
+      "terrain": "city",
+      "baseResource": null,
+      "startingCityStrength": 1,
+      "isEdge": false,
+      "isCorner": null,
+      "neighbors": [
+        "C3-5",
+        "C3-6",
+        "C4-4",
+        "C4-6",
+        "C5-5",
+        "C5-6"
+      ]
+    },
+    {
+      "coordinate": "C4-6",
+      "boardId": "great_cloud",
+      "row": "4",
+      "column": 6,
+      "x": 5.5,
+      "y": 3,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_beanstalk",
+        "initial": true
+      },
+      "neighbors": [
+        "C3-6",
+        "C3-7",
+        "C4-5",
+        "C5-6",
+        "C5-7"
+      ]
+    },
+    {
+      "coordinate": "C5-1",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 1,
+      "x": 0,
+      "y": 4,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C4-1",
+        "C5-2"
+      ]
+    },
+    {
+      "coordinate": "C5-2",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 2,
+      "x": 1,
+      "y": 4,
+      "terrain": "rainbow",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "rainbow",
+        "pairId": "rainbow_1",
+        "endpoint": "cloud",
+        "initial": true
+      },
+      "neighbors": [
+        "C4-1",
+        "C4-2",
+        "C5-1",
+        "C5-3"
+      ]
+    },
+    {
+      "coordinate": "C5-3",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 3,
+      "x": 2,
+      "y": 4,
+      "terrain": "field",
+      "baseResource": "carrots",
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C4-2",
+        "C4-3",
+        "C5-2",
+        "C5-4"
+      ]
+    },
+    {
+      "coordinate": "C5-4",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 4,
+      "x": 3,
+      "y": 4,
+      "terrain": "wondrous",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "farm",
+        "farmType": "wondrous",
+        "resource": "wondrous_feathers",
+        "initial": true
+      },
+      "neighbors": [
+        "C4-3",
+        "C4-4",
+        "C5-3",
+        "C5-5"
+      ]
+    },
+    {
+      "coordinate": "C5-5",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 5,
+      "x": 4,
+      "y": 4,
+      "terrain": "nimbus",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C4-4",
+        "C4-5",
+        "C5-4",
+        "C5-6"
+      ]
+    },
+    {
+      "coordinate": "C5-6",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 6,
+      "x": 5,
+      "y": 4,
+      "terrain": "rainbow",
+      "baseResource": null,
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "startingBuilding": {
+        "category": "rainbow",
+        "pairId": "rainbow_2",
+        "endpoint": "cloud",
+        "initial": true
+      },
+      "neighbors": [
+        "C4-5",
+        "C4-6",
+        "C5-5",
+        "C5-7"
+      ]
+    },
+    {
+      "coordinate": "C5-7",
+      "boardId": "great_cloud",
+      "row": "5",
+      "column": 7,
+      "x": 6,
+      "y": 4,
+      "terrain": "forest",
+      "baseResource": "wood",
+      "startingCityStrength": 0,
+      "isEdge": true,
+      "isCorner": null,
+      "neighbors": [
+        "C4-6",
+        "C5-6"
+      ]
+    }
+  ],
+  "blockedConnections": []
+}
