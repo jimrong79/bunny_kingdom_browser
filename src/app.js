@@ -37,7 +37,7 @@ try {
   const responses = await Promise.all(['data/maps/original-board.json', 'data/cards/base-buildings-and-provisions.json', 'data/cards/base-parchments.json','data/maps/great-cloud.json','data/cards/in-the-sky.json'].map(async path => { const r = await fetch(path); if (!r.ok) throw Error(`Could not load ${path}`); return r.json(); }));
   data = { map: responses[0], buildings: responses[1], parchments: responses[2], cloud:responses[3], expansion:responses[4] };
   setup();
-} catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p><p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p></section>`; }
+} catch (e) { app.innerHTML = `<section class="panel"><h1>Unable to load the game</h1><p>${escape(e.message)}</p>${location.protocol === 'file:' || ['localhost','127.0.0.1'].includes(location.hostname) ? '<p>Start the local server from the project folder: <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open <a href="http://localhost:8000">localhost:8000</a>.</p>' : '<p>Check your internet connection and <a href="./">reload the game</a>. If the site was just updated, try again in a moment.</p>'}</section>`; }
 function setup() {
   soundEffects.stop();
   reviewingFinalBoard=false;

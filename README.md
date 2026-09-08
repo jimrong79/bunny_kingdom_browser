@@ -2,6 +2,18 @@
 
 Browser implementation of Bunny Kingdom and the In the Sky expansion, with local AI opponents.
 
+## Play online
+
+[Play Bunny Kingdom in your browser](https://jimrong79.github.io/bunny_kingdom_browser/). Choose the base game or **Bunny Kingdom + In the Sky**, enter your name, and select your bot opponents. No installation or account is required, and the developer's computer does not need to be running.
+
+Games autosave in the browser on the device where you play. Saves from localhost remain there; they do not automatically move to the online site or another device. Finished games can still be downloaded as JSON.
+
+### Publishing updates
+
+[GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `feat/in-the-sky`. The expansion PR remains separate from `main`. Once it is merged, change both branch references in [the Pages workflow](.github/workflows/pages.yml) to `main` and keep `main` allowed in the repository's `github-pages` deployment environment. Pull requests run the checks without publishing.
+
+The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, and the five game-data JSON files in `_site/`. Reference photos, saved matches, audit reports, and review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
+
 ## Play locally
 
 From this folder, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [localhost:8000](http://localhost:8000). No package installation is required. Games autosave in this browser; after a refresh, select **Resume**. A seed lets you reproduce a deal. Choose 1–3 bots, select and confirm cards, and pass hands through a complete Exploration phase. Territory claims, reserved buildings, secret parchments, Provisions, and two-player discards are implemented. Construction supports legal city/farm placement, Sky Tower pairs, and saving buildings. Camp prompts support placement, saving, and lower-priority interruption when a Camp is announced. Players assign Trading Post resources, confirm harvests, and continue through all four rounds. All 37 parchments have scoring handlers, including copy selection and treasure interactions. Select board territories to inspect buildings, resources, lava boundaries, and fiefs. Your secret parchments are available to inspect throughout play. Final scores show a per-card breakdown. Only a tie for second at the Opportunist checkpoint still requires an explicit, recorded ruling.
