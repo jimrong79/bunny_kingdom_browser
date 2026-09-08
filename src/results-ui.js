@@ -1,3 +1,4 @@
+import {hasExpansion} from './config.js';
 import { rabbitArt } from './art.js';
 import { scoringPanel } from './scoring-ui.js';
 import { soundToggleHTML } from './sound.js';
@@ -10,17 +11,17 @@ export function resultsScreen(state,saved) {
   const ranked=[...state.players].sort((a,b)=>b.score-a.score||a.id-b.id);
   return `<section class="results-screen" aria-labelledby="results-title">
     <div class="results-toolbar"><span class="eyebrow">THE ROYAL RESULTS</span>${soundToggleHTML()}</div>
-    <div class="results-intro"><div class="results-crown">${crown}</div><h1 id="results-title" tabindex="-1">${esc(title)}</h1><p>Four harvests and all parchments scored.</p></div>
+    <div class="results-intro"><div class="results-crown">${crown}</div><h1 id="results-title" tabindex="-1">${esc(title)}</h1><p>${hasExpansion(state)?'Four harvests, Trade, and all parchments scored.':'Four harvests and all parchments scored.'}</p></div>
     <ol class="final-standings" style="--players:${ranked.length}" aria-label="Final standings">
       ${ranked.map(player=>{
         const winner=state.winners.includes(player.id);
         const rank=1+ranked.filter(p=>p.score>player.score).length;
         const score=state.finalScoring.players.find(p=>p.playerId===player.id);
         return `<li class="result-player ${winner?'result-winner':''}" data-result-player="${player.id}" style="--player:${esc(player.color)}" value="${rank}">
-          <div class="result-rank"><span aria-label="Rank ${rank}">${['','1st','2nd','3rd','4th'][rank]}</span>${winner?`<strong class="winner-badge">${crown}${shared?'Joint winner':'Winner'}</strong>`:''}</div>
+          <div class="result-rank"><span aria-label="Rank ${rank}">${['','1st','2nd','3rd','4th','5th'][rank]}</span>${winner?`<strong class="winner-badge">${crown}${shared?'Joint winner':'Winner'}</strong>`:''}</div>
           <div class="result-rabbit">${rabbitArt()}</div><h2>${esc(player.name)}</h2>
           <div class="result-score">${player.score}</div><span class="result-points-label">points</span>
-          <dl class="result-breakdown"><div><dt>Harvests</dt><dd>${score.harvest}</dd></div><div><dt>Parchments</dt><dd>${score.parchmentPoints}</dd></div></dl>
+          <dl class="result-breakdown"><div><dt>Harvests</dt><dd>${score.harvest}</dd></div><div><dt>Parchments</dt><dd>${score.parchmentPoints}</dd></div>${hasExpansion(state)?`<div><dt>Trade</dt><dd>${score.trade}</dd></div>`:''}</dl>
         </li>`;
       }).join('')}
     </ol>

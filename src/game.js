@@ -11,7 +11,7 @@ export function randomSource(seed) {
 }
 export function makeDeck(data, expansion = false) {
   requireRule(!expansion || data.cloud && data.expansion, 'Expansion data is missing.');
-  const territories = [...data.map.cells,...(expansion?data.cloud.cells:[])].map(cell => ({ id: `territory_${cell.coordinate}`, instanceId: `territory_${cell.coordinate}`, category: 'territory', name: cell.coordinate, coordinate: cell.coordinate, terrain: cell.terrain, ...(cell.boardId?{boardId:cell.boardId}:{}), ...(cell.startingBuilding?.category==='rainbow'?{rainbow:cell.startingBuilding.pairId}:{}) }));
+  const territories = [...data.map.cells,...(expansion?data.cloud.cells:[])].map(cell => ({ id: `territory_${cell.coordinate}`, instanceId: `territory_${cell.coordinate}`, category: 'territory', name: cell.coordinate, coordinate: cell.coordinate, terrain: cell.terrain, ...(cell.boardId?{boardId:cell.boardId,printedResource:cell.startingBuilding?.resource||cell.baseResource,startingCityStrength:cell.startingCityStrength}:{}), ...(cell.startingBuilding?.category==='rainbow'?{rainbow:cell.startingBuilding.pairId}:{}) }));
   const others = [...data.buildings.cards, ...data.parchments.cards,...(expansion?[...data.expansion.cards,...data.expansion.parchments]:[])].flatMap(card => Array.from({ length: card.copies }, (_, i) => ({ ...structuredClone(card), instanceId: `${card.id}_${i + 1}` })));
   const deck = [...territories, ...others];
   const expected=expansion?232:182;
@@ -111,6 +111,7 @@ export function resolveDraft(state, selections) {
   });
   const lastTurn={round:state.round,pick:state.draftTurn,players:state.players.map(p=>({playerId:p.id,actions:[]}))};
   const beforeDistricts=state.players.map(p=>districtSnapshot(state,p.id));
+  const beforeCoins=state.players.map(p=>p.coins||0);
   for (const p of state.players) {
     const actions=lastTurn.players[p.id].actions;
     for (const card of plays[p.id]) playCard(state, p.id, card, actions,true);
@@ -119,6 +120,7 @@ export function resolveDraft(state, selections) {
   // Selected cards are played simultaneously; compare the completed pick with
   // its initial position, so array order cannot manufacture District coins.
   for(const p of state.players)awardNewDistricts(state,p.id,beforeDistricts[p.id],lastTurn.players[p.id].actions.filter(a=>a.type==='territory').map(a=>a.coordinate));
+  if(hasExpansion(state))for(const p of state.players){const actions=lastTurn.players[p.id].actions,count=p.coins-beforeCoins[p.id]-actions.filter(a=>a.type==='coins').reduce((n,a)=>n+a.count,0);if(count)actions.push({type:'coins',count,reason:'District'});}
   state.lastTurn=lastTurn;
   if (state.players.every(p => p.hand.length === 0)) {
     state.phase = 'construction'; state.log.push('Exploration finished. Construction begins.');
