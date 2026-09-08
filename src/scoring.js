@@ -1,5 +1,7 @@
 import { requireRule } from './game.js';
 import { fiefs, resourcesAt } from './fiefs.js';
+import {boardOf} from './topology.js';
+export const resourceKind = (state,id) => state.resourceKinds?.[id] || (['wood','fish','carrots'].includes(id)?'basic':'luxury');
 export const isCopy = c => c.scoringSpec?.type === 'copy_parchment';
 export function copyOptions(state, playerId, card) {
   const direction=card.scoringSpec.targetNeighbor==='left'?1:-1;
@@ -9,13 +11,22 @@ export function copyOptions(state, playerId, card) {
 export function playerStats(state, playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId), groups=fiefs(state,playerId);
   const production=cells.flatMap(resourcesAt), cityCount=cells.filter(c=>c.building?.category==='city').length;
-  const rows=Object.values(state.cells).map(c=>c.row.charCodeAt(0)), columns=Object.values(state.cells).map(c=>c.column);
+  const ground=Object.values(state.cells).filter(c=>boardOf(c)==='new_world');
+  const rows=ground.map(c=>c.row.charCodeAt(0)), columns=ground.map(c=>c.column);
   const minRow=Math.min(...rows), maxRow=Math.max(...rows), minCol=Math.min(...columns), maxCol=Math.max(...columns);
   const rowEdge=c=>[minRow,maxRow].includes(c.row.charCodeAt(0)), colEdge=c=>[minCol,maxCol].includes(c.column);
-  return {cells,groups,production,metrics:{
+  const cloud=cells.filter(c=>boardOf(c)==='great_cloud');
+  const knownCorners=cells.filter(c=>boardOf(c)==='great_cloud'?c.isCorner===true:rowEdge(c)&&colEdge(c)).length;
+  const unknownCorners=cloud.filter(c=>c.isCorner===null&&(c.column===1||!Object.values(state.cells).some(d=>boardOf(d)==='great_cloud'&&d.row===c.row&&d.column===c.column+1)));
+  const coins=state.players[playerId].coins||0, uniqueResources=[...new Set(production.filter(r=>resourceKind(state,r)!=='basic'))];
+  const cloudRows=[...new Set(cloud.map(c=>c.row))];
+  const cloudRowsLed=cloudRows.filter(row=>state.players.every(p=>p.id===playerId||cloud.filter(c=>c.row===row).length>Object.values(state.cells).filter(c=>boardOf(c)==='great_cloud'&&c.owner===p.id&&c.row===row).length)).length;
+  return {cells,groups,production,knownCorners,unknownCorners,uniqueResources,resourceKinds:state.resourceKinds,cloudPoints:fiefs(state,playerId,{boardId:'great_cloud',ignoreLinks:true}).reduce((sum,f)=>sum+f.points,0),metrics:{
+    coins,trade_score:coins*uniqueResources.length,controlled_districts:groups.filter(f=>f.coordinates.length>=2).length,
+    controlled_cloud_rows:cloudRows.length,controlled_cloud_territories:cloud.length,cloud_rows_led:cloudRowsLed,
     controlled_cities:cityCount,
-    controlled_border_territories:cells.filter(c=>rowEdge(c)||colEdge(c)).length,
-    controlled_corner_territories:cells.filter(c=>rowEdge(c)&&colEdge(c)).length,
+    controlled_border_territories:cells.filter(c=>boardOf(c)==='great_cloud'?c.isEdge:rowEdge(c)||colEdge(c)).length,
+    controlled_corner_territories:unknownCorners.length?null:knownCorners,
     controlled_mountain_territories:cells.filter(c=>c.terrain==='mountain').length,
     controlled_fiefs:groups.length,
     cities_in_fiefs_with_no_resource_production:groups.filter(f=>!f.production.length).reduce((sum,f)=>sum+f.coordinates.filter(id=>state.cells[id].building?.category==='city').length,0),
@@ -29,10 +40,12 @@ export function basePoints(card, stats, effective) {
   switch(s.type) {
     case 'fixed_points': return s.points;
     case 'paired_treasure': return effective.some(c=>c.id===s.partnerCardId)?s.pointsWithPartner:s.pointsAlone;
-    case 'points_per_count': return metric[s.metric]*s.pointsPerItem;
+    case 'points_per_count': return metric[s.metric]===null?null:metric[s.metric]*s.pointsPerItem;
     case 'points_per_resource': return units*s.pointsPerUnit;
     case 'resource_threshold': return units>=s.minimum?s.points:0;
-    case 'points_per_resource_class': return stats.production.filter(r=>!['wood','fish','carrots'].includes(r)).length*s.pointsPerUnit;
+    case 'points_per_resource_class': return stats.production.filter(r=>resourceKind(stats,r)===(s.resourceClass||'luxury')).length*s.pointsPerUnit;
+    case 'treasure_sequence': return s.points[Math.min(metric.owned_treasures,s.points.length-1)];
+    case 'cloud_independence': return stats.cloudPoints;
     case 'points_per_qualifying_fief': return stats.groups.filter(f=>f.coordinates.length>=s.minimumTerritories).length*s.pointsPerFief;
     case 'count_threshold': return metric[s.metric]>=s.minimum?s.points:0;
     case 'extra_harvest_except_best': return stats.groups.reduce((sum,f)=>sum+f.points,0)-Math.max(0,...stats.groups.map(f=>f.points));
@@ -73,21 +86,24 @@ export function evaluateFinal(state, decisions={copies:{},rulings:{},copyResolut
       if(!card)return {id:original.instanceId,name:original.name,points:entry.empty?0:null,note:entry.empty?'No parchment available to copy.':'Awaiting copy choice.'};
       const s=card.scoringSpec;
       let points=basePoints(card,stats[p.id],cards);
+      if(s.metric==='controlled_corner_territories'&&stats[p.id].unknownCorners.length) {
+        const own=stats[p.id];points=ask(`cloud-corners:${original.instanceId}`,'points',`${p.name}: Explorer's cloud corners need a ruling for ${own.unknownCorners.map(c=>c.coordinate).join(', ')}. Choose its total award, including ${own.knownCorners} confirmed corners.`,Array.from({length:own.unknownCorners.length+1},(_,i)=>(own.knownCorners+i)*s.pointsPerItem));
+      }
       if(s.type==='territory_lead_bonus')points=stats[p.id].cells.length<territoryMax?0:leaders===1?s.points:ask(`matriarch:${original.instanceId}`,'points',`${p.name} ties for most territories. Award for ${original.name} under your ruling?`,[0,s.points]);
       if(card.parchmentType==='treasure')points=multiplier===null?null:points*multiplier;
       return {id:original.instanceId,name:original.name,effectiveName:card.name,type:s.type,points,note:s.type==='multiply_treasure_values'?`Treasure multiplier applied to treasure cards (${multiplier ?? '?'}× total).`:entry.copiedFrom?`Copies ${card.name}${entry.manual?' (manual ruling)':''}.`:''};
     });
-    return {playerId:p.id,harvest:p.score,rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
+    return {playerId:p.id,harvest:p.score,trade:stats[p.id].metrics.trade_score,coins:stats[p.id].metrics.coins,uniqueResources:stats[p.id].uniqueResources,rows,parchmentPoints:rows.reduce((sum,r)=>sum+(r.points||0),0)};
   });
   const rankRows=results.flatMap(p=>p.rows.filter(r=>r.type==='rank_bonus').map(row=>({player:p,row})));
-  const beforeRank=results.map(p=>p.harvest+p.parchmentPoints);
+  const beforeRank=results.map(p=>p.harvest+p.trade+p.parchmentPoints);
   // All other parchment values must be settled before checking Opportunist's rank.
   if(!issues.length) for(const {player,row} of rankRows) {
     const value=beforeRank[player.playerId],higher=beforeRank.filter(n=>n>value).length,tied=beforeRank.filter(n=>n===value).length>1;
     if(rankRows.length>1||tied)row.points=ask(`opportunist:${row.id}`,'points',`${state.players[player.playerId].name}: ${row.name} has ${rankRows.length>1?'copied Opportunist interactions':'a tied rank'}. Scores before these bonuses: ${beforeRank.join(', ')}. Award under your ruling?`,[0,10]);
     else row.points=higher===1?10:0;
   }
-  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+p.parchmentPoints;}
+  for(const p of results){p.parchmentPoints=p.rows.reduce((sum,r)=>sum+(r.points||0),0);p.total=p.harvest+p.trade+p.parchmentPoints;}
   return {complete:!issues.length&&results.every(p=>p.rows.every(r=>r.points!==null)),issues,players:results};
 }
 export function finalizeScoring(state, decisions) {

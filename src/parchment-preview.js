@@ -52,7 +52,7 @@ export function draftParchmentPreview(state, playerId, card) {
   const after=knownDraftPoints(view,playerId,[...kept,card],stats);
   const points=after.points.get(card.instanceId);
   if(after.multiplierPending)return {points:null,reason:'A ruling is needed for multiple Treasure Hunter effects.'};
-  if(points===null)return {points:null,reason:'You are tied for most territories; this award needs a tie ruling.'};
+  if(points===null)return {points:null,reason:card.scoringSpec.metric==='controlled_corner_territories'?'Cloud corner classification needs a ruling.':'You are tied for most territories; this award needs a tie ruling.'};
   const notes=[];
   if(kept.some(isCopy))notes.push('Unchosen copy effects are excluded.');
   if(kept.some(c=>c.scoringSpec.type==='rank_bonus'))notes.push('Final-rank bonuses are excluded.');
