@@ -3,7 +3,8 @@ import { fiefs } from './fiefs.js';
 import {boardOf} from './topology.js';
 import {districtSnapshot,awardNewDistricts} from './districts.js';
 export function eligibleTerritories(state, playerId, card) {
-  return Object.values(state.cells).filter(c => !c.building && c.owner === (card.category === 'camp' ? null : playerId) && (!card.placement?.allowedTerrains || card.placement.allowedTerrains.includes(c.terrain)) && (!card.placement?.allowedBoards || card.placement.allowedBoards.includes(boardOf(c)))).map(c => c.coordinate);
+  const source=card.category==='rainbow'?fiefs(state,playerId).find(f=>f.coordinates.includes(card.effect.cloud)):null;
+  return Object.values(state.cells).filter(c => !c.building && c.owner === (card.category === 'camp' ? null : playerId) && (!card.placement?.allowedTerrains || card.placement.allowedTerrains.includes(c.terrain)) && (!card.placement?.allowedBoards || card.placement.allowedBoards.includes(boardOf(c))) && (card.category!=='rainbow'||source&&!source.coordinates.includes(c.coordinate))).map(c => c.coordinate);
 }
 export function placeBuilding(state, playerId, cardId, coordinates) {
   requireRule(state.phase === 'construction', 'It is not Construction.');

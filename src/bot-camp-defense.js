@@ -1,9 +1,11 @@
 import {draftRecipient} from './game.js';
 import {forkPosition} from './bot-evaluation.js';
 import {planBuildings} from './bot-planning.js';
+import {selectionsPerPick} from './config.js';
 
 export function campExposure(view,handSize) {
-  if(handSize<=2)return 0;
+  const count=selectionsPerPick(view);
+  if(handSize<=count)return 0;
   if(view.players.length===2) {
     // The recipient adds one reserve card, then plays one and discards one.
     // A discard also saves our camp, so only the played card is a capture risk.
@@ -12,7 +14,7 @@ export function campExposure(view,handSize) {
   // Everyone must play two cards. If the hand cannot return, loss is certain.
   // Otherwise use the fraction played before our next look as a neutral estimate;
   // we cannot know opponents' preferences or secret objectives.
-  return Math.min(1,2*(view.players.length-1)/(handSize-2));
+  return Math.min(1,count*(view.players.length-1)/(handSize-count));
 }
 
 export function passedCampPenalty(view,playerId,cards,exposure,secureValue) {

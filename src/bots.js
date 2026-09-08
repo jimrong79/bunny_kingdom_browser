@@ -5,11 +5,18 @@ import {playerStats,copyOptions,isCopy} from './scoring.js';
 import {forkPosition,positionValue,parchmentValue} from './bot-evaluation.js';
 import {planBuildings} from './bot-planning.js';
 import {campExposure,passedCampPenalty} from './bot-camp-defense.js';
+import {hasExpansion,cardsPerPick} from './config.js';
+import {districtSnapshot,awardNewDistricts} from './districts.js';
+import {movableRainbows,rainbowDestinations,moveRainbow} from './construction.js';
+import {chimneyPlan} from './bot-chimneys.js';
+export {chooseChimneys} from './bot-chimneys.js';
 export {positionValue} from './bot-evaluation.js';
 
 export function draftPosition(view,playerId,cards) {
   const trial=forkPosition(view,playerId);
-  for(const card of cards)if(card.category!=='provisions')playCard(trial,playerId,card);
+  const before=districtSnapshot(trial,playerId);
+  for(const card of cards)if(card.category!=='provisions')playCard(trial,playerId,card,null,true);
+  awardNewDistricts(trial,playerId,before,cards.filter(c=>c.category==='territory').map(c=>c.coordinate));
   return trial;
 }
 export function projectedValue(view,playerId) {
@@ -24,6 +31,7 @@ export function cardValue(view,playerId,card,base=projectedValue(view,playerId))
   return projectedValue(draftPosition(view,playerId,[card]),playerId)-base;
 }
 export function chooseDraft(view,playerId) {
+  if(hasExpansion(view)&&view.players.length>2)return chooseExpansionDraft(view,playerId);
   const base=projectedValue(view,playerId);
   const cards=[...view.players[playerId].hand].sort((a,b)=>a.instanceId.localeCompare(b.instanceId));
   const next=(playerId+(view.round%2?1:-1)+view.players.length)%view.players.length;
@@ -58,6 +66,43 @@ export function chooseDraft(view,playerId) {
     }
   }
   return best;
+}
+
+function chooseExpansionDraft(view,playerId) {
+  const count=cardsPerPick(view),hand=[...view.players[playerId].hand].sort((a,b)=>a.instanceId.localeCompare(b.instanceId));
+  if(hand.length===count)return {play:hand.map(c=>c.instanceId),discard:[]};
+  const base=projectedValue(view,playerId),next=(playerId+(view.round%2?1:-1)+view.players.length)%view.players.length;
+  const rival=forkPosition(view,next),rivalBase=projectedValue(rival,next);
+  const values=new Map(hand.map(c=>[c.instanceId,cardValue(view,playerId,c,base)]));
+  const threats=new Map(hand.map(c=>[c.instanceId,Math.max(0,cardValue(rival,next,c,rivalBase))]));
+  // Bound triple search for responsive local play; score combinations, not only singles.
+  const candidates=count===3?[...hand].sort((a,b)=>values.get(b.instanceId)-values.get(a.instanceId)).slice(0,10):hand;
+  let best=null,bestValue=-Infinity;
+  function visit(start,picked){
+    if(picked.length<count){for(let i=start;i<=candidates.length-(count-picked.length);i++)visit(i+1,[...picked,candidates[i]]);return;}
+    const trial=draftPosition(view,playerId,picked),secure=projectedValue(trial,playerId);
+    const passed=hand.filter(c=>!picked.includes(c));
+    const danger=passed.map(c=>threats.get(c.instanceId)).sort((a,b)=>b-a).slice(0,count).reduce((n,v)=>n+v,0);
+    let value=secure-base+picked.filter(c=>c.category==='provisions').length*provisionsValue(view)-.12*danger;
+    if(value>bestValue)value-=passedCampPenalty(trial,playerId,passed,campExposure(view,hand.length),secure);
+    if(value>bestValue){bestValue=value;best={play:picked.map(c=>c.instanceId),discard:[]};}
+  }
+  visit(0,[]);return best;
+}
+
+export function chooseRainbowMoves(view,playerId) {
+  let trial=forkPosition(view,playerId);const choices=[];
+  for(const old of movableRainbows(trial,playerId)) {
+    const pairId=old.building.pairId;let best=trial,value=positionValue(trial,playerId),destination=null;
+    for(const coordinate of rainbowDestinations(trial,playerId,pairId)) {
+      if(coordinate===old.coordinate)continue;
+      const candidate=forkPosition(trial,playerId);candidate.phase='construction';moveRainbow(candidate,playerId,pairId,coordinate);
+      const score=positionValue(candidate,playerId);
+      if(score>value+.01){value=score;best=candidate;destination=coordinate;}
+    }
+    if(destination){choices.push({pairId,coordinate:destination});trial=best;}
+  }
+  return choices;
 }
 
 export function chooseBuilding(view,playerId) {
@@ -97,7 +142,7 @@ function prepareMarkets(view,playerId) {
 }
 export function chooseMarkets(view,playerId) {
   const posts=Object.values(view.cells).filter(c=>c.owner===playerId&&c.building?.farmType==='trading_post');
-  return marketPlan(view,playerId,posts,trial=>fiefs(trial,playerId).reduce((n,f)=>n+f.points,0)
+  return marketPlan(view,playerId,posts,trial=>chimneyPlan(trial,playerId).value
     +(view.round===4?parchmentValue(trial,playerId,trial.players[playerId].parchments,playerStats(trial,playerId),false):0));
 }
 

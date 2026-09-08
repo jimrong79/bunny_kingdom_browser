@@ -21,7 +21,7 @@ export function playerStats(state, playerId) {
   const coins=state.players[playerId].coins||0, uniqueResources=[...new Set(production.filter(r=>resourceKind(state,r)!=='basic'))];
   const cloudRows=[...new Set(cloud.map(c=>c.row))];
   const cloudRowsLed=cloudRows.filter(row=>state.players.every(p=>p.id===playerId||cloud.filter(c=>c.row===row).length>Object.values(state.cells).filter(c=>boardOf(c)==='great_cloud'&&c.owner===p.id&&c.row===row).length)).length;
-  return {cells,groups,production,knownCorners,unknownCorners,uniqueResources,resourceKinds:state.resourceKinds,cloudPoints:fiefs(state,playerId,{boardId:'great_cloud',ignoreLinks:true}).reduce((sum,f)=>sum+f.points,0),metrics:{
+  return {cells,groups,production,knownCorners,unknownCorners,uniqueResources,resourceKinds:state.resourceKinds,get cloudPoints(){return cloud.length?fiefs(state,playerId,{boardId:'great_cloud',ignoreLinks:true}).reduce((sum,f)=>sum+f.points,0):0;},metrics:{
     coins,trade_score:coins*uniqueResources.length,controlled_districts:groups.filter(f=>f.coordinates.length>=2).length,
     controlled_cloud_rows:cloudRows.length,controlled_cloud_territories:cloud.length,cloud_rows_led:cloudRowsLed,
     controlled_cities:cityCount,

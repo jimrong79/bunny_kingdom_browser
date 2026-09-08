@@ -3,6 +3,7 @@ import {eligibleTerritories,placeBuilding} from './construction.js';
 import {forkPosition,positionValue,inventoryValue,picksLeft} from './bot-evaluation.js';
 import {playerStats} from './scoring.js';
 import {knownTerritories} from './bot-memory.js';
+import {districtSnapshot,awardNewDistricts} from './districts.js';
 const basics=['wood','fish','carrots'];
 
 function slotPressure(view,playerId,coordinate,cardId) {
@@ -38,8 +39,10 @@ export function applyBuilding(view,playerId,action) {
   const trial=forkPosition(view,playerId),card=trial.players[playerId].buildings.find(c=>c.instanceId===action.cardId);
   trial.phase='construction';
   if(card.category==='camp') {
+    const before=districtSnapshot(trial,playerId);
     const c=trial.cells[action.coordinates[0]];c.owner=playerId;c.building={category:'camp',priority:card.effect.priority,instanceId:card.instanceId};
     trial.players[playerId].buildings=trial.players[playerId].buildings.filter(c=>c.instanceId!==card.instanceId);
+    awardNewDistricts(trial,playerId,before,action.coordinates);
   } else placeBuilding(trial,playerId,card.instanceId,action.coordinates);
   if(action.choice)trial.cells[action.coordinates[0]].building.choice=action.choice;
   // Preserve the real decision point when estimating how much time remains to acquire land.
