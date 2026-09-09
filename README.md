@@ -12,7 +12,7 @@ Use **Rules & support** in the header at any time for BoardGameGeek listings, IE
 
 ### Publishing updates
 
-[GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `feat/in-the-sky`. The expansion PR remains separate from `main`. Once it is merged, change both branch references in [the Pages workflow](.github/workflows/pages.yml) to `main` and keep `main` allowed in the repository's `github-pages` deployment environment. Pull requests run the checks without publishing.
+[GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `main`. Develop changes on a feature branch and open a pull request; merging it into `main` updates the live game after the checks pass. Pull requests run the checks without publishing. Keep `main` allowed in the repository's `github-pages` deployment environment.
 
 The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, the five game-data JSON files, and the in-game parchment picture guide in `_site/`. Reference photos, saved matches, audit reports, and other review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
 
