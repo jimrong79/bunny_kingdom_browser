@@ -8,11 +8,13 @@ Browser implementation of Bunny Kingdom and the In the Sky expansion, with local
 
 Games autosave in the browser on the device where you play. Saves from localhost remain there; they do not automatically move to the online site or another device. Finished games can still be downloaded as JSON.
 
+Use **Rules & support** in the header at any time for BoardGameGeek listings, IELLO's game pages, and official English rulebooks for both games. Enjoying the game? Support the tabletop creators—designer Richard Garfield, illustrator Paul Mafayon, and publisher IELLO—by buying a physical copy. This browser version is an unofficial fan project.
+
 ### Publishing updates
 
 [GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `feat/in-the-sky`. The expansion PR remains separate from `main`. Once it is merged, change both branch references in [the Pages workflow](.github/workflows/pages.yml) to `main` and keep `main` allowed in the repository's `github-pages` deployment environment. Pull requests run the checks without publishing.
 
-The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, and the five game-data JSON files in `_site/`. Reference photos, saved matches, audit reports, and review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
+The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, the five game-data JSON files, and the in-game parchment picture guide in `_site/`. Reference photos, saved matches, audit reports, and other review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
 
 ## Play locally
 

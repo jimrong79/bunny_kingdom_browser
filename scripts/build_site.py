@@ -15,7 +15,7 @@ DATA_FILES = (
 
 
 def build():
-    files = [ROOT / 'index.html']
+    files = [ROOT / 'index.html', ROOT / 'review/parchments/index.html']
     files += sorted((ROOT / 'src').glob('*.js'))
     files += sorted((ROOT / 'src').glob('*.css'))
     files += [ROOT / path for path in DATA_FILES]
