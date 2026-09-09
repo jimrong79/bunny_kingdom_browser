@@ -12,9 +12,21 @@ Use **Rules & support** in the header at any time for BoardGameGeek listings, IE
 
 ### Publishing updates
 
-[GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `feat/in-the-sky`. The expansion PR remains separate from `main`. Once it is merged, change both branch references in [the Pages workflow](.github/workflows/pages.yml) to `main` and keep `main` allowed in the repository's `github-pages` deployment environment. Pull requests run the checks without publishing.
+[GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `main`. Develop changes on a feature branch and open a pull request; merging it into `main` updates the live game after the checks pass. Pull requests run the checks without publishing. Keep `main` allowed in the repository's `github-pages` deployment environment.
 
 The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, the five game-data JSON files, and the in-game parchment picture guide in `_site/`. Reference photos, saved matches, audit reports, and other review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
+
+### Website visitor statistics
+
+The live site's counter is configured for [jimrong79.goatcounter.com](https://jimrong79.goatcounter.com/). Sign in there to view the dashboard after this configuration is deployed.
+
+Visitor analytics use [GoatCounter](https://www.goatcounter.com/), which offers free hosting for reasonable public usage. Create a GoatCounter site for the game's public URL, then put its public `https://YOUR-SITE.goatcounter.com/count` endpoint in `GOATCOUNTER_ENDPOINT` in [src/analytics.js](src/analytics.js). No password or API key is needed. An empty endpoint disables analytics.
+
+Counting runs only at `https://jimrong79.github.io/bunny_kingdom_browser/`; local games and copies hosted elsewhere do not load the analytics script. The dashboard shows page visits, estimated visitors, referring sites, and browser/device statistics. Counts start after configuration and deployment; GitHub's **Insights → Traffic** measures repository traffic separately. Ad blockers can prevent counting. If analytics is blocked or unavailable, the game still works.
+
+Only page visits are counted, not game starts, moves, or completions. Our integration uses a fixed page path/title and the referring site's origin. It does not read player names, seeds, scores, cards, or saved matches. GoatCounter also collects basic browser/device information and can process URL campaign parameters; the game does not put player details in its URL. **Rules & support** includes a visitor-statistics notice on the live site.
+
+To exclude your own browser, open [the game with `#toggle-goatcounter`](https://jimrong79.github.io/bunny_kingdom_browser/#toggle-goatcounter), reload if necessary, and follow GoatCounter's popup. This preference is specific to that browser; visiting it again toggles counting back on. See [GoatCounter's instructions](https://www.goatcounter.com/help/skip-dev). The dashboard is at your GoatCounter site address; keep its public-dashboard option disabled if you want the statistics private.
 
 ## Play locally
 

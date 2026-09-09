@@ -2,8 +2,7 @@ name: Publish game to GitHub Pages
 
 on:
   push:
-    # Publish the expansion branch while its PR is under review.
-    branches: [feat/in-the-sky]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -31,7 +30,7 @@ jobs:
           path: _site
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/in-the-sky'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:
