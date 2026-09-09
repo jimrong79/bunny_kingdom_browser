@@ -1,13 +1,13 @@
 """Complete expansion sessions through the actual UI; explicit test rulings are not official clarifications."""
-from pathlib import Path
+import argparse
 from playwright.sync_api import sync_playwright
 from browser_smoke import snapshot, camps, build
 
-def game(browser, players):
+def game(browser, players, url='http://127.0.0.1:8000'):
     page=browser.new_page(viewport={'width':1440,'height':900},reduced_motion='reduce')
     errors=[]
     page.on('pageerror',lambda error:errors.append(str(error)))
-    page.goto('http://127.0.0.1:8000')
+    page.goto(url)
     page.locator('[name=expansion]').select_option('in_the_sky')
     page.locator('[name=bots]').select_option(str(players-1))
     page.locator('[name=difficulty]').select_option('normal' if players==3 else 'easy')
@@ -69,7 +69,10 @@ def game(browser, players):
     page.close();print(f'{players} players: four rounds, expansion construction, harvests, Trade, scoring, resume passed',flush=True)
 
 if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--url',default='http://127.0.0.1:8000')
+    args=parser.parse_args()
     with sync_playwright() as p:
         browser=p.chromium.launch()
-        for players in [2,3,4,5]:game(browser,players)
+        for players in [2,3,4,5]:game(browser,players,args.url)
         browser.close()

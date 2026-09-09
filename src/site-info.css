@@ -1,0 +1,11 @@
+.site-nav{display:flex;align-items:center;gap:18px;margin-left:auto}
+.site-info-button{padding:6px 10px;font:600 12px system-ui;white-space:nowrap}
+.site-info{width:min(710px,calc(100vw - 24px));font:14px/1.6 system-ui}
+.site-info .inventory-heading{gap:12px}.site-info .inventory-heading h2{font:500 25px/1.2 Georgia,serif}.site-info .inventory-heading button{padding:8px 10px}
+.support-message,.support-note{background:#f7eed3;border-left:3px solid #b18b39;border-radius:4px;padding:12px 15px}
+.support-note{font:13px/1.6 system-ui;margin:20px 0}.support-note a{display:inline-block;font-weight:600}
+.site-info-games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
+.site-info-games section{background:#fffdf7;border:1px solid #ded5b5;border-radius:10px;padding:16px}
+.site-info-games h3{font:500 23px Georgia,serif;margin:0 0 8px}.site-info-games p{font-size:12px;color:#687568;margin:0 0 12px}
+.site-info-games a{display:block;padding:7px 0;text-underline-offset:3px}
+@media(max-width:520px){body>header{gap:10px}.brand{font-size:13px;letter-spacing:1px}.rabbit-logo{margin-right:4px}.site-nav{gap:0}.site-info{padding:16px}.site-info .inventory-heading h2{font-size:22px}.site-info-games{grid-template-columns:1fr;gap:12px}}

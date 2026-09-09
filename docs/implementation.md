@@ -30,6 +30,16 @@ All 37 parchments have original vector pictograms shared across hands, inventory
 
 Turn playback uses the public recap and newly placed board buildings. Rabbits hop to claims, building cards enter trays, and anonymous card backs enter parchment stacks. Construction animates placement, including both Sky Tower endpoints and Camp priority. Phone playback brings off-screen territories into view and uses the visible player badge when the player's panel is off screen. The engine settles and autosaves before animation starts. Playback changes presentation only; input is paused until it finishes or is skipped. **Skip**, **Esc**, the saved **Animations** toggle, and device reduced-motion preferences support faster or motion-free play. Refreshing resumes the settled state without replaying effects.
 
+## Construction undo
+
+**Undo last action** works backward through the human player's current construction decisions. It returns placed buildings to the tray, removes both Sky Tower endpoints together, and restores a moved Rainbow to its preceding location. An older Rainbow can undo a move made this round; its earlier placement stays locked. Territory cards and printed buildings are never removed by construction undo.
+
+Camp placement, saving, and announcements include any bot responses that they trigger. Undo restores the earlier priority queue, affected bot placements and readiness, Coins, permanent District marks, and activity log. Bots that acted before the decision remain unchanged. Repeating the decision therefore cannot mint extra Coins or skip a lower-priority Camp.
+
+The journal contains only changes to public construction data and lives in `ui.constructionUndo`, outside the game object passed to bots. It survives autosave/resume. Failed actions roll back atomically. Undo validates the saved action's round, player, game seed, phase, and resulting position before restoring anything. **Done building** clears the journal; later phases and rounds reject it. Older saves have no retrospective undo history and start recording with the next action.
+
+Run `python3 tests/browser_construction_undo.py --url http://localhost:8000/` with Playwright installed to check placements, repeat undo, save/resume, confirmation locks, mobile controls, Rainbow Coins and links, and Camp priority with bot responses. The synthetic fixtures retain the full physical card inventory. `tests/construction-undo.test.js` also checks all building categories, both Sky Tower endpoints, prior District history, previous-round protection, stale actions, and failed transactions.
+
 ## Confirmed scoring and the remaining ruling
 
 User confirmations on 2026-09-08 define the special cases:
@@ -61,6 +71,7 @@ The controller supplies `publicView(state, playerId)`. Rival hands, unrevealed p
 
 | Module | Responsibility |
 | --- | --- |
+| `src/construction-undo.js` | Reversible construction decisions, Camp response rollback, current-round locks |
 | `src/game.js` | Deck construction, deterministic shuffle/deals, drafting, immediate effects, visibility |
 | `src/fiefs.js` | Ownership connectivity, lava, Sky Tower pairs, resource production |
 | `src/construction.js` | City/farm/Sky Tower placement and completion barrier |

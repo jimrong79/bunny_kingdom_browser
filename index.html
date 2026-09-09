@@ -1,10 +1,22 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bunny Kingdom · The New World</title><link rel="stylesheet" href="src/style.css"><link rel="stylesheet" href="src/table.css"><link rel="stylesheet" href="src/last-turn.css"><link rel="stylesheet" href="src/interaction.css">
-  <link rel="stylesheet" href="src/turn-animation.css"><link rel="stylesheet" href="src/results.css"><link rel="stylesheet" href="src/expansion.css"></head>
+  <link rel="stylesheet" href="src/turn-animation.css"><link rel="stylesheet" href="src/results.css"><link rel="stylesheet" href="src/expansion.css"><link rel="stylesheet" href="src/site-info.css"></head>
 <body>
-<header><a class="brand" href="./"><span class="rabbit-logo">♧</span> BUNNY KINGDOM</a><span class="edition">THE NEW WORLD · BASE GAME</span></header>
+<header><a class="brand" href="./"><span class="rabbit-logo">♧</span> BUNNY KINGDOM</a><div class="site-nav"><span class="edition">THE NEW WORLD · BASE GAME</span><button class="quiet site-info-button" id="open-site-info" aria-haspopup="dialog" aria-controls="site-info">Rules &amp; support</button></div></header>
 <main id="app"><p class="loading">Preparing the kingdom…</p></main>
+<dialog id="site-info" class="inventory-dialog site-info" aria-labelledby="site-info-title">
+  <form method="dialog" class="inventory-heading"><h2 id="site-info-title">Rules &amp; the tabletop game</h2><button class="quiet" aria-label="Close rules and support">Close ×</button></form>
+  <p class="support-message"><strong>Enjoying Bunny Kingdom?</strong> Support its creators by buying a physical copy from your favorite game shop and sharing it with friends.</p>
+  <p>The tabletop game was designed by <strong>Richard Garfield</strong>, illustrated by <strong>Paul Mafayon</strong>, and published by <strong>IELLO</strong>.</p>
+  <div class="site-info-games">
+    <section aria-labelledby="base-game-links"><h3 id="base-game-links">Bunny Kingdom</h3><p>The original tabletop game.</p><a href="https://boardgamegeek.com/boardgame/184921/bunny-kingdom" target="_blank" rel="noopener noreferrer">Explore on BoardGameGeek ↗</a><a href="https://iellogames.com/games/bunny-kingdom/" target="_blank" rel="noopener noreferrer">Official IELLO game page ↗</a><a href="https://iellogames.com/wp-content/uploads/2017/09/Bunny-Kingdom-Rules-EN-Light.pdf" target="_blank" rel="noopener noreferrer">Official rules · English PDF ↗</a></section>
+    <section aria-labelledby="sky-game-links"><h3 id="sky-game-links">In the Sky</h3><p>Expansion · requires the base game.</p><a href="https://boardgamegeek.com/boardgame/264396/bunny-kingdom-in-the-sky" target="_blank" rel="noopener noreferrer">Explore on BoardGameGeek ↗</a><a href="https://iellogames.com/games/bunny-kingdom-in-the-sky/" target="_blank" rel="noopener noreferrer">Official IELLO expansion page ↗</a><a href="https://iellogames.com/wp-content/uploads/2019/04/BK_extension_Rules_EN_light.pdf" target="_blank" rel="noopener noreferrer">Official rules · English PDF ↗</a></section>
+  </div>
+  <p class="muted">Links open in a new tab so you can keep your game open.</p>
+  <p class="muted">An unofficial fan project, unaffiliated with the creators or IELLO.</p>
+</dialog>
 <noscript>This game needs JavaScript enabled.</noscript>
+<script type="module" src="src/site-info.js"></script>
 <script type="module" src="src/app.js"></script>
 </body></html>
