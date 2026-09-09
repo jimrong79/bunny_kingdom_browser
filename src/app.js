@@ -6,6 +6,7 @@ import { COLORS, createGame, publicView, resolveDraft, draftRecipient } from './
 import * as normalBots from './bots.js';
 import * as easyBots from './bots-baseline.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
+import {constructionAction,canUndoConstruction,undoConstruction} from './construction-undo.js';
 import { fiefs } from './fiefs.js';
 import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
 import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './harvest.js';
@@ -27,6 +28,7 @@ app.addEventListener('pointerdown',()=>soundEffects.unlock());
 app.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key))soundEffects.unlock();});
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
+let constructionUndo=[];
 let reviewingFinalBoard=false;
 const botPolicy=()=>state.botDifficulty==='easy'?easyBots:normalBots;
 const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===cardsPerPick(state);
@@ -46,13 +48,14 @@ function setup() {
   app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Your name <span class="muted">optional · leave blank to play as You</span><input name="playerName" autocomplete="nickname" maxlength="${PLAYER_NAME_LIMIT}" placeholder="Your royal name" value="${escape(saved?.game.players[0].name==='You'?'':saved?.game.players[0].name||'')}"></label><label>Game<select name="expansion"><option value="base">Original Bunny Kingdom</option><option value="in_the_sky">Bunny Kingdom + In the Sky</option></select></label><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option><option value="4" disabled>4 bots · 5-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted" id="setup-scope">Original 100-territory board · Full 182-card deck</p></section>`;
   document.querySelector('.setup .lede').insertAdjacentHTML('afterend','<p class="support-note">Enjoying Bunny Kingdom? Support its creators by buying a physical copy. <a href="https://boardgamegeek.com/boardgame/184921/bunny-kingdom" target="_blank" rel="noopener noreferrer">Discover the tabletop game on BoardGameGeek ↗</a></p>');
   document.querySelector('#setup').insertAdjacentHTML('beforebegin',soundToggleHTML());bindSoundToggles();
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; constructionUndo=[]; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
   document.querySelector('[name=expansion]').onchange=e=>{const sky=e.target.value==='in_the_sky',bots=document.querySelector('[name=bots]');bots.querySelector('[value="4"]').disabled=!sky;if(!sky&&bots.value==='4')bots.value='3';document.querySelector('#setup-scope').textContent=sky?'Two boards · 131 territories · Full 232-card deck':'Original 100-territory board · Full 182-card deck';};
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
 }
 function resume(saved) {
   reviewingFinalBoard=false;
   state=saved.game;const ui=saved.ui||{};
+  constructionUndo=Array.isArray(ui.constructionUndo)?ui.constructionUndo:[];
   for(const player of state.players)player.color=COLORS[player.id];
   animationsEnabled=ui.animationsEnabled??true;
   boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
@@ -151,11 +154,12 @@ function focusedControl() {
   return null;
 }
 function render() {
+  if(!canUndoConstruction(state,0,constructionUndo.at(-1)))constructionUndo=[];
   if(forcedFinalPick())selected=state.players[0].hand.map(c=>c.instanceId);
   const focus=focusedControl();
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
-  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled});
+  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled,constructionUndo});
   if(state.phase==='finished'&&!reviewingFinalBoard){renderResults(saved);return;}
   const handScroll=document.querySelector('.hand')?.scrollLeft||0;
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
@@ -246,7 +250,7 @@ function renderResults(saved) {
 function constructionPanel() {
   if(state.phase==='camps') {
     const current=state.campQueue[0];
-    return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2>${placementGuide()}<p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>`;
+    return `<p class="eyebrow">CAMP PRIORITY ${current.priority}</p><h2>Place your camp?</h2>${placementGuide()}<p class="help">Choose an empty territory and confirm, or keep this Camp for later. Lower-numbered Camps have first choice.</p><div class="actions"><button class="primary" id="place-building" ${targets.length?'':'disabled'}>Confirm camp</button><button class="quiet" id="save-camp">Save camp</button></div>${undoPanel()}`;
   }
   if(state.phase==='markets') {
     const posts=tradingPosts(state,0),vents=chimneys(state,0);
@@ -258,14 +262,22 @@ function constructionPanel() {
   const available = state.players[0].buildings;
   const card=selectedBuilding();
   const complete=card&&targets.length===(card.category==='sky_tower'?2:1);
-  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length||buildingId?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}${movableRainbows(state,0).map(c=>`<button class="quiet rainbow-move" data-move-rainbow="${c.building.pairId}">Move Rainbow ${c.building.pairId.split('_').at(-1)} · currently ${c.coordinate}</button>`).join('')}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div><details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
+  return `<p class="help">Select a building, then an eligible territory. Sky Towers need two territories in separate fiefs. Unplaced buildings can be saved for later rounds.</p>${available.length||buildingId?placementGuide():'<p class="help">You have no buildings waiting. Continue to the harvest.</p>'}${movableRainbows(state,0).map(c=>`<button class="quiet rainbow-move" data-move-rainbow="${c.building.pairId}">Move Rainbow ${c.building.pairId.split('_').at(-1)} · currently ${c.coordinate}</button>`).join('')}<div class="building-list">${available.map(c=>`<button class="card ${c.instanceId===buildingId?'selected':''}" data-building="${c.instanceId}"><span class="tag">${c.farmType==='luxury'?'Luxury farm':c.category.replace('_',' ')}</span><span class="building-illustration">${cardArt(c)}</span><h3>${escape(c.name)}</h3><p>${escape(cardText(c,state))}</p></button>`).join('')}</div><div class="actions"><button class="primary" id="place-building" ${complete ? '' : 'disabled'}>Place building</button><button class="quiet" id="cancel-building" ${buildingId?'':'disabled'}>Cancel selection</button><button class="quiet" id="finish-building">Done building · save the rest</button></div>${undoPanel()}<details class="fief-list"><summary>Your current fiefs</summary>${fiefs(state,0).map(f=>`<p>${f.coordinates.join(', ')}: strength ${f.strength} × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`;
 }
-async function attempt(action) {
+function undoPanel() {
+  const entry=constructionUndo.at(-1);
+  return `<div class="construction-undo"><button id="undo-building" class="quiet" ${entry?'':'disabled'}>↶ Undo last action</button>${entry?`<p class="muted">${escape(entry.label)}${entry.botResponses?'<br>Also rewinds the bot responses to this decision.':''}</p>`:''}<p class="muted">Done building locks this round’s placements.</p></div>`;
+}
+function recordConstruction(label,action) {
+  const entry=constructionAction(state,0,label,action);
+  if(entry)constructionUndo.push(entry);
+}
+async function attempt(action,{animate=true}={}) {
   if(playing)return;
   soundEffects.unlock();
   const before=capturePresentation(state),phase=state.phase;
   try {error='';action();} catch(e) {error=e.message;render();soundEffects.play('error');return;}
-  const events=animationEvents(before,state,[...data.buildings.cards,...data.expansion.cards]);
+  const events=animate?animationEvents(before,state,[...data.buildings.cards,...data.expansion.cards]):[];
   const transition=phase!==state.phase?({harvest:'harvest',parchments:'reveal',finished:state.winners?.includes(0)?'finish':'lose',draft:'round'})[state.phase]:null;
   playing=animationsEnabled&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&events.length>0;
   render();
@@ -303,7 +315,7 @@ function driveBots() {
 }
 function bindConstruction() {
   document.querySelectorAll('[data-move-rainbow]').forEach(b=>b.onclick=()=>{buildingId='move:'+b.dataset.moveRainbow;targets=[];render();});
-  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];soundEffects.play('select');const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp'){requestCamp(state,0,buildingId);driveBots();}}));
+  document.querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>attempt(()=>{buildingId=b.dataset.building;targets=[];soundEffects.play('select');const c=state.players[0].buildings.find(c=>c.instanceId===buildingId);if(c.category==='camp')recordConstruction('Announced '+c.name,()=>{requestCamp(state,0,buildingId);driveBots();});}));
   document.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>{
     const card=selectedBuilding();
     inspected=b.dataset.cell;
@@ -314,8 +326,9 @@ function bindConstruction() {
     soundEffects.play('select');
     render();
   });
-  const bind=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn);};
-  bind('place-building',()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{if(buildingId?.startsWith('move:'))moveRainbow(state,0,buildingId.slice(5),targets[0]);else placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}});
+  const bind=(id,fn,options)=>{const b=document.getElementById(id);if(b)b.onclick=()=>attempt(fn,options);};
+  bind('place-building',()=>recordConstruction(`${buildingId?.startsWith('move:')?'Moved':'Placed'} ${selectedBuilding()?.name?.replace(/^Move /,'')||'building'} · ${targets.join(' + ')}`,()=>{if(state.phase==='camps'){respondCamp(state,0,targets[0]);driveBots();}else{if(buildingId?.startsWith('move:'))moveRainbow(state,0,buildingId.slice(5),targets[0]);else placeBuilding(state,0,buildingId,targets);buildingId=null;targets=[];}}));
+  bind('undo-building',()=>{undoConstruction(state,0,constructionUndo.at(-1));constructionUndo.pop();buildingId=state.phase==='camps'?state.campQueue[0].cardId:null;targets=[];inspected=null;soundEffects.play('deselect');},{animate:false});
   document.querySelectorAll('[data-market]').forEach(select=>select.onchange=()=>attempt(()=>chooseResource(state,0,select.dataset.market,select.value)));
   document.querySelectorAll('[data-chimney]').forEach(select=>select.onchange=()=>attempt(()=>chooseChimney(state,0,select.dataset.chimney,select.value)));
   bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
@@ -329,9 +342,9 @@ function bindConstruction() {
   }));
   bind('finish-scoring',()=>finalizeScoring(state,state.scoringDecisions));
   const again=document.querySelector('#play-again');if(again)again.onclick=setup;
-  bind('save-camp',()=>{respondCamp(state,0);driveBots();});
+  bind('save-camp',()=>recordConstruction('Saved Camp '+state.campQueue[0].priority,()=>{respondCamp(state,0);driveBots();}));
   bind('cancel-building',()=>{buildingId=null;targets=[];});
-  bind('finish-building',()=>{finishConstruction(state,0);buildingId=null;targets=[];driveBots();});
+  bind('finish-building',()=>{finishConstruction(state,0);constructionUndo=[];buildingId=null;targets=[];driveBots();});
 }
 
 function inspectionPanel() {
