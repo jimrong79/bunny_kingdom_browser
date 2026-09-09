@@ -1,6 +1,6 @@
 // Public counting endpoint, supplied by the site's GoatCounter account.
 // Leave empty to disable analytics. No account credentials belong here.
-const GOATCOUNTER_ENDPOINT = '';
+const GOATCOUNTER_ENDPOINT = 'https://jimrong79.goatcounter.com/count';
 const liveSite = location.origin === 'https://jimrong79.github.io'
   && location.pathname.startsWith('/bunny_kingdom_browser/');
 

@@ -18,6 +18,8 @@ The workflow runs `python3 scripts/build_site.py`, which packages only `index.ht
 
 ### Website visitor statistics
 
+The live site's counter is configured for [jimrong79.goatcounter.com](https://jimrong79.goatcounter.com/). Sign in there to view the dashboard after this configuration is deployed.
+
 Visitor analytics use [GoatCounter](https://www.goatcounter.com/), which offers free hosting for reasonable public usage. Create a GoatCounter site for the game's public URL, then put its public `https://YOUR-SITE.goatcounter.com/count` endpoint in `GOATCOUNTER_ENDPOINT` in [src/analytics.js](src/analytics.js). No password or API key is needed. An empty endpoint disables analytics.
 
 Counting runs only at `https://jimrong79.github.io/bunny_kingdom_browser/`; local games and copies hosted elsewhere do not load the analytics script. The dashboard shows page visits, estimated visitors, referring sites, and browser/device statistics. Counts start after configuration and deployment; GitHub's **Insights → Traffic** measures repository traffic separately. Ad blockers can prevent counting. If analytics is blocked or unavailable, the game still works.
