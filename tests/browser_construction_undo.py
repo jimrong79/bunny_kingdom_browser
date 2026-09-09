@@ -106,8 +106,8 @@ def run(browser, url):
     assert saved(page)['game']==original
     assert not errors,errors
     print('Camps: bot construction rollback, priority, reload, deterministic redo, saved offers and no repeated Coins passed',flush=True)
-    position(page,url,'base');original=saved(page)['game']
     page.emulate_media(reduced_motion='no-preference')
+    position(page,url,'base');original=saved(page)['game']
     page.locator('#toggle-animation').click()
     place(page,'city_1','A1')
     page.locator('#turn-animation').wait_for(state='visible')
