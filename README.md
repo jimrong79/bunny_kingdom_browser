@@ -2,6 +2,12 @@
 
 Browser implementation of Bunny Kingdom and the In the Sky expansion, with local AI opponents.
 
+## Landing art exploration
+
+This branch offers three landing-page treatments: **Current**, **Royal atlas**, and **Storybook**. Use the **Landing studio** buttons above setup to compare them. Your entered name, game selection, opponent count, difficulty and seed stay in place when switching. Starting or resuming a game returns to the established board and card design.
+
+Run `python3 -m http.server 8002 --bind 127.0.0.1`, then compare [Royal atlas](http://localhost:8002/?landing=atlas), [Storybook](http://localhost:8002/?landing=storybook), and [Current](http://localhost:8002/?landing=classic). These are working setup screens, including saved-game resume and Rules & support. Royal atlas reuses the existing vector pieces; Storybook adds an [original illustration](assets/landing/README.md). The experiment lives on `feat/landing-art-exploration`; pushes to this branch do not update the public game.
+
 ## Play online
 
 [Play Bunny Kingdom in your browser](https://jimrong79.github.io/bunny_kingdom_browser/). Choose the base game or **Bunny Kingdom + In the Sky**, enter your name, and select your bot opponents. No installation or account is required, and the developer's computer does not need to be running.
@@ -14,7 +20,7 @@ Use **Rules & support** in the header at any time for BoardGameGeek listings, IE
 
 [GitHub Actions](https://github.com/jimrong79/bunny_kingdom_browser/actions) tests and publishes each push to `main`. Develop changes on a feature branch and open a pull request; merging it into `main` updates the live game after the checks pass. Pull requests run the checks without publishing. Keep `main` allowed in the repository's `github-pages` deployment environment.
 
-The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, the five game-data JSON files, and the in-game parchment picture guide in `_site/`. Reference photos, saved matches, audit reports, and other review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
+The workflow runs `python3 scripts/build_site.py`, which packages only `index.html`, the JavaScript/CSS, the five game-data JSON files, the in-game parchment picture guide, and the landing illustration in `_site/`. Reference photos, saved matches, audit reports, and other review tools are excluded. To preview that package locally, run `python3 -m http.server 8001 --bind 127.0.0.1 --directory _site` after building it.
 
 ### Website visitor statistics
 

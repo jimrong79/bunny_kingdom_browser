@@ -3,6 +3,7 @@ import { rabbitArt, terrainArt, pieceArt, resourceArt } from './art.js';
 const directions = [
   { id: 'classic', name: 'Current', note: 'The original parchment palette and familiar, compact setup.' },
   { id: 'atlas', name: 'Royal atlas', note: 'The same game pieces, with a richer palette and room for the kingdom.' },
+  { id: 'storybook', name: 'Storybook', note: 'An original watercolor world, with the familiar parchment and forest-green controls.' },
 ];
 
 function atlasArt() {
@@ -22,7 +23,6 @@ function atlasArt() {
     <div class="atlas-seal">${rabbitArt()}<span>A small beginning.<br>A kingdom of possibilities.</span></div>
     <div class="atlas-resource resource-one">${resourceArt('carrots')}</div>
     <div class="atlas-resource resource-two">${resourceArt('fish')}</div>
-    <span class="atlas-coordinate">THE NEW WORLD &nbsp; / &nbsp; EST. YOUR FIRST TURN</span>
   </div>`;
 }
 
@@ -65,7 +65,9 @@ export function landingPreview() {
       intro.append(...introNodes);
       const art = document.createElement('div');
       art.className = 'landing-art';
-      art.innerHTML = atlasArt();
+      art.innerHTML = direction.id === 'storybook'
+        ? '<img class="storybook-image" src="assets/landing/storybook-kingdom.webp" width="1536" height="1024" alt="A rabbit in a green cloak overlooks a painted kingdom, with a castle in the clouds." decoding="async" fetchpriority="high">'
+        : atlasArt();
       intro.append(art);
       const play = document.createElement('section');
       play.className = 'landing-play';

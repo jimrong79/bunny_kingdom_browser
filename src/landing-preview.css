@@ -50,7 +50,7 @@
 .atlas-seal>svg{width:42px;height:48px;color:#b9883c}.atlas-seal>span{font:italic 12px/1.4 Georgia,serif}
 .atlas-resource{position:absolute;width:57px;height:57px;padding:8px;background:#f6e4b5;border:3px double #bc9350;border-radius:50%;filter:drop-shadow(0 5px 5px #082a2830)}
 .resource-one{left:6%;top:72%;transform:rotate(-15deg)}.resource-two{left:41%;top:76%;transform:rotate(16deg)}
-.atlas-coordinate{position:absolute;left:46px;top:calc(100% - 157px);font:8px system-ui;letter-spacing:2px;color:#a1b295}
+
 .atlas-orbit{position:absolute;border:1px solid #bdc99618;border-radius:50%;width:620px;height:620px;left:0;top:125px}
 .orbit-two{width:500px;height:500px;left:60px;top:185px}
 .atlas-compass{position:absolute;top:57px;left:46%;color:#bda66b;font:9px Georgia;text-align:center;opacity:.55}.atlas-compass>span{display:block;font-size:54px;font-weight:400;line-height:1}
@@ -59,19 +59,19 @@
 .atlas-map{left:7%;top:25px;width:390px;height:340px}
 .atlas-seal{left:62%;top:34%;padding:12px 15px}.atlas-seal>span{white-space:nowrap}
 .resource-one{left:1%;top:70%}.resource-two{left:84%;top:82%}
-.atlas-coordinate{left:0;top:auto;bottom:-7px;font-size:7px;letter-spacing:1.6px}
+
 .atlas-orbit{width:520px;height:520px;left:-30px;top:-80px}.orbit-two{width:420px;height:420px;left:20px;top:-30px}
 .atlas-compass{left:auto;right:0;top:0}
 
 @media(min-width:1500px){.setup.landing-composed{padding:54px;column-gap:65px;grid-template-columns:minmax(0,1fr) 390px}}
-@media(max-width:1100px){.setup.landing-composed{padding:32px;column-gap:28px;grid-template-columns:minmax(0,1fr) 340px}.landing-play-heading h2{font-size:24px}.landing-composed .landing-intro>h1{font-size:60px}.landing-art{height:310px}.atlas-map{left:2%;width:285px;height:260px;top:30px}.atlas-seal{left:43%;top:53%;padding:12px}.atlas-seal>span{font-size:10px}.resource-two{left:78%;top:85%}.atlas-coordinate{left:0;font-size:6px}.atlas-compass{right:0}.landing-composed .landing-play{padding:22px}.landing-facts{gap:16px}}
+@media(max-width:1100px){.setup.landing-composed{padding:32px;column-gap:28px;grid-template-columns:minmax(0,1fr) 340px}.landing-play-heading h2{font-size:24px}.landing-composed .landing-intro>h1{font-size:60px}.landing-art{height:310px}.atlas-map{left:2%;width:285px;height:260px;top:30px}.atlas-seal{left:43%;top:53%;padding:12px}.atlas-seal>span{font-size:10px}.resource-two{left:78%;top:85%}.atlas-compass{right:0}.landing-composed .landing-play{padding:22px}.landing-facts{gap:16px}}
 @media(max-width:800px){
   .landing-studio{margin-bottom:18px;gap:12px}.studio-directions{margin-left:auto}.studio-note{text-align:left}
   .setup.landing-composed{grid-template-columns:1fr;gap:24px;padding:28px;min-height:0}
   .landing-composed .landing-intro{grid-column:1;grid-row:1;min-height:0;max-width:100%}
   .landing-composed .landing-intro>h1{font-size:64px;max-width:500px}.landing-composed .landing-intro>.eyebrow{margin-bottom:17px}.landing-composed .landing-intro>.lede{max-width:380px;font-size:14px}
   .landing-composed .landing-play{grid-column:1;grid-row:2;width:100%;max-width:560px;justify-self:center;padding:26px}
-  .landing-art{height:290px;max-width:500px;margin:24px auto 0}.atlas-map{left:12%;right:auto;top:15px;width:300px;height:260px}.atlas-seal{left:45%;top:62%}.atlas-resource{width:45px;height:45px}.resource-one{top:70%;left:4%}.resource-two{top:18%;left:auto;right:4%}.atlas-coordinate{display:none}.atlas-compass{left:auto;right:10px;top:5px}
+  .landing-art{height:290px;max-width:500px;margin:24px auto 0}.atlas-map{left:12%;right:auto;top:15px;width:300px;height:260px}.atlas-seal{left:45%;top:62%}.atlas-resource{width:45px;height:45px}.resource-one{top:70%;left:4%}.resource-two{top:18%;left:auto;right:4%}.atlas-compass{left:auto;right:10px;top:5px}
   .landing-facts{flex-wrap:wrap;gap:14px;margin-bottom:18px;font-size:10px}.landing-facts b{font-size:17px}.landing-footer{grid-row:3}
 }
 @media(max-width:480px){
@@ -80,3 +80,19 @@
   .landing-art{height:235px}.atlas-map{width:240px;height:210px;left:8%;right:auto;top:10px}.atlas-seal{left:31%;top:73%;padding:8px;gap:6px}.atlas-seal>svg{width:27px;height:30px}.atlas-seal>span{font-size:9px}.resource-one{top:20%;left:0;width:37px;height:37px;padding:4px}.resource-two{top:56%;right:0;width:37px;height:37px;padding:4px}.atlas-compass{display:none}
   .landing-composed .landing-play{padding:20px 16px}.landing-play-heading h2{font-size:25px}.landing-kicker{font-size:8px}.landing-play input,.landing-play select{font-size:12px}.landing-play #setup{gap:16px 10px}.landing-utilities{font-size:8px;gap:8px}.landing-facts{display:grid;gap:12px}.landing-composed .support-note{font-size:10px}.landing-composed .support-note a{margin-left:0}
 }
+
+/* A second direction: a painted storybook, framed by the existing paper palette. */
+.setup[data-landing=storybook]{background:radial-gradient(ellipse at 20% 55%,#e9e3c745,transparent 65%),#faf3e4;border-color:#ddd1b2;box-shadow:0 20px 50px #78613117}
+[data-landing=storybook] .landing-intro>.eyebrow{color:#94733a}
+[data-landing=storybook] .landing-intro>h1{color:#2d4c3b}
+[data-landing=storybook] .landing-intro>.lede{color:#63715b}
+[data-landing=storybook] .landing-art{width:calc(100% + 96px);height:390px;margin:12px -48px -12px}
+.storybook-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center top;mask-image:linear-gradient(transparent,black 8%,black 92%,transparent),linear-gradient(to right,black 92%,transparent);mask-composite:intersect;filter:saturate(.87)}
+[data-landing=storybook] .landing-play{background:#fffdf5e8;border-color:#d9cdb0;box-shadow:0 12px 35px #7f704119}
+[data-landing=storybook] .landing-facts{color:#536a50}
+[data-landing=storybook] .landing-facts b{color:#9f7c36}
+[data-landing=storybook] .support-note{color:#717863;border-color:#d7ceb8}
+[data-landing=storybook] .support-note a{color:#486445}
+@media(max-width:1100px){[data-landing=storybook] .landing-art{width:calc(100% + 64px);height:310px;margin-left:-32px;margin-right:-32px}}
+@media(max-width:800px){[data-landing=storybook] .landing-art{width:calc(100% + 56px);max-width:none;height:330px;margin:4px -28px -16px}}
+@media(max-width:480px){[data-landing=storybook] .landing-art{width:calc(100% + 32px);height:235px;margin:8px -16px -12px}.studio-label{flex-basis:100%}.studio-directions{margin-left:0}.studio-directions button{padding:9px 14px}.studio-note{line-height:1.5}}
