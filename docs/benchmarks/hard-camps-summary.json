@@ -1,0 +1,687 @@
+{
+  "baselineCommit": "52e2c97",
+  "baselineTag": "bots-normal-before-hard",
+  "batches": {
+    "development-base": {
+      "expansion": "base",
+      "seedPrefix": "hard-camps-development-v1",
+      "start": 0,
+      "seedsPerPlayerCount": 2,
+      "rulingConvention": "low",
+      "workers": 3,
+      "candidateCommit": "d1e697d",
+      "results": {
+        "2": {
+          "deals": 2,
+          "candidate": {
+            "games": 4,
+            "winRate": 0.5,
+            "averageMargin": -0.25,
+            "averageScore": 141,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 160,
+              "mean": 83.1147966874999,
+              "p95": 295.39924900000005,
+              "max": 379.47421700000086
+            },
+            "campMs": {
+              "count": 7,
+              "mean": 292.9005180000004,
+              "p95": 899.7543470000019,
+              "max": 899.7543470000019
+            }
+          },
+          "control": {
+            "games": 4,
+            "winRate": 0.5,
+            "averageMargin": 0,
+            "averageScore": 141.25,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 80,
+              "mean": 85.892908325,
+              "p95": 318.33609099999967,
+              "max": 480.58084900000006
+            },
+            "campMs": {
+              "count": 3,
+              "mean": 145.74805066666704,
+              "p95": 338.1565470000005,
+              "max": 338.1565470000005
+            }
+          },
+          "meanMarginChange": -0.25,
+          "dealMarginStandardError": 0.25,
+          "changedGames": 1
+        },
+        "3": {
+          "deals": 2,
+          "candidate": {
+            "games": 6,
+            "winRate": 0.16666666666666666,
+            "averageMargin": -22,
+            "averageScore": 186.5,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 144,
+              "mean": 245.834155263889,
+              "p95": 864.2105940000001,
+              "max": 2497.6357179999977
+            },
+            "campMs": {
+              "count": 11,
+              "mean": 442.8821370909085,
+              "p95": 1853.743450000009,
+              "max": 1853.743450000009
+            }
+          },
+          "control": {
+            "games": 6,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -15,
+            "averageScore": 193.33333333333334,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 48,
+              "mean": 385.3845107083335,
+              "p95": 1634.3897590000051,
+              "max": 2453.239155999996
+            },
+            "campMs": {
+              "count": 4,
+              "mean": 611.1132024999999,
+              "p95": 1949.7235650000002,
+              "max": 1949.7235650000002
+            }
+          },
+          "meanMarginChange": -7,
+          "dealMarginStandardError": 7,
+          "changedGames": 1
+        },
+        "4": {
+          "deals": 2,
+          "candidate": {
+            "games": 8,
+            "winRate": 0.375,
+            "averageMargin": -11.375,
+            "averageScore": 127.625,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 160,
+              "mean": 108.32458346875,
+              "p95": 374.3988970000064,
+              "max": 692.7322930000009
+            },
+            "campMs": {
+              "count": 11,
+              "mean": 498.5780973636383,
+              "p95": 1791.9746230000019,
+              "max": 1791.9746230000019
+            }
+          },
+          "control": {
+            "games": 8,
+            "winRate": 0.25,
+            "averageMargin": -21.25,
+            "averageScore": 119.125,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 40,
+              "mean": 110.31771922500039,
+              "p95": 605.7360090000002,
+              "max": 687.9535439999963
+            },
+            "campMs": {
+              "count": 1,
+              "mean": 43.256634999997914,
+              "p95": 43.256634999997914,
+              "max": 43.256634999997914
+            }
+          },
+          "meanMarginChange": 9.875,
+          "dealMarginStandardError": 1.125,
+          "changedGames": 2
+        }
+      }
+    },
+    "development-sky": {
+      "expansion": "in_the_sky",
+      "seedPrefix": "hard-camps-development-v1",
+      "start": 0,
+      "seedsPerPlayerCount": 2,
+      "rulingConvention": "low",
+      "workers": 3,
+      "candidateCommit": "d1e697d",
+      "results": {
+        "3": {
+          "deals": 2,
+          "candidate": {
+            "games": 6,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -36.666666666666664,
+            "averageScore": 329.1666666666667,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 120,
+              "mean": 692.7780185833342,
+              "p95": 3597.95492199999,
+              "max": 4808.982237000004
+            },
+            "campMs": {
+              "count": 10,
+              "mean": 823.7258465999978,
+              "p95": 1696.5787360000031,
+              "max": 1696.5787360000031
+            }
+          },
+          "control": {
+            "games": 6,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -33.166666666666664,
+            "averageScore": 333.6666666666667,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 40,
+              "mean": 879.7680789,
+              "p95": 3883.3009879999954,
+              "max": 4117.82997
+            },
+            "campMs": {
+              "count": 4,
+              "mean": 1039.6979742500002,
+              "p95": 1395.0354389999993,
+              "max": 1395.0354389999993
+            }
+          },
+          "meanMarginChange": -3.5,
+          "dealMarginStandardError": 4.833333333333334,
+          "changedGames": 2
+        },
+        "4": {
+          "deals": 2,
+          "candidate": {
+            "games": 8,
+            "winRate": 0.25,
+            "averageMargin": -20.875,
+            "averageScore": 225.875,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 192,
+              "mean": 210.5217005989583,
+              "p95": 864.2632579999918,
+              "max": 1395.5079770000011
+            },
+            "campMs": {
+              "count": 11,
+              "mean": 634.4577214545458,
+              "p95": 1431.2199020000116,
+              "max": 1431.2199020000116
+            }
+          },
+          "control": {
+            "games": 8,
+            "winRate": 0.25,
+            "averageMargin": -26.5,
+            "averageScore": 223.625,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 48,
+              "mean": 219.30512214583143,
+              "p95": 898.9422909999998,
+              "max": 1271.4290110000002
+            },
+            "campMs": {
+              "count": 2,
+              "mean": 709.2663470000007,
+              "p95": 1079.2390610000002,
+              "max": 1079.2390610000002
+            }
+          },
+          "meanMarginChange": 5.625,
+          "dealMarginStandardError": 2.625,
+          "changedGames": 3
+        },
+        "5": {
+          "deals": 2,
+          "candidate": {
+            "games": 10,
+            "winRate": 0.2,
+            "averageMargin": -39,
+            "averageScore": 145.7,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 200,
+              "mean": 96.82767286999952,
+              "p95": 397.2037539999874,
+              "max": 1181.309432000009
+            },
+            "campMs": {
+              "count": 10,
+              "mean": 304.12522129999996,
+              "p95": 1384.6817239999946,
+              "max": 1384.6817239999946
+            }
+          },
+          "control": {
+            "games": 10,
+            "winRate": 0.2,
+            "averageMargin": -39,
+            "averageScore": 145.7,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 40,
+              "mean": 82.19910652500039,
+              "p95": 270.05699499999173,
+              "max": 297.8847539999988
+            },
+            "campMs": {
+              "count": 1,
+              "mean": 40.60522500000661,
+              "p95": 40.60522500000661,
+              "max": 40.60522500000661
+            }
+          },
+          "meanMarginChange": 0,
+          "dealMarginStandardError": 0,
+          "changedGames": 0
+        }
+      }
+    },
+    "validation-base": {
+      "expansion": "base",
+      "seedPrefix": "hard-camps-validation-v1",
+      "start": 0,
+      "seedsPerPlayerCount": 10,
+      "rulingConvention": "low",
+      "workers": 6,
+      "candidateCommit": "f06f094",
+      "results": {
+        "2": {
+          "deals": 10,
+          "candidate": {
+            "games": 20,
+            "winRate": 0.5,
+            "averageMargin": -0.15,
+            "averageScore": 139.5,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 800,
+              "mean": 121.47616167000007,
+              "p95": 355.9746989999985,
+              "max": 690.1616500000018
+            },
+            "campMs": {
+              "count": 37,
+              "mean": 1197.7456303783802,
+              "p95": 6472.982056000001,
+              "max": 9459.456406000005
+            }
+          },
+          "control": {
+            "games": 20,
+            "winRate": 0.5,
+            "averageMargin": 0,
+            "averageScore": 138.95,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 400,
+              "mean": 118.74943144500011,
+              "p95": 339.64837500000067,
+              "max": 596.7752270000001
+            },
+            "campMs": {
+              "count": 17,
+              "mean": 1435.4449527058823,
+              "p95": 8446.055109,
+              "max": 8446.055109
+            }
+          },
+          "meanMarginChange": -0.15,
+          "dealMarginStandardError": 0.15000000000000002,
+          "changedGames": 1
+        },
+        "3": {
+          "deals": 10,
+          "candidate": {
+            "games": 30,
+            "winRate": 0.3,
+            "averageMargin": -14.066666666666666,
+            "averageScore": 184.43333333333334,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 720,
+              "mean": 286.9790210888891,
+              "p95": 915.4670350000088,
+              "max": 2604.1080049999873
+            },
+            "campMs": {
+              "count": 54,
+              "mean": 905.6140718888893,
+              "p95": 4217.115504000016,
+              "max": 6340.111861999991
+            }
+          },
+          "control": {
+            "games": 30,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -13.333333333333334,
+            "averageScore": 186.36666666666667,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 240,
+              "mean": 236.4568252625007,
+              "p95": 841.3209299999871,
+              "max": 1992.7886799999978
+            },
+            "campMs": {
+              "count": 22,
+              "mean": 1080.3943970909072,
+              "p95": 3955.094870000001,
+              "max": 4551.635181999998
+            }
+          },
+          "meanMarginChange": -0.7333333333333325,
+          "dealMarginStandardError": 1.1954646805611346,
+          "changedGames": 3
+        },
+        "4": {
+          "deals": 10,
+          "candidate": {
+            "games": 40,
+            "winRate": 0.275,
+            "averageMargin": -19.125,
+            "averageScore": 126.425,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 800,
+              "mean": 155.0431200962502,
+              "p95": 553.6145470000047,
+              "max": 1903.9796429999988
+            },
+            "campMs": {
+              "count": 66,
+              "mean": 520.2179913333288,
+              "p95": 1917.653775999992,
+              "max": 3543.8303559999913
+            }
+          },
+          "control": {
+            "games": 40,
+            "winRate": 0.25,
+            "averageMargin": -20.325,
+            "averageScore": 125.7,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 200,
+              "mean": 151.63368043499824,
+              "p95": 555.4750490000006,
+              "max": 920.0945950000314
+            },
+            "campMs": {
+              "count": 15,
+              "mean": 405.6885160666677,
+              "p95": 1738.8158239999902,
+              "max": 1738.8158239999902
+            }
+          },
+          "meanMarginChange": 1.1999999999999993,
+          "dealMarginStandardError": 0.9278110439811186,
+          "changedGames": 8
+        }
+      }
+    },
+    "validation-sky": {
+      "expansion": "in_the_sky",
+      "seedPrefix": "hard-camps-validation-v1",
+      "start": 0,
+      "seedsPerPlayerCount": 20,
+      "rulingConvention": "low",
+      "workers": 8,
+      "candidateCommit": "f06f094",
+      "results": {
+        "3": {
+          "deals": 20,
+          "candidate": {
+            "games": 60,
+            "winRate": 0.36666666666666664,
+            "averageMargin": -18.716666666666665,
+            "averageScore": 327.03333333333336,
+            "gamesWithRulings": 4,
+            "draftMs": {
+              "count": 1200,
+              "mean": 1270.6720395066689,
+              "p95": 5093.007794999983,
+              "max": 14800.56216799999
+            },
+            "campMs": {
+              "count": 108,
+              "mean": 2262.4756067037065,
+              "p95": 8470.015436000074,
+              "max": 23067.41590100003
+            }
+          },
+          "control": {
+            "games": 60,
+            "winRate": 0.3333333333333333,
+            "averageMargin": -20.116666666666667,
+            "averageScore": 326.6666666666667,
+            "gamesWithRulings": 6,
+            "draftMs": {
+              "count": 400,
+              "mean": 1213.5670155974979,
+              "p95": 5198.387142000021,
+              "max": 12690.255002
+            },
+            "campMs": {
+              "count": 26,
+              "mean": 2034.5902543461539,
+              "p95": 7822.580417999998,
+              "max": 10813.283555999995
+            }
+          },
+          "meanMarginChange": 1.4000000000000021,
+          "dealMarginStandardError": 0.8824474206956456,
+          "changedGames": 7
+        },
+        "4": {
+          "deals": 20,
+          "candidate": {
+            "games": 80,
+            "winRate": 0.2625,
+            "averageMargin": -37.525,
+            "averageScore": 225.825,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 1920,
+              "mean": 337.7445381526044,
+              "p95": 1276.428930999944,
+              "max": 5593.001536000054
+            },
+            "campMs": {
+              "count": 114,
+              "mean": 1165.084571877184,
+              "p95": 5614.489910000004,
+              "max": 9860.92120099999
+            }
+          },
+          "control": {
+            "games": 80,
+            "winRate": 0.25,
+            "averageMargin": -37.575,
+            "averageScore": 225.575,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 480,
+              "mean": 284.7864286437551,
+              "p95": 1059.4620170001872,
+              "max": 3121.1647920000833
+            },
+            "campMs": {
+              "count": 25,
+              "mean": 924.9646242800169,
+              "p95": 2052.814645000035,
+              "max": 8117.801962000085
+            }
+          },
+          "meanMarginChange": 0.05000000000000426,
+          "dealMarginStandardError": 1.0908712114635712,
+          "changedGames": 11
+        },
+        "5": {
+          "deals": 20,
+          "candidate": {
+            "games": 100,
+            "winRate": 0.21,
+            "averageMargin": -33.62,
+            "averageScore": 150.21,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 2000,
+              "mean": 176.21900572050038,
+              "p95": 705.3951419999357,
+              "max": 2322.271694000112
+            },
+            "campMs": {
+              "count": 114,
+              "mean": 649.3329821754463,
+              "p95": 2345.43644199986,
+              "max": 5755.587223000126
+            }
+          },
+          "control": {
+            "games": 100,
+            "winRate": 0.2,
+            "averageMargin": -33.44,
+            "averageScore": 150.01,
+            "gamesWithRulings": 0,
+            "draftMs": {
+              "count": 400,
+              "mean": 166.56928293999866,
+              "p95": 673.9280369998887,
+              "max": 2327.8184490001295
+            },
+            "campMs": {
+              "count": 21,
+              "mean": 496.3588517142593,
+              "p95": 2046.2958980000112,
+              "max": 2092.6867439998314
+            }
+          },
+          "meanMarginChange": -0.17999999999999972,
+          "dealMarginStandardError": 0.4583494415032222,
+          "changedGames": 4
+        }
+      }
+    }
+  },
+  "candidateTag": "bots-hard-camps-candidate-v1",
+  "releaseStatus": "experimental; Normal remains recommended",
+  "browserCampChecks": [
+    {
+      "path": "source",
+      "views": [
+        {
+          "round": 2,
+          "playerId": 3,
+          "cardId": "camp_3_1",
+          "coordinate": "C1-2",
+          "normalCoordinate": "C1-2",
+          "hardMs": 111.60000000149012,
+          "normalMs": 22.399999998509884
+        },
+        {
+          "round": 2,
+          "playerId": 4,
+          "cardId": "camp_4_1",
+          "coordinate": "C5-1",
+          "normalCoordinate": "C5-1",
+          "hardMs": 222.39999999850988,
+          "normalMs": 154
+        },
+        {
+          "round": 3,
+          "playerId": 3,
+          "cardId": "camp_1_1",
+          "coordinate": "C10",
+          "normalCoordinate": "C10",
+          "hardMs": 260.6000000014901,
+          "normalMs": 240
+        },
+        {
+          "round": 3,
+          "playerId": 0,
+          "cardId": "camp_2_1",
+          "coordinate": "C4-3",
+          "normalCoordinate": "C4-3",
+          "hardMs": 2113.89999999851,
+          "normalMs": 1818.800000000745
+        },
+        {
+          "round": 3,
+          "playerId": 4,
+          "cardId": "camp_5_1",
+          "coordinate": "B4",
+          "normalCoordinate": "B4",
+          "hardMs": 456,
+          "normalMs": 388.5
+        }
+      ]
+    },
+    {
+      "path": "_site/",
+      "views": [
+        {
+          "round": 2,
+          "playerId": 3,
+          "cardId": "camp_3_1",
+          "coordinate": "C1-2",
+          "normalCoordinate": "C1-2",
+          "hardMs": 95.80000000074506,
+          "normalMs": 20.899999998509884
+        },
+        {
+          "round": 2,
+          "playerId": 4,
+          "cardId": "camp_4_1",
+          "coordinate": "C5-1",
+          "normalCoordinate": "C5-1",
+          "hardMs": 200.10000000149012,
+          "normalMs": 126.30000000074506
+        },
+        {
+          "round": 3,
+          "playerId": 3,
+          "cardId": "camp_1_1",
+          "coordinate": "C10",
+          "normalCoordinate": "C10",
+          "hardMs": 248.60000000149012,
+          "normalMs": 221.30000000074506
+        },
+        {
+          "round": 3,
+          "playerId": 0,
+          "cardId": "camp_2_1",
+          "coordinate": "C4-3",
+          "normalCoordinate": "C4-3",
+          "hardMs": 2109,
+          "normalMs": 1851
+        },
+        {
+          "round": 3,
+          "playerId": 4,
+          "cardId": "camp_5_1",
+          "coordinate": "B4",
+          "normalCoordinate": "B4",
+          "hardMs": 440,
+          "normalMs": 384.3999999985099
+        }
+      ]
+    }
+  ],
+  "validationWithoutRulings": {
+    "comparisons": 324,
+    "additionalWinShare": 3.0,
+    "meanMarginChange": 0.14506172839506173
+  }
+}
