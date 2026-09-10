@@ -8,6 +8,8 @@ Browser implementation of Bunny Kingdom and the In the Sky expansion, with local
 
 Games autosave in the browser on the device where you play. Saves from localhost remain there; they do not automatically move to the online site or another device. Finished games can still be downloaded as JSON.
 
+The **Royal atlas** landing page combines a decorative map made from the game's existing pieces with setup, saved-game resume, and sound controls. Its layout adapts to desktop and mobile screens. The board and cards retain their established design when you start or resume play.
+
 Use **Rules & support** in the header at any time for BoardGameGeek listings, IELLO's game pages, and official English rulebooks for both games. Enjoying the game? Support the tabletop creators—designer Richard Garfield, illustrator Paul Mafayon, and publisher IELLO—by buying a physical copy. This browser version is an unofficial fan project.
 
 ### Publishing updates
