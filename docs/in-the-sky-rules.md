@@ -25,6 +25,8 @@ The [expansion catalog](../data/cards/in-the-sky.json) preserves all supplied pa
 
 Trading Posts are selected before confirming Chimneys. Changing a Trading Post invalidates a Chimney choice if that basic resource is no longer present. Chimneys with no available basic resource require no selection. Harvest breakdowns distinguish shared access from production.
 
+After harvest, hovering, focusing, or selecting a territory shows its fief's awarded harvest value, including a labeled Chimney resource and point bonus. This also applies during parchment scoring and completed-board review. Once the next round starts, inspection returns to current production without carrying over the previous harvest's Chimney access. Player production counts remain unchanged.
+
 Explorer counts four corners on each board: A1, A10, J1, J10 and C1-1, C1-5, C5-1, C5-7. C3-1 and C3-7 do not count. This user confirmation (2026-09-08) also applies to previews, copied Explorer effects, and older unfinished saves.
 
 District history follows the user’s 2026-09-08 clarification. Camps and newly placed Rainbow/Sky Tower links can form new Districts. Selected cards still resolve together before checking the completed pick; click order creates no temporary rewards. Older unfinished saves recover historical membership from recorded board actions, current groups, and Coin events without rewriting previously awarded Coins.
