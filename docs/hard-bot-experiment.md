@@ -4,6 +4,14 @@
 
 The candidate will compare using a Camp now against retaining it through plausible next-round territory acquisitions. It must account for Coins that could arrive without spending the Camp, future Camp destinations, contested territory, and remaining harvests. Future possibilities must be generated from the permitted view, never the actual hidden deck, seed, opponents' private observations, hands, or parchments. District history and Coin awards use the real rules in each hypothetical position.
 
+## Candidate scope
+
+`src/bots-hard.js` inherits Normal's draft, building, Rainbow, market, Chimney, and copy decisions. Only isolated Camp timing differs. It compares saving with Normal's best current placement using six deterministic, shared next-round territory forecasts. Public connectivity influences estimated competition for those territories. Each forecast uses the real territory-claim and District rules, including simultaneous picks, Camp captures, and permanent District history. A saved Camp is reconsidered on the resulting board together with reserved buildings.
+
+The final evaluation blends the forecast with Normal's existing estimate and requires a meaningful advantage before changing its decision. Multiple pending own Camps retain Normal's joint planning, and round four retains Normal because no later construction phase remains. Forecasts approximate territory allocation; they do not simulate complete drafts, new non-territory cards, or every future opponent building and Camp. This is bounded planning, not a proof of optimal play.
+
+The first development version also compared alternative locations for immediate placement. A base-game development setback came from changing F10 to J1 on a small forecast advantage. The next version limits changes to timing: it keeps Normal's preferred current location. The reviewed human B4 position still prefers taking its Coin immediately; the model does not assume that every Coin-only Camp should be delayed.
+
 ## Evaluation plan
 
 Use saved human games and a small, separate development set to inspect decisions. After freezing the candidate, compare fresh deals against the tagged Normal checkout, rotating the candidate through every seat. Start with 20 deals each for three-, four-, and five-player expansion games and 10 deals each for two-, three-, and four-player base games. Keep these results separate from development; do not tune on them and report them as untouched validation.

@@ -11,7 +11,7 @@ import {playCard,randomSource} from './game.js';
 import {districtSnapshot,awardNewDistricts} from './districts.js';
 import {chimneyPlan} from './bot-chimneys.js';
 
-const SAMPLE_COUNT=6,SHORTLIST=3,FORECAST_WEIGHT=.65,SWITCH_MARGIN=.5;
+const SAMPLE_COUNT=6,FORECAST_WEIGHT=.65,SWITCH_MARGIN=.5;
 
 function prepare(view,playerId) {
   const trial=forkPosition(view,playerId);
@@ -118,7 +118,10 @@ export function evaluateCampTiming(view,playerId,cardId,{forecasts}={}) {
   positions.sort((a,b)=>b.plan.value-a.plan.value);
   const normal=positions[0];
   if(positions.length===1)return {coordinate:null,reason:'no-legal-location',plans:[]};
-  const shortlisted=[...new Set([...positions.slice(0,SHORTLIST),positions.find(p=>p.coordinate===null)])];
+  // Specialize timing, not today's location ranking. Noisy future allocations
+  // should not replace Normal's good current location with a speculative one.
+  const alternative=normal.coordinate===null?positions.find(p=>p.coordinate!==null):positions.find(p=>p.coordinate===null);
+  const shortlisted=[normal,alternative];
   const worlds=forecasts||campForecasts(view,playerId);
   if(!worlds.length)throw Error('Camp timing requires at least one territory forecast.');
   for(const p of shortlisted) {
