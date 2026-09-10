@@ -20,7 +20,7 @@ export function constructionAction(state,playerId,label,action) {
   const before={stage:stage(original),cells:original.cells,players:original.players.map(playerFields),log:original.log};
   try {
     action();
-    requireRule(state.round===round&&open(state,playerId),'Confirming Construction cannot be undone.');
+    requireRule(state.round===round&&open(state,playerId),'This action must remain in Construction.');
   } catch(error) {
     for(const key of Object.keys(state))if(!(key in original))delete state[key];
     Object.assign(state,original);
@@ -34,7 +34,7 @@ export function constructionAction(state,playerId,label,action) {
 }
 
 function validateUndo(state,playerId,entry) {
-  requireRule(open(state,playerId),'Buildings are locked after Done building.');
+  requireRule(open(state,playerId),'Building undo is only available during Construction.');
   requireRule(entry?.version===1&&entry.playerId===playerId&&entry.round===state.round&&entry.seed===state.seed,'Only your current round’s construction actions can be undone.');
   requireRule(Array.isArray(entry.cells)&&Array.isArray(entry.players)&&Array.isArray(entry.addedLog)&&typeof entry.label==='string','The saved undo action is invalid.');
   requireRule(['construction','camps'].includes(entry.beforeStage?.phase)&&equal(stage(state),entry.afterStage),'Only the latest construction action can be undone.');
@@ -53,4 +53,55 @@ export function undoConstruction(state,playerId,entry) {
   for(const change of restored.players)Object.assign(state.players[change.id],change.before);
   restoreStage(state,restored.beforeStage);
   state.log.splice(restored.logStart);
+}
+
+const constructionComplete='Construction complete. Choose Trading Post resources.';
+const confirmationPosition=state=>({stage:stage(state),cells:structuredClone(state.cells),
+  players:state.players.map(p=>({...playerFields(p),score:p.score,harvests:structuredClone(p.harvests)})),log:[...state.log]});
+function withoutResourceChoices(position) {
+  const result=structuredClone(position);
+  for(const cell of Object.values(result.cells))if(cell.building?.category==='chimney'||cell.building?.farmType==='trading_post')delete cell.building.choice;
+  return result;
+}
+
+// Save public construction data before Done building, including choices that
+// bot resource selection may change. The UI keeps this outside bot views.
+export function constructionConfirmation(state,playerId,action) {
+  requireRule(state.phase==='construction'&&open(state,playerId),'Construction decisions are closed.');
+  const original=structuredClone(state),before=confirmationPosition(state);
+  try {
+    action();
+    requireRule(state.phase==='markets'&&!state.players[playerId].ready&&state.round===original.round&&state.seed===original.seed,'Construction must end at harvest resource selection.');
+    return {version:1,round:state.round,seed:state.seed,playerId,before,after:withoutResourceChoices(confirmationPosition(state))};
+  } catch(error) {
+    for(const key of Object.keys(state))if(!(key in original))delete state[key];
+    Object.assign(state,original);throw error;
+  }
+}
+
+function validateReopen(state,playerId,entry) {
+  requireRule(state.phase==='markets'&&state.players[playerId]&&!state.players[playerId].ready,'Construction is locked after confirming the harvest.');
+  requireRule(state.players.every(p=>p.harvests.every(h=>h.round!==state.round)),'This round has already been harvested.');
+  if(!entry) {
+    // Older resource-stage saves can resume building, but cannot recover their
+    // already-discarded placement journal or previous resource assignments.
+    requireRule(state.log.at(-1)===constructionComplete&&state.players.every(p=>p.id===playerId||p.ready),'The construction confirmation is unavailable.');
+    return;
+  }
+  requireRule(entry.version===1&&entry.playerId===playerId&&entry.round===state.round&&entry.seed===state.seed,'Only this round’s construction confirmation can be reopened.');
+  requireRule(entry.before?.stage?.phase==='construction'&&entry.before.players?.length===state.players.length&&entry.before.players[playerId]?.ready===false,'The saved construction confirmation is invalid.');
+  requireRule(entry.before.cells&&equal(Object.keys(entry.before.cells).sort(),Object.keys(state.cells).sort())&&Object.entries(entry.before.cells).every(([id,c])=>c?.coordinate===id),'The saved construction board is invalid.');
+  requireRule(Array.isArray(entry.before.log)&&entry.before.players.every(p=>Array.isArray(p.buildings)&&Array.isArray(p.harvests)&&Number.isFinite(p.score)&&typeof p.ready==='boolean'),'The saved construction players are invalid.');
+  requireRule(equal(withoutResourceChoices(confirmationPosition(state)),entry.after),'The game has changed since Done building.');
+}
+export function canReopenConstruction(state,playerId,entry) {
+  try {validateReopen(state,playerId,entry);return true;} catch {return false;}
+}
+export function reopenConstruction(state,playerId,entry) {
+  validateReopen(state,playerId,entry);
+  if(!entry) {state.phase='construction';state.log.pop();return;}
+  const restored=structuredClone(entry.before);
+  state.cells=restored.cells;
+  restored.players.forEach((p,id)=>Object.assign(state.players[id],p));
+  restoreStage(state,restored.stage);state.log=restored.log;
 }
