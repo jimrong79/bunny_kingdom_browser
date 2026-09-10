@@ -8,6 +8,7 @@ import * as easyBots from './bots-baseline.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
 import {constructionAction,canUndoConstruction,undoConstruction,constructionConfirmation,canReopenConstruction,reopenConstruction} from './construction-undo.js';
 import { fiefs } from './fiefs.js';
+import {inspectionFiefs,inspectionLabel,chimneyHarvestNote} from './fief-inspection.js';
 import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
 import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './harvest.js';
 import { finalizeScoring } from './scoring.js';
@@ -356,8 +357,9 @@ function inspectionPanel() {
   if(!inspected)return '<p class="muted">Select a territory to inspect its owner, production, building, and fief.</p>';
   const c=state.cells[inspected],owner=c.owner===null?'Unclaimed':state.players[c.owner].name;
   const lava=state.blockedConnections.filter(e=>e.from===inspected||e.to===inspected).map(e=>e.from===inspected?e.to:e.from);
-  const group=c.owner===null?null:fiefs(state,c.owner).find(f=>f.coordinates.includes(inspected));
-  return `<div class="inspector"><h3>${c.coordinate} · ${escape(owner)}</h3><p>${c.terrain} · natural resource: ${resourceNames[c.baseResource]||'none'}</p><p>${escape(buildingText(c.building))}</p>${lava.length?`<p class="lava-note">Lava blocks the direct connection to ${lava.join(', ')}.</p>`:''}${group?`<p>Fief: ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resources = ${group.points} points</p><p>Resources: ${group.resources.map(r=>resourceNames[r]).join(', ')||'none'}</p>`:''}</div>`;
+  const group=c.owner===null?null:inspectionFiefs(state,c.owner).find(f=>f.coordinates.includes(inspected));
+  const chimney=group?chimneyHarvestNote(group):'';
+  return `<div class="inspector"><h3>${c.coordinate} · ${escape(owner)}</h3><p>${c.terrain} · natural resource: ${resourceNames[c.baseResource]||'none'}</p><p>${escape(buildingText(c.building))}</p>${lava.length?`<p class="lava-note">Lava blocks the direct connection to ${lava.join(', ')}.</p>`:''}${group?`<p>${inspectionLabel(state)}: ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resources = ${group.points} points</p><p>Resources: ${group.resources.map(r=>resourceNames[r]).join(', ')||'none'}</p>${chimney?`<p>${escape(chimney)}. This grants access, not additional resource production.</p>`:''}`:''}</div>`;
 }
 function privateCardsPanel() {
   if(['parchments','finished'].includes(state.phase))return '';

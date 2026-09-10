@@ -1,6 +1,7 @@
 import {hasExpansion} from './config.js';
 import {playerStats} from './scoring.js';
 import { fiefs, resourcesAt } from './fiefs.js';
+import {inspectionFiefs,inspectionLabel,chimneyHarvestNote} from './fief-inspection.js';
 import { rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { cardText, resourceNames } from './card-text.js';
 import { sortedHand } from './hand-order.js';
@@ -38,7 +39,7 @@ export function openInventory(state,playerId,pile) {
 export function bindKingdomInspection(state,inspected) {
   const board=document.querySelector('.board-scroll'),readout=document.querySelector('#fief-readout');
   const byCoordinate=new Map();
-  for(const player of state.players)for(const group of fiefs(state,player.id))for(const id of group.coordinates)byCoordinate.set(id,{player,group});
+  for(const player of state.players)for(const group of inspectionFiefs(state,player.id))for(const id of group.coordinates)byCoordinate.set(id,{player,group});
   const highlight=id=>{
     board.querySelectorAll('.fief-highlight').forEach(el=>el.classList.remove('fief-highlight'));
     const entry=byCoordinate.get(id);
@@ -48,7 +49,8 @@ export function bindKingdomInspection(state,inspected) {
     const {player,group}=entry;
     for(const coordinate of group.coordinates)board.querySelector(`[data-cell="${coordinate}"]`)?.classList.add('fief-highlight');
     if(overlay){const rect=overlay.getBoundingClientRect(),pairs=new Map();for(const coordinate of group.coordinates){const cell=state.cells[coordinate];if(!['sky_tower','rainbow'].includes(cell.building?.category))continue;const key=cell.building.pairId;if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(coordinate);}for(const endpoints of pairs.values())if(endpoints.length===2){const points=endpoints.map(id=>{const r=board.querySelector(`[data-cell="${id}"]`).getBoundingClientRect();return [r.x+r.width/2-rect.x,r.y+r.height/2-rect.y];});const line=document.createElementNS('http://www.w3.org/2000/svg','line');for(const [key,value] of Object.entries({x1:points[0][0],y1:points[0][1],x2:points[1][0],y2:points[1][1],stroke:player.color,'stroke-width':4,'stroke-dasharray':'7 5'}))line.setAttribute(key,value);overlay.append(line);}}
-    readout.innerHTML=`<b style="color:${player.color}">${esc(player.name)}</b> · ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resource types = <b>${group.points} points</b>`;
+    const chimney=chimneyHarvestNote(group);
+    readout.innerHTML=`<b style="color:${player.color}">${esc(player.name)}</b> · ${inspectionLabel(state)} · ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resource types = <b>${group.points} points</b>${chimney?` · ${esc(chimney)}`:''}`;
   };
   for(const cell of board.querySelectorAll('[data-cell]')) {
     cell.onmouseenter=()=>highlight(cell.dataset.cell);cell.onfocus=()=>highlight(cell.dataset.cell);

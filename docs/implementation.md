@@ -104,6 +104,7 @@ python3 tests/browser_smoke.py
 python3 tests/browser_controls.py
 python3 tests/browser_table.py
 python3 tests/browser_interactions.py
+python3 tests/browser_chimney_inspection.py
 python3 tests/browser_animations.py
 python3 tests/browser_audio.py
 python3 tests/browser_results.py
