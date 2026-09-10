@@ -16,7 +16,6 @@ DATA_FILES = (
 
 def build():
     files = [ROOT / 'index.html', ROOT / 'review/parchments/index.html']
-    files += [ROOT / 'assets/landing/storybook-kingdom.webp']
     files += sorted((ROOT / 'src').glob('*.js'))
     files += sorted((ROOT / 'src').glob('*.css'))
     files += [ROOT / path for path in DATA_FILES]
