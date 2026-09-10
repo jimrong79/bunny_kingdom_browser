@@ -54,6 +54,8 @@ Run engine tests with `npm test` (Node.js 22+). See [play flow, bot strategy, ru
 
 Choose **Bunny Kingdom + In the Sky** when starting a game. Play against 1–4 bots using both boards and all 232 cards. The expansion includes Carrotadels, Rainbows, Chimneys, District Coins, Trade, and all ten new parchments. Player panels show Coins and current Trade; the final results separate Trade from harvests and parchments.
 
+On desktop, compact player panels leave more room for both boards and the hand. New World and Cloud territories share a scale that adjusts when you move between monitors. Very short windows scroll vertically to preserve board readability; **Enlarge board** provides a closer, scrollable view.
+
 Explorer scores four corners per board. Districts remember every territory that has belonged to one, including after Rainbow movement or Camp capture. Copy chains use the copying player’s seat, Treasure Hunters stack additively, and all Opportunists share one final checkpoint. Only Opportunist qualification when tied for second remains under review. See [implemented rules, known questions, bot behavior, and validation](docs/in-the-sky-rules.md) and the [cloud map review](review/cloud/index.html).
 
 ## Local workspace

@@ -6,6 +6,7 @@ import { rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { cardText, resourceNames } from './card-text.js';
 import { sortedHand } from './hand-order.js';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let boardInspectionObserver;
 
 export function productionCounts(state,playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId);
@@ -23,7 +24,7 @@ export function playerPanels(state) {
   return `<div class="players">${state.players.map(p=>{
     const {counts,territories,cities,cityStrength,pending}=productionCounts(state,p.id);
     const resources=Object.keys(resourceNames).filter(r=>['carrots','fish','wood'].includes(r)||counts[r]);
-    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="city-summary" title="Controlled cities only, including starting cities. Strength is the total effective strength of your fiefs, including Carrotadel floors.">${pieceArt({category:'city',strength:1})}<span><b data-city-count>${cities}</b> cities · <b data-city-strength>${cityStrength}</b> strength</span></div><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${hasExpansion(state)?`<div class="trade-summary"><span title="Coins retained from District creation and Tax Collectors"><b data-coins>${p.coins}</b> Coins</span><span>${playerStats(state,p.id).uniqueResources.length} Unique</span><span title="Current endgame Trade value">Trade <b>${playerStats(state,p.id).metrics.trade_score}</b></span></div>`:''}${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
+    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="city-summary" title="Controlled cities only, including starting cities. Strength is the total effective strength of your fiefs, including Carrotadel floors.">${pieceArt({category:'city',strength:1})}<span><b data-city-count>${cities}</b> cities · <b data-city-strength>${cityStrength}</b> strength</span></div><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${hasExpansion(state)?`<div class="trade-summary"><span title="Coins retained from District creation and Tax Collectors"><b data-coins>${p.coins}</b> Coins</span><span>${playerStats(state,p.id).uniqueResources.length} Unique</span><span title="Current endgame Trade value">Trade <b>${playerStats(state,p.id).metrics.trade_score}</b></span></div>`:''}${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" aria-label="View ${esc(p.name)}'s unplaced buildings" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" aria-label="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
   }).join('')}</div>`;
 }
 
@@ -37,10 +38,13 @@ export function openInventory(state,playerId,pile) {
 }
 
 export function bindKingdomInspection(state,inspected) {
+  boardInspectionObserver?.disconnect();
   const board=document.querySelector('.board-scroll'),readout=document.querySelector('#fief-readout');
+  let highlighted=inspected;
   const byCoordinate=new Map();
   for(const player of state.players)for(const group of inspectionFiefs(state,player.id))for(const id of group.coordinates)byCoordinate.set(id,{player,group});
   const highlight=id=>{
+    highlighted=id;
     board.querySelectorAll('.fief-highlight').forEach(el=>el.classList.remove('fief-highlight'));
     const entry=byCoordinate.get(id);
     for(const pane of board.querySelectorAll('.board'))pane.classList.toggle('has-fief-focus',Boolean(entry));
@@ -57,5 +61,11 @@ export function bindKingdomInspection(state,inspected) {
     cell.onmouseleave=()=>highlight(inspected);cell.onblur=()=>highlight(inspected);
   }
   highlight(inspected);
+  // Redraw connections when a monitor change or layout reflow moves the cells.
+  boardInspectionObserver=new ResizeObserver(()=>{
+    if(board.isConnected)highlight(highlighted);
+    else boardInspectionObserver.disconnect();
+  });
+  boardInspectionObserver.observe(board);
   document.querySelectorAll('[data-pile]').forEach(b=>b.onclick=()=>openInventory(state,Number(b.dataset.pilePlayer),b.dataset.pile));
 }
