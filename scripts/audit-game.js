@@ -11,6 +11,7 @@ import {tradingPosts,chooseResource,finishMarkets,advanceRound} from '../src/har
 import {finalizeScoring} from '../src/scoring.js';
 import {validSave} from '../src/storage.js';
 import * as normal from '../src/bots.js';
+import * as hard from '../src/bots-hard.js';
 import * as easy from '../src/bots-baseline.js';
 
 // Independent flood fill and arithmetic; deliberately does not use fiefs.js or scoring.js.
@@ -112,7 +113,7 @@ export function auditGame(saved) {
   // Keep the names recorded when this match was played, including older Bot 1 saves.
   state.players.forEach((player,i)=>{player.name=target.players[i].name;});
   if(Object.hasOwn(target,'botDifficulty'))state.botDifficulty=target.botDifficulty;
-  const policy=state.botDifficulty==='easy'?easy:normal;
+  const policy=state.botDifficulty==='hard'?hard:state.botDifficulty==='easy'?easy:normal;
   const report={seed:state.seed,players:state.players.length,difficulty:state.botDifficulty||'normal',draftPicks:0,
     botDecisions:0,hiddenInformationChecks:0,decisionsByType:{},camps:[],placements:[],rounds:[],reconstructedMarkets:[]};
   const logMatches=trial=>trial.log.every((line,i)=>line===target.log[i]);

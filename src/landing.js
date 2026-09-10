@@ -36,7 +36,7 @@ export function renderLanding() {
     option.textContent = `${bots} bot${bots === 1 ? '' : 's'} · ${bots + 1} players`;
   }
   for (const option of form.querySelectorAll('[name=difficulty] option')) {
-    option.textContent = option.value === 'normal' ? 'Normal' : 'Easy';
+    option.textContent = {normal:'Normal',hard:'Hard (test)',easy:'Easy'}[option.value] || option.textContent;
   }
   const intro = document.createElement('div');
   intro.className = 'landing-intro';
