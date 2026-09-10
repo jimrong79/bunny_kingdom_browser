@@ -23,6 +23,7 @@ import { capturePresentation, animationEvents, playAnimation } from './turn-anim
 import { PLAYER_NAME_LIMIT } from './player-names.js';
 import { saveGame, loadGame, exportGame } from './storage.js';
 import { soundEffects, soundToggleHTML, bindSoundToggles } from './sound.js';
+import { landingPreview } from './landing-preview.js';
 const app = document.querySelector('#app');
 app.addEventListener('pointerdown',()=>soundEffects.unlock());
 app.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key))soundEffects.unlock();});
@@ -51,6 +52,7 @@ function setup() {
   document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=f.get('difficulty')==='easy'?'easy':'normal'; constructionUndo=[]; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
   document.querySelector('[name=expansion]').onchange=e=>{const sky=e.target.value==='in_the_sky',bots=document.querySelector('[name=bots]');bots.querySelector('[value="4"]').disabled=!sky;if(!sky&&bots.value==='4')bots.value='3';document.querySelector('#setup-scope').textContent=sky?'Two boards · 131 territories · Full 232-card deck':'Original 100-territory board · Full 182-card deck';};
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
+  landingPreview();
 }
 function resume(saved) {
   reviewingFinalBoard=false;
