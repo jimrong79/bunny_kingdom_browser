@@ -113,6 +113,7 @@ export function auditGame(saved) {
   // Keep the names recorded when this match was played, including older Bot 1 saves.
   state.players.forEach((player,i)=>{player.name=target.players[i].name;});
   if(Object.hasOwn(target,'botDifficulty'))state.botDifficulty=target.botDifficulty;
+  if(Object.hasOwn(target,'botStrategyVersion'))state.botStrategyVersion=target.botStrategyVersion;
   const policy=state.botDifficulty==='hard'?hard:state.botDifficulty==='easy'?easy:normal;
   const report={seed:state.seed,players:state.players.length,difficulty:state.botDifficulty||'normal',draftPicks:0,
     botDecisions:0,hiddenInformationChecks:0,decisionsByType:{},camps:[],placements:[],rounds:[],reconstructedMarkets:[]};
