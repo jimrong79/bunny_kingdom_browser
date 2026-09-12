@@ -12,6 +12,7 @@ import {movableRainbows,rainbowDestinations,moveRainbow} from './construction.js
 import {chimneyPlan} from './bot-chimneys.js';
 export {chooseChimneys} from './bot-chimneys.js';
 export {positionValue} from './bot-evaluation.js';
+export const strategyVersion='normal-luxury-timing-v1';
 
 export function draftPosition(view,playerId,cards) {
   const trial=forkPosition(view,playerId);

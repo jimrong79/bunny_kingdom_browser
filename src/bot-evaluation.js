@@ -107,7 +107,15 @@ export function idleBuildingValue(view,playerId,card,stats=playerStats(view,play
   if(card.category==='chimney')potential=groups.filter(f=>f.coordinates.some(id=>boardOf(view.cells[id])==='new_world')).reduce((n,f)=>n+f.strength*.4,0);
   if(card.category==='camp')potential=2;
   const waiting=view.players[playerId].buildings.filter(c=>c.category===card.category).length;
-  return potential*Math.max(.3,remaining-.7)*chance*.45/Math.sqrt(Math.max(1,waiting));
+  // Trade is paid at game end. A luxury kept for a later legal placement can
+  // still earn it: credit that option as well as the farm's harvest potential.
+  // Otherwise an isolated farm appears to gain Trade immediately by committing
+  // now, even when waiting preserves the same payout and a choice of locations.
+  // Mirror positionValue's unique-resource forecast; never grant Coins, actual
+  // production, or another Trade bonus for a resource already on the board.
+  const newLuxury=hasExpansion(view)&&card.farmType==='luxury'&&!stats.uniqueResources.includes(card.effect.resource);
+  const deferredTrade=newLuxury?(stats.metrics.coins+Math.max(0,remaining-1)*.6)*chance:0;
+  return potential*Math.max(.3,remaining-.7)*chance*.45/Math.sqrt(Math.max(1,waiting))+deferredTrade;
 }
 
 export function inventoryValue(view,playerId,stats=playerStats(view,playerId),knowledge=knownTerritories(view,playerId)) {

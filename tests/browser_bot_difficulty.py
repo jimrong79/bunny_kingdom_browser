@@ -31,8 +31,10 @@ with sync_playwright() as p:
         page.locator('#confirm-draft').click()
         after = snapshot(page)
         assert after['botDifficulty'] == difficulty
-        if difficulty == 'hard':
-            assert after['botStrategyVersion'] == 'hard-camps-v1'
+        if difficulty != 'easy':
+            expected_version = 'hard-camps-luxury-v2' if difficulty == 'hard' else 'normal-luxury-timing-v1'
+            assert before['botStrategyVersion'] == expected_version
+            assert after['botStrategyVersion'] == expected_version
         for player in after['players'][1:]:
             old_hand = {c['instanceId'] for c in before['players'][player['id']]['hand']}
             played = {c['instanceId'] for c in player['played'] + player['parchments']} & old_hand
@@ -44,10 +46,11 @@ with sync_playwright() as p:
         label = 'Hard (test)' if difficulty == 'hard' else difficulty.title()
         assert label + ' bots' in page.locator('.save-status').inner_text()
     assert selections['easy'] != selections['normal']
-    assert selections['hard'] == selections['normal']  # Hard currently specializes Camps.
+    assert selections['hard'] == selections['normal']  # Both share luxury timing; Hard specializes Camps.
     page.evaluate("""()=>{
         const saved=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1'));
         delete saved.game.botDifficulty;
+        saved.game.botStrategyVersion='hard-camps-v1';
         for(const p of saved.game.players)delete p.draftMemory;
         localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(saved));
     }""")
@@ -57,6 +60,7 @@ with sync_playwright() as p:
     page.locator('[data-card]').nth(0).click()
     page.locator('[data-card]').nth(1).click()
     page.locator('#confirm-draft').click()
+    assert snapshot(page)['botStrategyVersion'] == 'normal-luxury-timing-v1'
     assert all(len(p['draftMemory']) == 1 for p in snapshot(page)['players'])
     page.set_viewport_size({'width': 390, 'height': 844})
     page.goto(BASE_URL)

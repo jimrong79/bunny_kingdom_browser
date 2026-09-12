@@ -1,10 +1,10 @@
 # Experimental Hard: Camp timing
 
-`bots-normal-before-hard` freezes commit `52e2c97` and its complete policy helpers. Normal and Easy stay unchanged while the candidate is developed on `feat/hard-camp-planning`.
+`bots-normal-before-hard` freezes commit `52e2c97` and its complete policy helpers. The original Camp experiment kept Normal and Easy unchanged. The September 12 revision also corrects luxury reserve valuation shared by Normal and Hard; Easy remains unchanged. See the [luxury placement review](luxury-placement-review.md) for this separate correction and its validation. The Camp results below describe the original frozen policy, not the revised combination.
 
 The candidate compares using a Camp now against retaining it through plausible next-round territory acquisitions. It accounts for Coins that could arrive without spending the Camp, future Camp destinations, contested territory, and remaining harvests. Possibilities are generated from the permitted view, never the actual hidden deck, seed, opponents' private observations, hands, or parchments. District history and Coin awards use the real rules in each hypothetical position.
 
-**Hard (test)** is available in setup for playtesting. Normal remains the recommended default: measured gains are small and mixed. Saves record `botDifficulty: "hard"` and `botStrategyVersion: "hard-camps-v1"`. The frozen policy checkpoint is `bots-hard-camps-candidate-v1` (`f06f094`); the menu and save integration were added afterward without changing its decisions.
+**Hard (test)** is available in setup for playtesting. Normal remains the recommended default: measured Camp gains are small and mixed. Original saves recorded `botDifficulty: "hard"` and `botStrategyVersion: "hard-camps-v1"`. The frozen policy checkpoint is `bots-hard-camps-candidate-v1` (`f06f094`); the menu and save integration were added afterward without changing its decisions. Current Hard decisions use `hard-camps-luxury-v2`, including when an older game resumes.
 
 ## Candidate scope
 

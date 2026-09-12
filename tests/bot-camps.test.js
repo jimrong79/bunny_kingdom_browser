@@ -36,7 +36,7 @@ function bridgePosition() {
   return s;
 }
 
-test('Duke combines Camps with his reserved City 3 and Gold Farm',()=>{
+test('Duke combines Camps with City 3 and keeps his cityless Gold Farm available',()=>{
   const s=dukePosition(),before=structuredClone(s),view=publicView(s,3);
   const first=chooseCamp(view,3,'camp_4_1');
   assert.deepEqual(s,before);assert.deepEqual(view,publicView(s,3));
@@ -44,8 +44,15 @@ test('Duke combines Camps with his reserved City 3 and Gold Farm',()=>{
   const second=chooseCamp(publicView(s,3),3,'camp_5_1');respondCamp(s,3,second);
   assert.deepEqual(new Set([first,second]),new Set(['C5','C4-3']));
   finishBuildings(s,3);
-  assert.equal(s.cells.C6.building.strength,3);assert.equal(s.cells.F3.building.resource,'gold');
+  assert.equal(s.cells.C6.building.strength,3);
+  // The same reserve-Trade correction as the reviewed Diamond: F3 is isolated
+  // and Gold adds no current harvest. Camps and the productive city still place.
+  assert.equal(s.cells.F3.building,null);
+  assert.deepEqual(s.players[3].buildings.map(c=>c.id),['farm_gold']);
   assert.equal(harvest(s,3),4);assert.equal(s.players[3].coins,2);
+  assert.equal(playerStats(s,3).metrics.trade_score,0);
+  s.round=4;finishBuildings(s,3);
+  assert.equal(s.cells.F3.building.resource,'gold');
   assert.equal(playerStats(s,3).metrics.trade_score,2);
 });
 

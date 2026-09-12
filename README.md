@@ -40,7 +40,9 @@ Player panels show total production (including farms and assigned Trading Posts)
 
 Choose **Normal** for the stronger bots or **Easy** for the original strategy. Normal compares draft pairs, plans building placements, values remaining harvests and parchment combinations, and considers the next player's opportunities. Bots remember only hands they personally saw. Difficulty is saved; older games resume with Normal bots. See the [strategy checkpoints and benchmark](docs/bot-benchmark.md).
 
-**Hard (test)** is an experimental alternative that compares placing a Camp now with saving it for plausible future territory outcomes. Its other decisions reuse Normal. Initial comparisons show small, mixed gains, so Normal remains the recommended default. Hard saves include the strategy version `hard-camps-v1`; see the [experiment, checkpoints, and results](docs/hard-bot-experiment.md).
+Normal and Hard account for a reserved luxury's eventual Trade value when comparing placement with waiting. This avoids committing an isolated farm early just to secure end-game points that a later placement can still earn. Productive harvests, legal terrain, and the final construction deadline still matter. See the [luxury placement review](docs/luxury-placement-review.md).
+
+**Hard (test)** is an experimental alternative that compares placing a Camp now with saving it for plausible future territory outcomes. Its other decisions reuse Normal. Initial Camp comparisons show small, mixed gains, so Normal remains the recommended default. Current saves record `normal-luxury-timing-v1` or `hard-camps-luxury-v2`; resumed games record the current version when the next bot decision occurs. See the [experiment, checkpoints, and results](docs/hard-bot-experiment.md).
 
 Confirmed picks animate every player's claims and card pickups; construction moves buildings from the tray onto the board. Select **Skip**, press **Esc**, or turn **Animations off** in the heading for faster play. Device reduced-motion settings are respected. Moves save before playback, so skipping or refreshing cannot repeat or lose an effect.
 
