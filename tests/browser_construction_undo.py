@@ -30,6 +30,13 @@ def position(page, url, scenario):
         for(const id of scenario==='base'?['A1','A2','B1']:['A1','J10','C5-2','B2'])claim(id);
         placeBuilding(state,0,give('city_3'),[scenario==='base'?'B1':'B2']);state.round=2;
         if(scenario==='base'){give('city_1');give('farm_fish');}
+        if(scenario==='resources'){
+          claim('C1-2');claim('C1-3');claim('A8',1);claim('B8',1);
+          placeBuilding(state,0,give('trading_post'),['C1-2']);
+          placeBuilding(state,0,give('chimney'),['C1-3']);
+          placeBuilding(state,1,give('trading_post',1),['A8']);
+          placeBuilding(state,1,give('city_1',1),['B8']);
+        }
         for(const p of state.players)if(p.bot)p.ready=true;
       }
       const ui={animationsEnabled:false,selected:[],targets:[],buildingId:scenario==='camp'?state.campQueue[0].cardId:null};
@@ -67,15 +74,23 @@ def run(browser, url):
     page.screenshot(path='/tmp/bunny-undo-mobile.png')
     page.locator('#finish-building').click()
     assert saved(page)['ui']['constructionUndo']==[]
+    assert len(saved(page)['ui']['constructionReturn']['undo'])==1
     assert page.locator('#undo-building').count()==0
     page.reload();page.locator('#resume-game').click()
     assert page.locator('#undo-building').count()==0
+    page.locator('#back-to-building').click()
+    assert page.locator('#undo-building').is_enabled()
+    page.locator('#undo-building').click();assert saved(page)['game']==original
+    place(page,'city_1','A1')
+    page.locator('#finish-building').click()
     page.locator('#confirm-markets').click();page.locator('#next-round').click()
     assert saved(page)['game']['round']==3
     assert saved(page)['game']['cells']['A1']['building']['cardId']=='city_1'
     assert saved(page)['game']['cells']['B1']['building']['cardId']=='city_3'
     assert saved(page)['ui']['constructionUndo']==[]
-    print('Base: place elsewhere, repeated undo, reload, mobile, confirmation lock and previous-round buildings passed',flush=True)
+    assert saved(page)['ui']['constructionReturn'] is None
+    assert page.locator('#back-to-building').count()==0
+    print('Base: repeated undo, reload, mobile return to building, harvest lock and previous-round buildings passed',flush=True)
 
     page.set_viewport_size({'width':1440,'height':900})
     position(page,url,'rainbow');original=saved(page)['game']
@@ -96,6 +111,8 @@ def run(browser, url):
     assert after['players'][0]['coins']==original['players'][0]['coins']+1
     assert after['cells']['B1']['building']['cardId']=='city_3'
     assert 'bot responses' in page.locator('.construction-undo').inner_text()
+    page.locator('#finish-building').click();page.locator('#back-to-building').click()
+    assert saved(page)['game']==after
     page.reload();page.locator('#resume-game').click()
     page.locator('#undo-building').click();assert saved(page)['game']==original
     assert saved(page)['game']['campQueue'][0]['priority']==3
@@ -106,6 +123,33 @@ def run(browser, url):
     assert saved(page)['game']==original
     assert not errors,errors
     print('Camps: bot construction rollback, priority, reload, deterministic redo, saved offers and no repeated Coins passed',flush=True)
+
+    position(page,url,'resources');original=saved(page)['game']
+    place(page,'territory_C5-2','A1');before_done=saved(page)['game']
+    for _ in range(2):
+        page.locator('#finish-building').click()
+        assert saved(page)['game']['cells']['A8']['building']['choice'] is not None
+        page.locator('[data-market="C1-2"]').select_option('fish')
+        page.locator('[data-chimney="C1-3"]').select_option('fish')
+        page.reload();page.locator('#resume-game').click()
+        assert page.locator('#confirm-markets').is_enabled()
+        page.locator('#back-to-building').click()
+        assert saved(page)['game']==before_done
+    page.locator('#undo-building').click();assert saved(page)['game']==original
+    assert saved(page)['game']['cells']['C1-2']['building']['choice'] is None
+    assert saved(page)['game']['cells']['C1-3']['building']['choice'] is None
+    print('Resources: human and bot choices restored, repeat returns, resume, Rainbow undo and Coins passed',flush=True)
+
+    position(page,url,'base');place(page,'city_1','A1')
+    page.locator('#finish-building').click()
+    page.evaluate("""()=>{const s=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1'));delete s.ui.constructionReturn;localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(s));}""")
+    page.reload();page.locator('#resume-game').click();page.locator('#back-to-building').click()
+    assert page.locator('#undo-building').is_disabled()
+    place(page,'farm_fish','A2');page.locator('#undo-building').click()
+    assert saved(page)['game']['cells']['A1']['building']['cardId']=='city_1'
+    assert saved(page)['game']['cells']['A2']['building'] is None
+    print('Older resource-stage save: return, retained placements and undo for new actions passed',flush=True)
+
     page.emulate_media(reduced_motion='no-preference')
     position(page,url,'base');original=saved(page)['game']
     page.locator('#toggle-animation').click()

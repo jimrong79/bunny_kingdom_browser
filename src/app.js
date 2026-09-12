@@ -7,8 +7,9 @@ import * as normalBots from './bots.js';
 import * as hardBots from './bots-hard.js';
 import * as easyBots from './bots-baseline.js';
 import { eligibleTerritories, placeBuilding, finishConstruction } from './construction.js';
-import {constructionAction,canUndoConstruction,undoConstruction} from './construction-undo.js';
+import {constructionAction,canUndoConstruction,undoConstruction,constructionConfirmation,canReopenConstruction,reopenConstruction} from './construction-undo.js';
 import { fiefs } from './fiefs.js';
+import {inspectionFiefs,inspectionLabel,chimneyHarvestNote} from './fief-inspection.js';
 import { beginCampOffers, requestCamp, respondCamp } from './camps.js';
 import { tradingPosts, chooseResource, finishMarkets, advanceRound } from './harvest.js';
 import { finalizeScoring } from './scoring.js';
@@ -30,7 +31,7 @@ app.addEventListener('pointerdown',()=>soundEffects.unlock());
 app.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key))soundEffects.unlock();});
 let data, state, selected = [], buildingId = null, targets = [], error = "", inspected = null;
 let animationsEnabled=true,playing=false;
-let constructionUndo=[];
+let constructionUndo=[],constructionReturn=null;
 let reviewingFinalBoard=false;
 const botPolicy=()=>state.botDifficulty==='hard'?hardBots:state.botDifficulty==='easy'?easyBots:normalBots;
 const forcedFinalPick=()=>state.phase==='draft'&&state.players.length>2&&state.players[0].hand.length===cardsPerPick(state);
@@ -50,7 +51,7 @@ function setup() {
   app.innerHTML = `<section class="setup panel"><p class="eyebrow">A KINGDOM BEGINS WITH A BUNNY</p><h1>Make this world<br>your own.</h1><p class="lede">Claim land, build cities, and gather a royal fortune over four seasons.</p>${saved?`<div class="resume"><button class="primary" id="resume-game">${saved.game.phase==='finished'?'View last result':'Resume round '+saved.game.round} →</button><p class="muted">${saved.game.players.length} players · saved ${escape(new Date(saved.savedAt).toLocaleString())}</p></div>`:''}<form id="setup"><label>Your name <span class="muted">optional · leave blank to play as You</span><input name="playerName" autocomplete="nickname" maxlength="${PLAYER_NAME_LIMIT}" placeholder="Your royal name" value="${escape(saved?.game.players[0].name==='You'?'':saved?.game.players[0].name||'')}"></label><label>Game<select name="expansion"><option value="base">Original Bunny Kingdom</option><option value="in_the_sky">Bunny Kingdom + In the Sky</option></select></label><label>Bot opponents<select name="bots"><option value="1">1 bot · 2-player game</option><option value="2" selected>2 bots · 3-player game</option><option value="3">3 bots · 4-player game</option><option value="4" disabled>4 bots · 5-player game</option></select></label><label>Bot difficulty<select name="difficulty"><option value="normal" selected>Normal · strategic</option><option value="hard">Hard · experimental</option><option value="easy">Easy · relaxed</option></select></label><label>Game seed <span class="muted">optional</span><input name="seed" placeholder="A new world every game" maxlength="100"></label><button class="primary">Start game <span>→</span></button></form><p class="muted" id="setup-scope">Original 100-territory board · Full 182-card deck</p></section>`;
   document.querySelector('.setup .lede').insertAdjacentHTML('afterend','<p class="support-note">Enjoying Bunny Kingdom? Support its creators by buying a physical copy. <a href="https://boardgamegeek.com/boardgame/184921/bunny-kingdom" target="_blank" rel="noopener noreferrer">Discover the tabletop game on BoardGameGeek ↗</a></p>');
   document.querySelector('#setup').insertAdjacentHTML('beforebegin',soundToggleHTML());bindSoundToggles();
-  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=['easy','hard'].includes(f.get('difficulty'))?f.get('difficulty'):'normal'; if(state.botDifficulty==='hard')state.botStrategyVersion='hard-camps-v1'; constructionUndo=[]; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
+  document.querySelector('#setup').onsubmit = event => { event.preventDefault(); const f = new FormData(event.target); state = createGame(data, Number(f.get('bots')), f.get('seed') || Date.now(), f.get('playerName'),{expansion:f.get('expansion')}); state.botDifficulty=['easy','hard'].includes(f.get('difficulty'))?f.get('difficulty'):'normal'; if(state.botDifficulty==='hard')state.botStrategyVersion='hard-camps-v1'; constructionUndo=[]; constructionReturn=null; selected = []; buildingId=null; targets=[]; inspected=null; error=''; render(); soundEffects.play('round'); };
   document.querySelector('[name=expansion]').onchange=e=>{const sky=e.target.value==='in_the_sky',bots=document.querySelector('[name=bots]');bots.querySelector('[value="4"]').disabled=!sky;if(!sky&&bots.value==='4')bots.value='3';document.querySelector('#setup-scope').textContent=sky?'Two boards · 131 territories · Full 232-card deck':'Original 100-territory board · Full 182-card deck';};
   const button=document.querySelector('#resume-game');if(button)button.onclick=()=>resume(saved);
   renderLanding();
@@ -59,6 +60,7 @@ function resume(saved) {
   reviewingFinalBoard=false;
   state=saved.game;const ui=saved.ui||{};
   constructionUndo=Array.isArray(ui.constructionUndo)?ui.constructionUndo:[];
+  constructionReturn=ui.constructionReturn||null;
   for(const player of state.players)player.color=COLORS[player.id];
   animationsEnabled=ui.animationsEnabled??true;
   boardZoom=ui.boardZoom??matchMedia('(max-width:600px)').matches;
@@ -157,12 +159,13 @@ function focusedControl() {
   return null;
 }
 function render() {
+  if(constructionReturn&&(!constructionReturn.checkpoint||!Array.isArray(constructionReturn.undo)||!canReopenConstruction(state,0,constructionReturn.checkpoint)))constructionReturn=null;
   if(!canUndoConstruction(state,0,constructionUndo.at(-1)))constructionUndo=[];
   if(forcedFinalPick())selected=state.players[0].hand.map(c=>c.instanceId);
   const focus=focusedControl();
   const boardScroll=document.querySelector('.board-scroll')?.scrollLeft||0;
   const openPanels=[...document.querySelectorAll('details[open]')].map(el=>el.querySelector('summary')?.textContent);
-  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled,constructionUndo});
+  const saved=saveGame(state,{selected,buildingId,targets,inspected,boardZoom,animationsEnabled,constructionUndo,constructionReturn});
   if(state.phase==='finished'&&!reviewingFinalBoard){renderResults(saved);return;}
   const handScroll=document.querySelector('.hand')?.scrollLeft||0;
   const sideScroll=document.querySelector('.table-sidebar')?.scrollTop||0;
@@ -258,7 +261,7 @@ function constructionPanel() {
   if(state.phase==='markets') {
     const posts=tradingPosts(state,0),vents=chimneys(state,0);
     const pending=posts.some(c=>!c.building.choice)||vents.some(c=>{const options=chimneyOptions(state,0,c.coordinate);return options.length&&!options.includes(c.building.choice);});
-    return `<h2>Choose harvest resources</h2><p class="help">Trading Posts produce a basic resource. Chimneys share one resource already present in their fief with your New World fiefs for this harvest.</p>${posts.map(c=>`<label>Trading Post · ${c.coordinate}<select data-market="${c.coordinate}"><option value="" disabled ${!c.building.choice?'selected':''}>Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`).join('')}${vents.map(c=>{const options=chimneyOptions(state,0,c.coordinate);return `<label>Chimney · ${c.coordinate}<select data-chimney="${c.coordinate}" ${options.length?'':'disabled'}><option value="" disabled ${!options.includes(c.building.choice)?'selected':''}>${options.length?'Choose a resource':'No basic resource in this fief'}</option>${options.map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`;}).join('')}${!posts.length&&!vents.length?'<p>No resources to assign.</p>':''}<div class="actions"><button id="confirm-markets" class="primary" ${pending?'disabled':''}>Confirm & harvest</button></div>`;
+    return `<h2>Choose harvest resources</h2><p class="help">Trading Posts produce a basic resource. Chimneys share one resource already present in their fief with your New World fiefs for this harvest.</p>${posts.map(c=>`<label>Trading Post · ${c.coordinate}<select data-market="${c.coordinate}"><option value="" disabled ${!c.building.choice?'selected':''}>Choose a resource</option>${['wood','fish','carrots'].map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`).join('')}${vents.map(c=>{const options=chimneyOptions(state,0,c.coordinate);return `<label>Chimney · ${c.coordinate}<select data-chimney="${c.coordinate}" ${options.length?'':'disabled'}><option value="" disabled ${!options.includes(c.building.choice)?'selected':''}>${options.length?'Choose a resource':'No basic resource in this fief'}</option>${options.map(r=>`<option value="${r}" ${c.building.choice===r?'selected':''}>${resourceNames[r]}</option>`).join('')}</select></label>`;}).join('')}${!posts.length&&!vents.length?'<p>No resources to assign.</p>':''}<div class="actions"><button id="back-to-building" class="quiet" ${canReopenConstruction(state,0,constructionReturn?.checkpoint)?'':'disabled'}>← Back to building</button><button id="confirm-markets" class="primary" ${pending?'disabled':''}>Confirm & harvest</button></div>`;
   }
   if(state.phase==='harvest') return `<h2>Round ${state.round} harvest</h2><table class="table"><thead><tr><th>Player</th><th>Harvest</th><th>Total</th></tr></thead><tbody>${state.lastHarvest.map(h=>`<tr><td>${escape(state.players[h.playerId].name)}</td><td>+${h.points}</td><td>${state.players[h.playerId].score}</td></tr>`).join('')}</tbody></table>${state.lastHarvest.map(h=>`<details class="fief-list"><summary>${escape(state.players[h.playerId].name)}: fief breakdown</summary>${h.fiefs.map(f=>`<p>${f.coordinates.join(', ')}: ${f.strength} strength × ${f.wealth} resources = ${f.points}</p>`).join('')}</details>`).join('')}<div class="actions"><button id="next-round" class="primary">${state.round===4?'Reveal parchments':'Begin round '+(state.round+1)} →</button></div>`;
   if(['parchments','finished'].includes(state.phase)) return scoringPanel(state);
@@ -269,7 +272,7 @@ function constructionPanel() {
 }
 function undoPanel() {
   const entry=constructionUndo.at(-1);
-  return `<div class="construction-undo"><button id="undo-building" class="quiet" ${entry?'':'disabled'}>↶ Undo last action</button>${entry?`<p class="muted">${escape(entry.label)}${entry.botResponses?'<br>Also rewinds the bot responses to this decision.':''}</p>`:''}<p class="muted">Done building locks this round’s placements.</p></div>`;
+  return `<div class="construction-undo"><button id="undo-building" class="quiet" ${entry?'':'disabled'}>↶ Undo last action</button>${entry?`<p class="muted">${escape(entry.label)}${entry.botResponses?'<br>Also rewinds the bot responses to this decision.':''}</p>`:''}<p class="muted">You can return after Done building. Confirm &amp; harvest locks this round’s placements.</p></div>`;
 }
 function recordConstruction(label,action) {
   const entry=constructionAction(state,0,label,action);
@@ -334,6 +337,7 @@ function bindConstruction() {
   bind('undo-building',()=>{undoConstruction(state,0,constructionUndo.at(-1));constructionUndo.pop();buildingId=state.phase==='camps'?state.campQueue[0].cardId:null;targets=[];inspected=null;soundEffects.play('deselect');},{animate:false});
   document.querySelectorAll('[data-market]').forEach(select=>select.onchange=()=>attempt(()=>chooseResource(state,0,select.dataset.market,select.value)));
   document.querySelectorAll('[data-chimney]').forEach(select=>select.onchange=()=>attempt(()=>chooseChimney(state,0,select.dataset.chimney,select.value)));
+  bind('back-to-building',()=>{const undo=constructionReturn?.undo||[];reopenConstruction(state,0,constructionReturn?.checkpoint);constructionUndo=undo;constructionReturn=null;buildingId=null;targets=[];inspected=null;soundEffects.play('deselect');},{animate:false});
   bind('confirm-markets',()=>{finishMarkets(state,0);driveBots();});
   bind('next-round',()=>{advanceRound(state);selected=[];buildingId=null;targets=[];driveBots();});
   document.querySelectorAll('[data-copy]').forEach(s=>s.onchange=()=>attempt(()=>{state.scoringDecisions=copyChoiceDecisions(state.scoringDecisions,s.dataset.copy,s.value);}));
@@ -347,15 +351,16 @@ function bindConstruction() {
   const again=document.querySelector('#play-again');if(again)again.onclick=setup;
   bind('save-camp',()=>recordConstruction('Saved Camp '+state.campQueue[0].priority,()=>{respondCamp(state,0);driveBots();}));
   bind('cancel-building',()=>{buildingId=null;targets=[];});
-  bind('finish-building',()=>{finishConstruction(state,0);constructionUndo=[];buildingId=null;targets=[];driveBots();});
+  bind('finish-building',()=>{const checkpoint=constructionConfirmation(state,0,()=>{finishConstruction(state,0);driveBots();});constructionReturn={checkpoint,undo:constructionUndo};constructionUndo=[];buildingId=null;targets=[];});
 }
 
 function inspectionPanel() {
   if(!inspected)return '<p class="muted">Select a territory to inspect its owner, production, building, and fief.</p>';
   const c=state.cells[inspected],owner=c.owner===null?'Unclaimed':state.players[c.owner].name;
   const lava=state.blockedConnections.filter(e=>e.from===inspected||e.to===inspected).map(e=>e.from===inspected?e.to:e.from);
-  const group=c.owner===null?null:fiefs(state,c.owner).find(f=>f.coordinates.includes(inspected));
-  return `<div class="inspector"><h3>${c.coordinate} · ${escape(owner)}</h3><p>${c.terrain} · natural resource: ${resourceNames[c.baseResource]||'none'}</p><p>${escape(buildingText(c.building))}</p>${lava.length?`<p class="lava-note">Lava blocks the direct connection to ${lava.join(', ')}.</p>`:''}${group?`<p>Fief: ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resources = ${group.points} points</p><p>Resources: ${group.resources.map(r=>resourceNames[r]).join(', ')||'none'}</p>`:''}</div>`;
+  const group=c.owner===null?null:inspectionFiefs(state,c.owner).find(f=>f.coordinates.includes(inspected));
+  const chimney=group?chimneyHarvestNote(group):'';
+  return `<div class="inspector"><h3>${c.coordinate} · ${escape(owner)}</h3><p>${c.terrain} · natural resource: ${resourceNames[c.baseResource]||'none'}</p><p>${escape(buildingText(c.building))}</p>${lava.length?`<p class="lava-note">Lava blocks the direct connection to ${lava.join(', ')}.</p>`:''}${group?`<p>${inspectionLabel(state)}: ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resources = ${group.points} points</p><p>Resources: ${group.resources.map(r=>resourceNames[r]).join(', ')||'none'}</p>${chimney?`<p>${escape(chimney)}. This grants access, not additional resource production.</p>`:''}`:''}</div>`;
 }
 function privateCardsPanel() {
   if(['parchments','finished'].includes(state.phase))return '';

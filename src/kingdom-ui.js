@@ -1,10 +1,12 @@
 import {hasExpansion} from './config.js';
 import {playerStats} from './scoring.js';
 import { fiefs, resourcesAt } from './fiefs.js';
+import {inspectionFiefs,inspectionLabel,chimneyHarvestNote} from './fief-inspection.js';
 import { rabbitArt, resourceArt, pieceArt, cardArt } from './art.js';
 import { cardText, resourceNames } from './card-text.js';
 import { sortedHand } from './hand-order.js';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let boardInspectionObserver;
 
 export function productionCounts(state,playerId) {
   const cells=Object.values(state.cells).filter(c=>c.owner===playerId);
@@ -22,7 +24,7 @@ export function playerPanels(state) {
   return `<div class="players">${state.players.map(p=>{
     const {counts,territories,cities,cityStrength,pending}=productionCounts(state,p.id);
     const resources=Object.keys(resourceNames).filter(r=>['carrots','fish','wood'].includes(r)||counts[r]);
-    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="city-summary" title="Controlled cities only, including starting cities. Strength is the total effective strength of your fiefs, including Carrotadel floors.">${pieceArt({category:'city',strength:1})}<span><b data-city-count>${cities}</b> cities · <b data-city-strength>${cityStrength}</b> strength</span></div><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${hasExpansion(state)?`<div class="trade-summary"><span title="Coins retained from District creation and Tax Collectors"><b data-coins>${p.coins}</b> Coins</span><span>${playerStats(state,p.id).uniqueResources.length} Unique</span><span title="Current endgame Trade value">Trade <b>${playerStats(state,p.id).metrics.trade_score}</b></span></div>`:''}${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
+    return `<section class="player" data-player="${p.id}" style="--player:${p.color}"><div class="player-name"><span class="player-rabbit" data-player-origin="${p.id}">${rabbitArt()}</span><b>${esc(p.name)}</b><span class="player-score">${p.score}<small> pts</small></span></div><small data-player-stats>${territories} territories · ${fiefs(state,p.id).length} fiefs${['construction','markets'].includes(state.phase)&&p.ready?' · ✓ Ready':''}</small><div class="city-summary" title="Controlled cities only, including starting cities. Strength is the total effective strength of your fiefs, including Carrotadel floors.">${pieceArt({category:'city',strength:1})}<span><b data-city-count>${cities}</b> cities · <b data-city-strength>${cityStrength}</b> strength</span></div><div class="production-row" aria-label="${esc(p.name)}'s resource production">${resources.map(r=>`<span data-production="${r}" title="${resourceNames[r]} production: ${counts[r]}" aria-label="${resourceNames[r]}: ${counts[r]}">${resourceArt(r)}<b>${counts[r]}</b></span>`).join('')}</div>${hasExpansion(state)?`<div class="trade-summary"><span title="Coins retained from District creation and Tax Collectors"><b data-coins>${p.coins}</b> Coins</span><span>${playerStats(state,p.id).uniqueResources.length} Unique</span><span title="Current endgame Trade value">Trade <b>${playerStats(state,p.id).metrics.trade_score}</b></span></div>`:''}${pending?`<small class="pending-production">${pending} Trading Post${pending===1?'':'s'} unassigned</small>`:''}<div class="player-piles"><button class="pile-button" data-pile="buildings" data-pile-player="${p.id}" aria-label="View ${esc(p.name)}'s unplaced buildings" title="View ${esc(p.name)}'s unplaced buildings">${pieceArt({category:'city',strength:2})}<span><b data-pile-count>${p.buildings.length}</b><small>Buildings</small></span></button><button class="pile-button" data-pile="parchments" data-pile-player="${p.id}" aria-label="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}" title="${esc(p.id===0?'View your parchments':'View '+p.name+'’s parchment stack')}">${cardBackArt()}<span><b data-pile-count>${p.parchments.length}</b><small>Parchments</small></span></button></div></section>`;
   }).join('')}</div>`;
 }
 
@@ -36,10 +38,13 @@ export function openInventory(state,playerId,pile) {
 }
 
 export function bindKingdomInspection(state,inspected) {
+  boardInspectionObserver?.disconnect();
   const board=document.querySelector('.board-scroll'),readout=document.querySelector('#fief-readout');
+  let highlighted=inspected;
   const byCoordinate=new Map();
-  for(const player of state.players)for(const group of fiefs(state,player.id))for(const id of group.coordinates)byCoordinate.set(id,{player,group});
+  for(const player of state.players)for(const group of inspectionFiefs(state,player.id))for(const id of group.coordinates)byCoordinate.set(id,{player,group});
   const highlight=id=>{
+    highlighted=id;
     board.querySelectorAll('.fief-highlight').forEach(el=>el.classList.remove('fief-highlight'));
     const entry=byCoordinate.get(id);
     for(const pane of board.querySelectorAll('.board'))pane.classList.toggle('has-fief-focus',Boolean(entry));
@@ -48,12 +53,19 @@ export function bindKingdomInspection(state,inspected) {
     const {player,group}=entry;
     for(const coordinate of group.coordinates)board.querySelector(`[data-cell="${coordinate}"]`)?.classList.add('fief-highlight');
     if(overlay){const rect=overlay.getBoundingClientRect(),pairs=new Map();for(const coordinate of group.coordinates){const cell=state.cells[coordinate];if(!['sky_tower','rainbow'].includes(cell.building?.category))continue;const key=cell.building.pairId;if(!pairs.has(key))pairs.set(key,[]);pairs.get(key).push(coordinate);}for(const endpoints of pairs.values())if(endpoints.length===2){const points=endpoints.map(id=>{const r=board.querySelector(`[data-cell="${id}"]`).getBoundingClientRect();return [r.x+r.width/2-rect.x,r.y+r.height/2-rect.y];});const line=document.createElementNS('http://www.w3.org/2000/svg','line');for(const [key,value] of Object.entries({x1:points[0][0],y1:points[0][1],x2:points[1][0],y2:points[1][1],stroke:player.color,'stroke-width':4,'stroke-dasharray':'7 5'}))line.setAttribute(key,value);overlay.append(line);}}
-    readout.innerHTML=`<b style="color:${player.color}">${esc(player.name)}</b> · ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resource types = <b>${group.points} points</b>`;
+    const chimney=chimneyHarvestNote(group);
+    readout.innerHTML=`<b style="color:${player.color}">${esc(player.name)}</b> · ${inspectionLabel(state)} · ${group.coordinates.length} territories · ${group.strength} strength × ${group.wealth} resource types = <b>${group.points} points</b>${chimney?` · ${esc(chimney)}`:''}`;
   };
   for(const cell of board.querySelectorAll('[data-cell]')) {
     cell.onmouseenter=()=>highlight(cell.dataset.cell);cell.onfocus=()=>highlight(cell.dataset.cell);
     cell.onmouseleave=()=>highlight(inspected);cell.onblur=()=>highlight(inspected);
   }
   highlight(inspected);
+  // Redraw connections when a monitor change or layout reflow moves the cells.
+  boardInspectionObserver=new ResizeObserver(()=>{
+    if(board.isConnected)highlight(highlighted);
+    else boardInspectionObserver.disconnect();
+  });
+  boardInspectionObserver.observe(board);
   document.querySelectorAll('[data-pile]').forEach(b=>b.onclick=()=>openInventory(state,Number(b.dataset.pilePlayer),b.dataset.pile));
 }
