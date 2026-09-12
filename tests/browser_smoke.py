@@ -61,11 +61,12 @@ def build(page):
     return placed
 
 
-def game(browser, bots, screenshots):
+def game(browser, bots, screenshots, difficulty='normal'):
     page = browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(ARGS.url)
+    page.locator('[name=difficulty]').select_option(difficulty)
     page.locator('[name=bots]').select_option(str(bots))
     page.locator('[name=seed]').fill(f'ui-{bots}')
     page.locator('#setup button').click()

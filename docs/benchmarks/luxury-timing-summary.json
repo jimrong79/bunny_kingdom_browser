@@ -1,0 +1,420 @@
+{
+  "checkpoint": "bots-luxury-timing-v1",
+  "commit": "6ac196b",
+  "baselineCheckpoint": "bots-before-luxury-timing",
+  "baselineCommit": "4653c2c",
+  "method": "Candidate rotates through every seat versus frozen old-policy opponents; compare the same seat in an all-old-policy control. Related seat rotations and seeds are not independent observations. No tuning during this batch.",
+  "engineTests": 145,
+  "candidateGames": 63,
+  "controlGames": 17,
+  "results": [
+    {
+      "policy": "Normal",
+      "game": "base",
+      "players": 2,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 2,
+      "candidate": {
+        "games": 4,
+        "winRate": 0.5,
+        "averageMargin": 0,
+        "averageScore": 171.75,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 160,
+          "mean": 67.8773081375,
+          "p95": 198.9249259999997,
+          "max": 228.37692400000014
+        },
+        "campMs": {
+          "count": 9,
+          "mean": 303.3750968888887,
+          "p95": 1141.5362509999995,
+          "max": 1141.5362509999995
+        }
+      },
+      "control": {
+        "games": 4,
+        "winRate": 0.5,
+        "averageMargin": 0,
+        "averageScore": 171.75,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 80,
+          "mean": 66.05416049999982,
+          "p95": 201.0248999999999,
+          "max": 238.21232899999995
+        },
+        "campMs": {
+          "count": 5,
+          "mean": 400.37996980000014,
+          "p95": 1168.4913890000003,
+          "max": 1168.4913890000003
+        }
+      },
+      "meanMarginChange": 0,
+      "dealMarginStandardError": 0,
+      "changedGames": 0,
+      "winningSeats": 2,
+      "controlWinningSeats": 2
+    },
+    {
+      "policy": "Normal",
+      "game": "base",
+      "players": 3,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 2,
+      "candidate": {
+        "games": 6,
+        "winRate": 0.3333333333333333,
+        "averageMargin": -17.666666666666668,
+        "averageScore": 177.33333333333334,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 144,
+          "mean": 107.23873893055517,
+          "p95": 401.94482599999174,
+          "max": 779.5090720000007
+        },
+        "campMs": {
+          "count": 8,
+          "mean": 405.6687603750024,
+          "p95": 1417.6114150000067,
+          "max": 1417.6114150000067
+        }
+      },
+      "control": {
+        "games": 6,
+        "winRate": 0.3333333333333333,
+        "averageMargin": -17.666666666666668,
+        "averageScore": 177.33333333333334,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 48,
+          "mean": 81.2831760208328,
+          "p95": 244.00144400000863,
+          "max": 564.2049010000046
+        },
+        "campMs": {
+          "count": 3,
+          "mean": 272.63172100000276,
+          "p95": 377.23356800001056,
+          "max": 377.23356800001056
+        }
+      },
+      "meanMarginChange": 0,
+      "dealMarginStandardError": 0,
+      "changedGames": 0,
+      "winningSeats": 2,
+      "controlWinningSeats": 2
+    },
+    {
+      "policy": "Normal",
+      "game": "base",
+      "players": 4,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 2,
+      "candidate": {
+        "games": 8,
+        "winRate": 0.25,
+        "averageMargin": -15,
+        "averageScore": 114.875,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 160,
+          "mean": 62.765619868749766,
+          "p95": 187.33429400000023,
+          "max": 324.5643290000153
+        },
+        "campMs": {
+          "count": 10,
+          "mean": 403.8014298999973,
+          "p95": 1921.0276739999827,
+          "max": 1921.0276739999827
+        }
+      },
+      "control": {
+        "games": 8,
+        "winRate": 0.25,
+        "averageMargin": -15,
+        "averageScore": 114.875,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 40,
+          "mean": 70.89441072500195,
+          "p95": 170.38267300000007,
+          "max": 287.702535000004
+        },
+        "campMs": {
+          "count": 3,
+          "mean": 213.88139866666947,
+          "p95": 318.54244000001927,
+          "max": 318.54244000001927
+        }
+      },
+      "meanMarginChange": 0,
+      "dealMarginStandardError": 0,
+      "changedGames": 0,
+      "winningSeats": 2,
+      "controlWinningSeats": 2
+    },
+    {
+      "policy": "Normal",
+      "game": "in_the_sky",
+      "players": 3,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 3,
+      "candidate": {
+        "games": 9,
+        "winRate": 0.4444444444444444,
+        "averageMargin": -30.666666666666668,
+        "averageScore": 345.3333333333333,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 180,
+          "mean": 862.5478958722209,
+          "p95": 3012.910057000001,
+          "max": 6828.363238999998
+        },
+        "campMs": {
+          "count": 15,
+          "mean": 1362.3813853999998,
+          "p95": 3858.2665350000025,
+          "max": 3858.2665350000025
+        }
+      },
+      "control": {
+        "games": 9,
+        "winRate": 0.3333333333333333,
+        "averageMargin": -34.77777777777778,
+        "averageScore": 348.44444444444446,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 60,
+          "mean": 595.0595914333351,
+          "p95": 2204.3612960000173,
+          "max": 4338.462387
+        },
+        "campMs": {
+          "count": 4,
+          "mean": 1239.972106250002,
+          "p95": 2645.178716999999,
+          "max": 2645.178716999999
+        }
+      },
+      "meanMarginChange": 4.111111111111111,
+      "dealMarginStandardError": 19.03246089976897,
+      "changedGames": 9,
+      "winningSeats": 4,
+      "controlWinningSeats": 3
+    },
+    {
+      "policy": "Normal",
+      "game": "in_the_sky",
+      "players": 4,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 3,
+      "candidate": {
+        "games": 12,
+        "winRate": 0.25,
+        "averageMargin": -33.333333333333336,
+        "averageScore": 226,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 288,
+          "mean": 232.47226622916847,
+          "p95": 750.8532220000052,
+          "max": 2587.0532520000124
+        },
+        "campMs": {
+          "count": 17,
+          "mean": 706.4931956470485,
+          "p95": 4011.6856810000027,
+          "max": 4011.6856810000027
+        }
+      },
+      "control": {
+        "games": 12,
+        "winRate": 0.25,
+        "averageMargin": -39.166666666666664,
+        "averageScore": 227.25,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 72,
+          "mean": 185.53938197222226,
+          "p95": 620.0258209999884,
+          "max": 1244.458806999959
+        },
+        "campMs": {
+          "count": 5,
+          "mean": 216.19916720000327,
+          "p95": 615.362604999973,
+          "max": 615.362604999973
+        }
+      },
+      "meanMarginChange": 5.833333333333329,
+      "dealMarginStandardError": 1.3411230782859234,
+      "changedGames": 12,
+      "winningSeats": 3,
+      "controlWinningSeats": 3
+    },
+    {
+      "policy": "Normal",
+      "game": "in_the_sky",
+      "players": 5,
+      "seedPrefix": "luxury-timing-validation-v1",
+      "rulings": "low",
+      "deals": 3,
+      "candidate": {
+        "games": 15,
+        "winRate": 0.2,
+        "averageMargin": -23,
+        "averageScore": 150.73333333333332,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 300,
+          "mean": 123.02325338333108,
+          "p95": 486.9274549999973,
+          "max": 830.0282059999881
+        },
+        "campMs": {
+          "count": 20,
+          "mean": 191.80452349999686,
+          "p95": 731.7874300000258,
+          "max": 731.7874300000258
+        }
+      },
+      "control": {
+        "games": 15,
+        "winRate": 0.2,
+        "averageMargin": -34.333333333333336,
+        "averageScore": 151.93333333333334,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 60,
+          "mean": 96.78971173333606,
+          "p95": 470.4310529999202,
+          "max": 819.2494750000187
+        },
+        "campMs": {
+          "count": 2,
+          "mean": 37.458152000035625,
+          "p95": 41.522523000021465,
+          "max": 41.522523000021465
+        }
+      },
+      "meanMarginChange": 11.333333333333336,
+      "dealMarginStandardError": 7.65970698598263,
+      "changedGames": 13,
+      "winningSeats": 3,
+      "controlWinningSeats": 3
+    },
+    {
+      "policy": "Hard",
+      "game": "in_the_sky",
+      "players": 4,
+      "seedPrefix": "luxury-hard-smoke-v1",
+      "rulings": "low",
+      "deals": 1,
+      "candidate": {
+        "games": 4,
+        "winRate": 0.25,
+        "averageMargin": -16.75,
+        "averageScore": 228,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 96,
+          "mean": 241.94620025000026,
+          "p95": 1153.480313,
+          "max": 1617.183186000002
+        },
+        "campMs": {
+          "count": 5,
+          "mean": 304.8099679999985,
+          "p95": 638.1287500000035,
+          "max": 638.1287500000035
+        }
+      },
+      "control": {
+        "games": 4,
+        "winRate": 0.25,
+        "averageMargin": -18.25,
+        "averageScore": 220.25,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 24,
+          "mean": 414.96918366666637,
+          "p95": 1996.887498,
+          "max": 2611.395522
+        },
+        "campMs": {
+          "count": 1,
+          "mean": 210.32046900000023,
+          "p95": 210.32046900000023,
+          "max": 210.32046900000023
+        }
+      },
+      "meanMarginChange": 1.5,
+      "dealMarginStandardError": null,
+      "changedGames": 4,
+      "winningSeats": 1,
+      "controlWinningSeats": 1
+    },
+    {
+      "policy": "Hard",
+      "game": "in_the_sky",
+      "players": 5,
+      "seedPrefix": "luxury-hard-smoke-v1",
+      "rulings": "low",
+      "deals": 1,
+      "candidate": {
+        "games": 5,
+        "winRate": 0.2,
+        "averageMargin": -44.2,
+        "averageScore": 152.2,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 100,
+          "mean": 196.60735139999997,
+          "p95": 731.1308660000032,
+          "max": 1153.9062259999919
+        },
+        "campMs": {
+          "count": 7,
+          "mean": 216.7731345714315,
+          "p95": 380.56491300000926,
+          "max": 380.56491300000926
+        }
+      },
+      "control": {
+        "games": 5,
+        "winRate": 0.2,
+        "averageMargin": -37.6,
+        "averageScore": 154.6,
+        "gamesWithRulings": 0,
+        "draftMs": {
+          "count": 20,
+          "mean": 336.8631114999998,
+          "p95": 1388.628453,
+          "max": 1388.628453
+        },
+        "campMs": {
+          "count": 1,
+          "mean": 159.58768699999928,
+          "p95": 159.58768699999928,
+          "max": 159.58768699999928
+        }
+      },
+      "meanMarginChange": -6.600000000000001,
+      "dealMarginStandardError": null,
+      "changedGames": 3,
+      "winningSeats": 1,
+      "controlWinningSeats": 1
+    }
+  ]
+}

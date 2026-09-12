@@ -1,6 +1,9 @@
 """Verify actual policy selection, saved difficulty, private observations, and old-save compatibility."""
+from os import environ
 from playwright.sync_api import sync_playwright
 from browser_smoke import snapshot
+
+BASE_URL=environ.get('BUNNY_TEST_URL','http://127.0.0.1:8000')
 
 
 with sync_playwright() as p:
@@ -9,16 +12,16 @@ with sync_playwright() as p:
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     selections = {}
-    for difficulty in ('easy', 'normal'):
-        page.goto('http://127.0.0.1:8000')
+    for difficulty in ('easy', 'normal', 'hard'):
+        page.goto(BASE_URL)
         page.locator('[name=bots]').select_option('3')
         page.locator('[name=difficulty]').select_option(difficulty)
         page.locator('[name=seed]').fill('1788624816571')
         page.locator('#setup button').click()
         before = snapshot(page)
         expected = page.evaluate("""async difficulty=>{
-            const bot=await import(difficulty==='easy'?'/src/bots-baseline.js':'/src/bots.js');
-            const {publicView}=await import('/src/game.js');
+            const bot=await import(difficulty==='hard'?'./src/bots-hard.js':difficulty==='easy'?'./src/bots-baseline.js':'./src/bots.js');
+            const {publicView}=await import('./src/game.js');
             const state=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1')).game;
             return state.players.slice(1).map(p=>bot.chooseDraft(publicView(state,p.id),p.id));
         }""", difficulty)
@@ -28,6 +31,10 @@ with sync_playwright() as p:
         page.locator('#confirm-draft').click()
         after = snapshot(page)
         assert after['botDifficulty'] == difficulty
+        if difficulty != 'easy':
+            expected_version = 'hard-camps-luxury-v2' if difficulty == 'hard' else 'normal-luxury-timing-v1'
+            assert before['botStrategyVersion'] == expected_version
+            assert after['botStrategyVersion'] == expected_version
         for player in after['players'][1:]:
             old_hand = {c['instanceId'] for c in before['players'][player['id']]['hand']}
             played = {c['instanceId'] for c in player['played'] + player['parchments']} & old_hand
@@ -36,11 +43,14 @@ with sync_playwright() as p:
         page.reload()
         page.locator('#resume-game').click()
         assert snapshot(page)['botDifficulty'] == difficulty
-        assert difficulty.title() + ' bots' in page.locator('.save-status').inner_text()
+        label = 'Hard (test)' if difficulty == 'hard' else difficulty.title()
+        assert label + ' bots' in page.locator('.save-status').inner_text()
     assert selections['easy'] != selections['normal']
+    assert selections['hard'] == selections['normal']  # Both share luxury timing; Hard specializes Camps.
     page.evaluate("""()=>{
         const saved=JSON.parse(localStorage.getItem('bunny-kingdom-save-v1'));
         delete saved.game.botDifficulty;
+        saved.game.botStrategyVersion='hard-camps-v1';
         for(const p of saved.game.players)delete p.draftMemory;
         localStorage.setItem('bunny-kingdom-save-v1',JSON.stringify(saved));
     }""")
@@ -50,11 +60,12 @@ with sync_playwright() as p:
     page.locator('[data-card]').nth(0).click()
     page.locator('[data-card]').nth(1).click()
     page.locator('#confirm-draft').click()
+    assert snapshot(page)['botStrategyVersion'] == 'normal-luxury-timing-v1'
     assert all(len(p['draftMemory']) == 1 for p in snapshot(page)['players'])
     page.set_viewport_size({'width': 390, 'height': 844})
-    page.goto('http://127.0.0.1:8000')
+    page.goto(BASE_URL)
     assert page.locator('[name=difficulty]').input_value() == 'normal'
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     assert not errors, errors
     browser.close()
-print('Easy/Normal policy routing, saved settings, seen-hand history, old saves, and mobile setup passed.')
+print('Easy/Normal/Hard policy routing, saved settings and version, seen-hand history, old saves, and mobile setup passed.')
